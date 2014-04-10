@@ -1,4 +1,4 @@
-pcl (1.7.1-1) UNRELEASED; urgency=low
+pcl (1.7.1-1.drp70+1) wheezy-robotics; urgency=low
 
   [Leopold Palomo-Avellaneda]
   * Initial release. (Closes: #703579)
@@ -18,6 +18,5 @@ pcl (1.7.1-1) UNRELEASED; urgency=low
 	  -DBUILD_app_modeler=ON
           -DBUILD_app_point_cloud_editor=ON 
     in rules.
-  * 
- -- Leopold Palomo-Avellaneda <leo@alaxarxa.net>  Thu, 03 Apr 2014 16:29:40 +0200
 
+ -- Leopold Palomo-Avellaneda <leo@alaxarxa.net>  Tue, 08 Apr 2014 15:13:05 +0200
