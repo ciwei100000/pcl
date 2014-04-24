@@ -41,3 +41,9 @@ Copyright: 2013, Thomas Moulard <thomas.moulard@gmail.com>
 	   2014, Leopold Palomo-Avellaneda <leo@alaxarxa.net>
 License: GPL-2
  See `/usr/share/common-licenses/GPL-2'.
+
+Files: doc/*
+Copyright: 2013, Thomas Moulard <thomas.moulard@gmail.com>
+	   2014, Leopold Palomo-Avellaneda <leo@alaxarxa.net>
+License: GPL-2
+ See `/usr/share/common-licenses/GPL-2'.

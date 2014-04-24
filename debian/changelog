@@ -1,3 +1,9 @@
+pcl (1.7.1-1.drp70+2) wheezy-robotics; urgency=low
+
+  * Changed libopenni-sensor-pointclouds-dev by libopenni-sensor-primesense-dev.
+
+ -- Leopold Palomo-Avellaneda <leo@alaxarxa.net>  Thu, 24 Apr 2014 14:59:26 +0200
+
 pcl (1.7.1-1.drp70+1) wheezy-robotics; urgency=low
 
   [Leopold Palomo-Avellaneda]
