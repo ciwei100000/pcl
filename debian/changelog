@@ -1,3 +1,9 @@
+pcl (1.7.1-1.drp70+3) wheezy-robotics; urgency=low
+
+  * Rebuild for drp the original package from unstable.
+
+ -- Leopold Palomo-Avellaneda <leo@alaxarxa.net>  Thu, 29 May 2014 17:58:12 +0200
+
 pcl (1.7.1-1.drp70+2) wheezy-robotics; urgency=low
 
   * Changed libopenni-sensor-pointclouds-dev by libopenni-sensor-primesense-dev.
@@ -12,7 +18,7 @@ pcl (1.7.1-1.drp70+1) wheezy-robotics; urgency=low
     Jochen Sprickerhof <jochen@sprickerhof.de> and myself
     added as uploaders.
   * Added libvtk5-qt4-dev, 
-	  libopenni-sensor-pointclouds-dev,
+	  libopenni-sensor-primesense-dev,
 	  python-vtk, libvtk5-qt4-dev,
 	  libqt4-opengl-dev,
  	  python-sphinx,
@@ -24,5 +30,7 @@ pcl (1.7.1-1.drp70+1) wheezy-robotics; urgency=low
 	  -DBUILD_app_modeler=ON
           -DBUILD_app_point_cloud_editor=ON 
     in rules.
+  * Renamed libpcl-tools to pcl-tools.
+  * Added the manpages ...
 
- -- Leopold Palomo-Avellaneda <leo@alaxarxa.net>  Tue, 08 Apr 2014 15:13:05 +0200
+ -- Leopold Palomo-Avellaneda <leo@alaxarxa.net>  Thu, 03 Apr 2014 16:29:40 +0200
