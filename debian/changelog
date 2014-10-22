@@ -1,36 +1,30 @@
-pcl (1.7.1-1.drp70+3) wheezy-robotics; urgency=low
+pcl (1.7.2-1.drp70+1) wheezy-robotics; urgency=low
+  * Rebuild for drp.
 
-  * Rebuild for drp the original package from unstable.
-
- -- Leopold Palomo-Avellaneda <leo@alaxarxa.net>  Thu, 29 May 2014 17:58:12 +0200
-
-pcl (1.7.1-1.drp70+2) wheezy-robotics; urgency=low
-
-  * Changed libopenni-sensor-pointclouds-dev by libopenni-sensor-primesense-dev.
-
- -- Leopold Palomo-Avellaneda <leo@alaxarxa.net>  Thu, 24 Apr 2014 14:59:26 +0200
-
-pcl (1.7.1-1.drp70+1) wheezy-robotics; urgency=low
+  [Thomas Moulard]
+  * Initial debianization.
 
   [Leopold Palomo-Avellaneda]
   * Initial release. (Closes: #703579)
   * Worked from the initial debianization from Thomas Moulard.
-    Jochen Sprickerhof <jochen@sprickerhof.de> and myself
-    added as uploaders.
-  * Added libvtk5-qt4-dev, 
-	  libopenni-sensor-primesense-dev,
-	  python-vtk, libvtk5-qt4-dev,
-	  libqt4-opengl-dev,
- 	  python-sphinx,
- 	  libusb-1.0-0-dev
-    build dependencies.
+    Jochen Sprickerhof and myself added as uploaders.
+  * Added libvtk5-qt4-dev, libopenni-sensor-primesense-dev, python-vtk,
+    libvtk5-qt4-dev, libqt4-opengl-dev, python-sphinx, libusb-1.0-0-dev build
+    dependencies.
   * Deleted pkg-kde-tools dependency.
   * Relaxed boost dependencies.
-  * Added -DBUILD_app_cloud_composer=ON 
-	  -DBUILD_app_modeler=ON
-          -DBUILD_app_point_cloud_editor=ON 
-    in rules.
+  * Added some applications to be build: app_modeler, app_point_cloud_editor,
+    in_hand_scanner in rules.
   * Renamed libpcl-tools to pcl-tools.
-  * Added the manpages ...
+  * Added manpages ...
+  * Added libjs-jquery dependency to calm lintian.
 
- -- Leopold Palomo-Avellaneda <leo@alaxarxa.net>  Thu, 03 Apr 2014 16:29:40 +0200
+  [Jochen Sprickerhof]
+  * Fix license file.
+  * Clean up debian/rules.
+  * Update Standards-Version (no changes).
+  * Fix hidden dependencies with glut and OpenGL of pcl-tools.
+  * Cosmetic changes.
+
+ -- Leopold Palomo-Avellaneda <leo@alaxarxa.net>  Mon, 06 Oct 2014 09:30:55 +0200
+

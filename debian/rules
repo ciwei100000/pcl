@@ -14,7 +14,10 @@ CXXFLAGS+=$(CPPFLAGS)
 # Multiarch.
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 
-.PHONY: override_dh_auto_configure override_dh_auto_build override_dh_strip override_dh_install
+.PHONY: override_dh_auto_configure \
+	override_dh_install \
+	override_dh_installchangelogs \
+	override_dh_strip
 
 override_dh_auto_configure:
 	dh_auto_configure -- 						\
@@ -27,17 +30,14 @@ override_dh_auto_configure:
 	-DBUILD_registration=ON -DBUILD_sample_consensus=ON		\
 	-DBUILD_search=ON -DBUILD_segmentation=ON -DBUILD_surface=ON	\
 	-DBUILD_tools=ON -DBUILD_tracking=ON -DBUILD_visualization=ON   \
-	-DBUILD_app_cloud_composer=ON -DBUILD_app_modeler=ON            \
-	-DBUILD_app_point_cloud_editor=ON 
-
-override_dh_auto_build:
-	dh_auto_build -- # Compile the software.
-	dh_auto_build -- doc # Generate Doxygen HTML documentation.
+	-DBUILD_apps_cloud_composer=OFF -DBUILD_apps_modeler=ON            \
+	-DBUILD_apps_point_cloud_editor=ON -DBUILD_apps_in_hand_scanner=ON \
+	-DWITH_DOCS=ON 
 
 override_dh_install:
 	mkdir -p debian/tmp/usr/share/doc/libpcl1.7-dbg && cp debian/README.Debug debian/tmp/usr/share/doc/libpcl1.7-dbg/
 	
-	@for i in pcl_cloud_composer pcl_concatenate_points_pcd \
+	@for i in pcl_concatenate_points_pcd pcl_grabcut_2d \
 		pcl_elch pcl_dinast_grabber pcl_hdl_grabber \
 		pcl_icp pcl_icp2d pcl_lum pcl_manual_registration pcl_match_linemod_template \
 		pcl_multiscale_feature_persistence_example pcl_ndt2d pcl_ndt3d pcl_ni_agast \
@@ -53,18 +53,43 @@ override_dh_install:
 		pcl_statistical_multiscale_interest_region_extraction_example \
 		pcl_registration_visualizer pcl_surfel_smoothing_test \
 		pcl_timed_trigger_test pcl_viewer pcl_virtual_scanner \
-		pcl_voxel_grid_occlusion_estimation; do \
+		pcl_voxel_grid_occlusion_estimation pcl_compute_hausdorff \
+		pcl_generate pcl_grid_min pcl_in_hand_scanner pcl_local_max \
+		pcl_morph pcl_ni_trajkovic pcl_obj2pcd pcl_offline_integration 	\
+		pcl_openni_klt pcl_progressive_morphological_filter \
+		pcl_openni_organized_multi_plane_segmentation; do \
 	cmd="dh_link -p pcl-tools usr/share/man/man1/pcl_pointclouds.1 usr/share/man/man1/$$i.1"; \
 	echo $$cmd; $$cmd; \
 	done
-
+		
 	dh_install --list-missing
 
 override_dh_strip:
 	dh_strip -a --dbg-package=libpcl1.7-dbg
 
-override_dh_shlibdeps:
-	dh_shlibdeps -Lpcl-tools -l/usr/lib/${DEB_HOST_MULTIARCH}/cloud_composer_plugins
+#override_dh_shlibdeps:
+#	dh_shlibdeps -v -Xusr/bin/pcl_* -Lpcl-tools -l:$(CURDIR)/debian/usr/lib/${DEB_HOST_MULTIARCH}/cloud_composer_plugins: -ppcl --- -xpcl-tools -v
+
+override_dh_installchangelogs:
+	dh_installchangelogs -plibpcl-common1.7 CHANGES.md
+	# Creating dh_links to share the same file
+	@for i in libpcl-dev libpcl1.7 libpcl1.7-dbg libpcl-apps1.7 \
+		libpcl-features1.7 libpcl-filters1.7 libpcl-io1.7 libpcl-kdtree1.7 \
+		libpcl-keypoints1.7 libpcl-octree1.7 libpcl-registration1.7 \
+		libpcl-sample-consensus1.7 libpcl-search1.7 libpcl-segmentation1.7 \
+		libpcl-surface1.7 libpcl-tracking1.7 libpcl-visualization1.7 \
+		libpcl-outofcore1.7 libpcl-people1.7 libpcl-recognition1.7 \
+		pcl-tools libpcl-doc; do \
+	cmd="dh_link -p$$i usr/share/doc/libpcl-common1.7/changelog.gz usr/share/doc/$$i/changelog.gz"; \
+	echo $$cmd; $$cmd; \
+	done
+	dh_installchangelogs
+
+
 %:
 	dh  $@ --parallel --builddirectory=build
+
+
+get-orig-source:
+	uscan --verbose --force-download --repack --compress xz
 
