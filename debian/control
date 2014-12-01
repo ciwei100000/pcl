@@ -5,28 +5,28 @@ Uploaders: Thomas Moulard <thomas.moulard@gmail.com>,
 	   Leopold Palomo-Avellaneda <leo@alaxarxa.net>
 Section: libs
 Priority: extra
-Build-Depends: debhelper (>= 9),
+Build-Depends: debhelper (>= 9), dh-exec (>=0.3),
                cmake,
                doxygen,
                doxygen-latex,
-               python-sphinx,
-               libboost-system-dev,
-               libboost-filesystem-dev,
-               libboost-thread-dev,
-               libboost-date-time-dev,
-               libboost-iostreams-dev,
                libboost-chrono-dev,
-               libeigen3-dev,
-               libflann-dev,
-               libvtk5-dev,
-               libqhull-dev,
-               libopenni-dev,
-               libqt4-opengl-dev,
-               libusb-1.0-0-dev,
-               freeglut3-dev,
-               libxmu-dev,
-               libxi-dev,
-               libvtk5-qt4-dev
+	       python-sphinx,
+	       libboost-system-dev,
+	       libboost-filesystem-dev,
+	       libboost-thread-dev, 
+	       libboost-date-time-dev,
+	       libboost-iostreams-dev,
+	       libeigen3-dev,
+	       libflann-dev,
+	       libvtk5-dev,
+	       libqhull-dev,
+	       libopenni-dev [i386 amd64],
+	       libqt4-opengl-dev,
+	       libusb-1.0-0-dev,
+	       freeglut3-dev, 
+	       libxmu-dev,
+	       libxi-dev,
+	       libvtk5-qt4-dev
 Standards-Version: 3.9.6
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=debian-science/packages/pcl.git
 Vcs-Git: git://anonscm.debian.org/debian-science/packages/pcl.git
@@ -40,11 +40,10 @@ Depends: libboost-all-dev,
 	 libflann-dev,
 	 libvtk5-dev,
 	 libqhull-dev,
-	 libopenni-dev,
+	 libopenni-dev [i386 amd64],
          libpcl1.7 (= ${binary:Version}),
          ${misc:Depends}
 Suggests: libpcl-doc
-Multi-Arch: same
 Description: Point Cloud Library - development files
  The Point Cloud Library (PCL) is a standalone, large scale, open
  project for 2D/3D image and point cloud processing.

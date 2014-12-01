@@ -1,5 +1,49 @@
-pcl (1.7.2-1.drp70+1) wheezy-robotics; urgency=low
+pcl (1.7.2-6.drp70+1) wheezy-robotics; urgency=medium
+
   * Rebuild for drp.
+
+ -- Leopold Palomo-Avellaneda <leo@alaxarxa.net>  Mon, 01 Dec 2014 16:41:22 +0100
+
+pcl (1.7.2-6) unstable; urgency=medium
+
+  * Remove --parallel from dh to fix build on i386 buildd.
+
+ -- Jochen Sprickerhof <git@jochen.sprickerhof.de>  Mon, 01 Dec 2014 10:46:10 +0100
+
+pcl (1.7.2-5) unstable; urgency=medium
+
+  [Leopold Palomo-Avellaneda]
+  * Reverted Multi-arch field for libpcl-apps1.7.
+
+ -- Leopold Palomo-Avellaneda <leo@alaxarxa.net>  Thu, 27 Nov 2014 18:14:40 +0100
+
+pcl (1.7.2-4) unstable; urgency=medium
+
+  [Leopold Palomo-Avellaneda]
+  * Added missing Multi-arch field for libpcl-apps1.7.
+  * Removing Multi-Arch of libpcl-dev. Closes: #770503
+
+ -- Leopold Palomo-Avellaneda <leo@alaxarxa.net>  Mon, 24 Nov 2014 12:27:06 +0100
+
+pcl (1.7.2-3) unstable; urgency=medium
+
+  [ Jochen Sprickerhof ]
+  * Change openni-dev to libopenni, Closes: #768953
+  * Build without OpenNI when it's not available. It opens
+    the number of architectures where it could be built. Closes: #769883
+  * Fix PCLConfig.cmake (patch taken from Fedora). Closes: #770029
+
+ -- Leopold Palomo-Avellaneda <leo@alaxarxa.net>  Tue, 11 Nov 2014 15:34:43 +0100
+
+pcl (1.7.2-2) unstable; urgency=medium
+
+  [Leopold Palomo-Avellaneda]
+  * Change install place for cmake files. Closes: #766685
+  * Added dh-exec (>=0.3) dependecy.
+
+ -- Leopold Palomo-Avellaneda <leo@alaxarxa.net>  Sun, 26 Oct 2014 09:46:18 +0100
+
+pcl (1.7.2-1) unstable; urgency=medium
 
   [Thomas Moulard]
   * Initial debianization.
