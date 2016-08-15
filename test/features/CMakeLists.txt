@@ -44,6 +44,14 @@ PCL_ADD_TEST(feature_spin_estimation test_spin_estimation
              FILES test_spin_estimation.cpp
              LINK_WITH pcl_gtest pcl_features pcl_io
              ARGUMENTS "${PCL_SOURCE_DIR}/test/bun0.pcd")
+PCL_ADD_TEST(feature_rsd_estimation test_rsd_estimation
+             FILES test_rsd_estimation.cpp
+             LINK_WITH pcl_gtest pcl_features pcl_io pcl_kdtree
+             ARGUMENTS "${PCL_SOURCE_DIR}/test/bun0.pcd")
+PCL_ADD_TEST(feature_grsd_estimation test_grsd_estimation
+             FILES test_grsd_estimation.cpp
+             LINK_WITH pcl_gtest pcl_features pcl_io pcl_kdtree
+             ARGUMENTS "${PCL_SOURCE_DIR}/test/bun0.pcd")
 PCL_ADD_TEST(feature_invariants_estimation test_invariants_estimation
              FILES test_invariants_estimation.cpp
              LINK_WITH pcl_gtest pcl_features pcl_io
@@ -62,6 +70,10 @@ PCL_ADD_TEST(feature_shot_lrf_estimation test_shot_lrf_estimation
              FILES test_shot_lrf_estimation.cpp
              LINK_WITH pcl_gtest pcl_features pcl_io
              ARGUMENTS "${PCL_SOURCE_DIR}/test/bun0.pcd")
+PCL_ADD_TEST(feature_brisk test_brisk
+             FILES test_brisk.cpp
+             LINK_WITH pcl_gtest pcl_io pcl_kdtree pcl_filters pcl_keypoints pcl_common pcl_features pcl_search
+             ARGUMENTS "${PCL_SOURCE_DIR}/test/brisk_image_gt.pcd" "${PCL_SOURCE_DIR}/test/brisk_keypoints_gt.pcd" "${PCL_SOURCE_DIR}/test/brisk_descriptors_gt.pcd")
 PCL_ADD_TEST(features_narf test_narf
              FILES test_narf.cpp
              LINK_WITH pcl_gtest pcl_features ${FLANN_LIBRARIES})

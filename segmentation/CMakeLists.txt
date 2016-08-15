@@ -1,6 +1,6 @@
 set(SUBSYS_NAME segmentation)
 set(SUBSYS_DESC "Point cloud segmentation library")
-set(SUBSYS_DEPS common geometry search sample_consensus kdtree octree features filters)
+set(SUBSYS_DEPS common geometry search sample_consensus kdtree octree features filters ml)
 
 set(build TRUE)
 PCL_SUBSYS_OPTION(build "${SUBSYS_NAME}" "${SUBSYS_DESC}" ON)
@@ -20,12 +20,16 @@ if(build)
         src/organized_connected_component_segmentation.cpp
         src/organized_multi_plane_segmentation.cpp
         src/planar_polygon_fusion.cpp
+        src/crf_segmentation.cpp
         src/crf_normal_segmentation.cpp
+        src/unary_classifier.cpp
         src/conditional_euclidean_clustering.cpp
         src/supervoxel_clustering.cpp
 	src/grabcut_segmentation.cpp
         src/progressive_morphological_filter.cpp
         src/approximate_progressive_morphological_filter.cpp
+        src/lccp_segmentation.cpp
+        src/cpc_segmentation.cpp
        )
     # NOTE: boost/graph/boykov_kolmogorov_max_flow.hpp only exists for versions > 1.43
     if(Boost_MAJOR_VERSION GREATER 1 OR Boost_MINOR_VERSION GREATER 43)
@@ -57,17 +61,27 @@ if(build)
         "include/pcl/${SUBSYS_NAME}/region_3d.h"
         "include/pcl/${SUBSYS_NAME}/planar_region.h"
         "include/pcl/${SUBSYS_NAME}/planar_polygon_fusion.h"
+        "include/pcl/${SUBSYS_NAME}/crf_segmentation.h"
         "include/pcl/${SUBSYS_NAME}/crf_normal_segmentation.h"
+        "include/pcl/${SUBSYS_NAME}/unary_classifier.h"
         "include/pcl/${SUBSYS_NAME}/conditional_euclidean_clustering.h"
         "include/pcl/${SUBSYS_NAME}/supervoxel_clustering.h"
 	"include/pcl/${SUBSYS_NAME}/grabcut_segmentation.h"
         "include/pcl/${SUBSYS_NAME}/progressive_morphological_filter.h"
         "include/pcl/${SUBSYS_NAME}/approximate_progressive_morphological_filter.h"
+        "include/pcl/${SUBSYS_NAME}/lccp_segmentation.h"
+        "include/pcl/${SUBSYS_NAME}/cpc_segmentation.h"
         )
     # NOTE: boost/graph/boykov_kolmogorov_max_flow.hpp only exists for versions > 1.43
     if(Boost_MAJOR_VERSION GREATER 1 OR Boost_MINOR_VERSION GREATER 43)
     list(APPEND incs
         "include/pcl/${SUBSYS_NAME}/min_cut_segmentation.h"
+       )
+    endif()
+    # Random walker requires Eigen::Sparse module that is available since 3.1.0
+    if(NOT ("${EIGEN_VERSION}" VERSION_LESS 3.1.0))
+    list(APPEND incs
+        "include/pcl/${SUBSYS_NAME}/random_walker.h"
        )
     endif()
 
@@ -83,12 +97,16 @@ if(build)
         "include/pcl/${SUBSYS_NAME}/impl/organized_connected_component_segmentation.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/organized_multi_plane_segmentation.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/planar_polygon_fusion.hpp"
+        "include/pcl/${SUBSYS_NAME}/impl/crf_segmentation.hpp"
+        "include/pcl/${SUBSYS_NAME}/impl/unary_classifier.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/crf_normal_segmentation.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/conditional_euclidean_clustering.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/supervoxel_clustering.hpp"
 	"include/pcl/${SUBSYS_NAME}/impl/grabcut_segmentation.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/progressive_morphological_filter.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/approximate_progressive_morphological_filter.hpp"
+        "include/pcl/${SUBSYS_NAME}/impl/lccp_segmentation.hpp"
+        "include/pcl/${SUBSYS_NAME}/impl/cpc_segmentation.hpp"
         )
     # NOTE: boost/graph/boykov_kolmogorov_max_flow.hpp only exists for versions > 1.43
     if(Boost_MAJOR_VERSION GREATER 1 OR Boost_MINOR_VERSION GREATER 43)
@@ -96,11 +114,17 @@ if(build)
         "include/pcl/${SUBSYS_NAME}/impl/min_cut_segmentation.hpp"
        )
     endif()
+    # Random walker requires Eigen::Sparse module that is available since 3.1.0
+    if(NOT ("${EIGEN_VERSION}" VERSION_LESS 3.1.0))
+    list(APPEND impl_incs
+        "include/pcl/${SUBSYS_NAME}/impl/random_walker.hpp"
+       )
+    endif()
 
     set(LIB_NAME "pcl_${SUBSYS_NAME}")
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
     PCL_ADD_LIBRARY("${LIB_NAME}" "${SUBSYS_NAME}" ${srcs} ${incs} ${impl_incs})
-    target_link_libraries("${LIB_NAME}" pcl_search pcl_sample_consensus pcl_filters pcl_features)
+    target_link_libraries("${LIB_NAME}" pcl_search pcl_sample_consensus pcl_filters pcl_ml pcl_features)
     PCL_MAKE_PKGCONFIG("${LIB_NAME}" "${SUBSYS_NAME}" "${SUBSYS_DESC}" "${SUBSYS_DEPS}" "" "" "" "")
 
     # Install include files

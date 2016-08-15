@@ -3,10 +3,10 @@ set(SUBSYS_DESC "Point cloud library global unit tests")
 
 if(BUILD_visualization)
   include("${VTK_USE_FILE}")
-  set(SUBSYS_DEPS common sample_consensus io kdtree features filters geometry keypoints search surface registration segmentation octree recognition people outofcore visualization)
+  set(SUBSYS_DEPS 2d common sample_consensus io kdtree features filters geometry keypoints search surface registration segmentation octree recognition people outofcore visualization)
   set(OPT_DEPS vtk)
 else()
-  set(SUBSYS_DEPS common sample_consensus io kdtree features filters geometry keypoints search surface registration segmentation octree recognition people outofcore)
+  set(SUBSYS_DEPS 2d common sample_consensus io kdtree features filters geometry keypoints search surface registration segmentation octree recognition people outofcore)
 endif()
 
 set(DEFAULT OFF)
@@ -30,6 +30,7 @@ if(build)
 
     add_custom_target(tests "${CMAKE_CTEST_COMMAND}" "-V" VERBATIM)
 
+    add_subdirectory(2d)
     add_subdirectory(common)
     add_subdirectory(features)
     add_subdirectory(filters)
@@ -42,11 +43,8 @@ if(build)
     add_subdirectory(search)
     add_subdirectory(keypoints)
     add_subdirectory(surface)
+    add_subdirectory(segmentation)
     add_subdirectory(sample_consensus)
-
-    PCL_ADD_TEST(a_bearing_angle_image_test test_bearing_angle_image
-                 FILES test_bearing_angle_image.cpp
-                 LINK_WITH pcl_gtest pcl_common pcl_io)
 
 	  PCL_ADD_TEST(a_recognition_ism_test test_recognition_ism
                  FILES test_recognition_ism.cpp

@@ -1,6 +1,6 @@
 set(SUBSYS_NAME features)
 set(SUBSYS_DESC "Point cloud features library")
-set(SUBSYS_DEPS common search kdtree octree filters)
+set(SUBSYS_DEPS common search kdtree octree filters 2d)
 
 set(build TRUE)
 PCL_SUBSYS_OPTION(build "${SUBSYS_NAME}" "${SUBSYS_DESC}" ON)
@@ -15,6 +15,7 @@ if(build)
         "include/pcl/${SUBSYS_NAME}/boost.h"
         "include/pcl/${SUBSYS_NAME}/eigen.h"
         "include/pcl/${SUBSYS_NAME}/board.h"
+        "include/pcl/${SUBSYS_NAME}/brisk_2d.h"
         "include/pcl/${SUBSYS_NAME}/cppf.h"
         "include/pcl/${SUBSYS_NAME}/cvfh.h"
         "include/pcl/${SUBSYS_NAME}/our_cvfh.h"
@@ -23,6 +24,7 @@ if(build)
         "include/pcl/${SUBSYS_NAME}/feature.h"
         "include/pcl/${SUBSYS_NAME}/fpfh.h"
         "include/pcl/${SUBSYS_NAME}/fpfh_omp.h"
+        "include/pcl/${SUBSYS_NAME}/from_meshes.h"
         "include/pcl/${SUBSYS_NAME}/gfpfh.h"
         "include/pcl/${SUBSYS_NAME}/integral_image2D.h"
         "include/pcl/${SUBSYS_NAME}/integral_image_normal.h"
@@ -37,6 +39,7 @@ if(build)
         "include/pcl/${SUBSYS_NAME}/normal_3d.h"
         "include/pcl/${SUBSYS_NAME}/normal_3d_omp.h"
         "include/pcl/${SUBSYS_NAME}/normal_based_signature.h"
+        "include/pcl/${SUBSYS_NAME}/organized_edge_detection.h"
         "include/pcl/${SUBSYS_NAME}/pfh.h"
         "include/pcl/${SUBSYS_NAME}/pfh_tools.h"
         "include/pcl/${SUBSYS_NAME}/pfhrgb.h"
@@ -50,7 +53,8 @@ if(build)
         "include/pcl/${SUBSYS_NAME}/principal_curvatures.h"
         "include/pcl/${SUBSYS_NAME}/rift.h"
         "include/pcl/${SUBSYS_NAME}/rops_estimation.h"
-        #"include/pcl/${SUBSYS_NAME}/rsd.h"
+        "include/pcl/${SUBSYS_NAME}/rsd.h"
+        "include/pcl/${SUBSYS_NAME}/grsd.h"
         "include/pcl/${SUBSYS_NAME}/statistical_multiscale_interest_region_extraction.h"
         "include/pcl/${SUBSYS_NAME}/vfh.h"
         "include/pcl/${SUBSYS_NAME}/esf.h"
@@ -62,6 +66,7 @@ if(build)
 
     set(impl_incs
         "include/pcl/${SUBSYS_NAME}/impl/board.hpp"
+        "include/pcl/${SUBSYS_NAME}/impl/brisk_2d.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/cppf.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/cvfh.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/our_cvfh.hpp"
@@ -83,6 +88,7 @@ if(build)
         "include/pcl/${SUBSYS_NAME}/impl/normal_3d.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/normal_3d_omp.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/normal_based_signature.hpp"
+        "include/pcl/${SUBSYS_NAME}/impl/organized_edge_detection.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/pfh.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/pfhrgb.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/ppf.hpp"
@@ -95,7 +101,8 @@ if(build)
         "include/pcl/${SUBSYS_NAME}/impl/principal_curvatures.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/rift.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/rops_estimation.hpp"
-        #"include/pcl/${SUBSYS_NAME}/impl/rsd.hpp"
+        "include/pcl/${SUBSYS_NAME}/impl/rsd.hpp"
+        "include/pcl/${SUBSYS_NAME}/impl/grsd.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/statistical_multiscale_interest_region_extraction.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/vfh.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/esf.hpp"
@@ -107,6 +114,7 @@ if(build)
 
     set(srcs
         src/board.cpp
+        src/brisk_2d.cpp
         src/boundary.cpp
         src/cppf.cpp
         src/cvfh.cpp
@@ -125,6 +133,7 @@ if(build)
         src/narf.cpp
         src/normal_3d.cpp
         src/normal_based_signature.cpp
+        src/organized_edge_detection.cpp
         src/pfh.cpp
         src/ppf.cpp
         src/shot.cpp
@@ -133,7 +142,8 @@ if(build)
         src/principal_curvatures.cpp
         src/rift.cpp
         src/rops_estimation.cpp
-        #src/rsd.cpp
+        src/rsd.cpp
+        src/grsd.cpp
         src/statistical_multiscale_interest_region_extraction.cpp
         src/vfh.cpp
         src/esf.cpp        
