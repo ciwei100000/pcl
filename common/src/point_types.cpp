@@ -189,6 +189,13 @@ namespace pcl
     return (os);
   }
 
+  std::ostream&
+  operator << (std::ostream& os, const PointXYZLNormal& p)
+  {
+    os << "(" << p.x << "," << p.y << "," << p.z << " - " << p.label << " - " << p.normal[0] << "," << p.normal[1] << "," << p.normal[2] << " - " << p.curvature << ")";
+    return (os);
+  }
+
   std::ostream& 
   operator << (std::ostream& os, const PointWithRange& p)
   {
@@ -288,6 +295,16 @@ namespace pcl
   }
 
   std::ostream& 
+  operator << (std::ostream& os, const UniqueShapeContext1960& p)
+  {
+    for (int i = 0; i < 9; ++i)
+    os << (i == 0 ? "(" : "") << p.rf[i] << (i < 8 ? ", " : ")");
+    for (size_t i = 0; i < 1960; ++i)
+      os << (i == 0 ? "(" : "") << p.descriptor[i] << (i < 1959 ? ", " : ")");
+    return (os);
+  }
+
+  std::ostream& 
   operator << (std::ostream& os, const SHOT352& p)
   {
     for (int i = 0; i < 9; ++i)
@@ -330,6 +347,15 @@ namespace pcl
   {
     for (int i = 0; i < 308; ++i)
     os << (i == 0 ? "(" : "") << p.histogram[i] << (i < 307 ? ", " : ")");
+    return (os);
+  }
+
+  std::ostream& 
+  operator << (std::ostream& os, const BRISKSignature512& p)
+  {
+    os << p.scale << " " << p.orientation << " ";
+    for (int i = 0; i < 64; ++i)
+    os << (i == 0 ? "(" : "") << p.descriptor[i] << (i < 63 ? ", " : ")");
     return (os);
   }
 
@@ -393,4 +419,14 @@ namespace pcl
     p.radius << " - " << p.confidence << " - " << p.curvature << ")";
     return (os);
   }
+
+  std::ostream& 
+  operator << (std::ostream& os, const PointDEM& p)
+  {
+    os << "(" << p.x << "," << p.y << "," << p.z << " - " 
+       << p.intensity << " - " << p.intensity_variance << " - " 
+       << p.height_variance << ")";
+    return (os);
+  }
+
 }

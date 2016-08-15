@@ -3,6 +3,7 @@ PCL_ADD_TEST(common_test_wrappers test_wrappers FILES test_wrappers.cpp LINK_WIT
 PCL_ADD_TEST(common_test_macros test_macros FILES test_macros.cpp LINK_WITH pcl_gtest pcl_common)
 PCL_ADD_TEST(common_vector_average test_vector_average FILES test_vector_average.cpp LINK_WITH pcl_gtest)
 PCL_ADD_TEST(common_common test_common FILES test_common.cpp LINK_WITH pcl_gtest pcl_common)
+PCL_ADD_TEST(common_geometry test_geometry FILES test_geometry.cpp LINK_WITH pcl_gtest pcl_common)
 PCL_ADD_TEST(common_copy_point test_copy_point FILES test_copy_point.cpp LINK_WITH pcl_gtest pcl_common)
 PCL_ADD_TEST(common_centroid test_centroid FILES test_centroid.cpp LINK_WITH pcl_gtest pcl_common)
 PCL_ADD_TEST(common_int test_plane_intersection FILES test_plane_intersection.cpp LINK_WITH pcl_gtest pcl_common)
@@ -16,5 +17,6 @@ PCL_ADD_TEST(common_intensity test_intensity FILES test_intensity.cpp LINK_WITH 
 PCL_ADD_TEST(common_generator test_generator FILES test_generator.cpp LINK_WITH pcl_gtest pcl_common)
 PCL_ADD_TEST(common_io test_common_io FILES test_io.cpp LINK_WITH pcl_gtest pcl_common)
 PCL_ADD_TEST(common_copy_make_borders test_copy_make_borders FILES test_copy_make_borders.cpp LINK_WITH pcl_gtest pcl_common)
+PCL_ADD_TEST(common_bearing_angle_image test_bearing_angle_image FILES test_bearing_angle_image.cpp LINK_WITH pcl_gtest pcl_common)
 
 PCL_ADD_TEST(common_point_type_conversion test_common_point_type_conversion FILES test_point_type_conversion.cpp LINK_WITH pcl_gtest pcl_common)

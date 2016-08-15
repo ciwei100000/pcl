@@ -45,6 +45,8 @@
 #include <pcl/point_cloud.h>
 #include <pcl/common/transforms.h>
 
+#include <pcl/pcl_tests.h>
+
 using namespace pcl;
 using namespace pcl::io;
 using namespace std;
@@ -190,6 +192,81 @@ TEST (PCL, Transform)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
+TEST (PCL, TransformCopyFields)
+{
+  Eigen::Affine3f transform;
+  transform = Eigen::Translation3f (100, 0, 0);
+
+  PointXYZRGBNormal empty_point;
+  std::vector<int> indices (1);
+
+  PointCloud<PointXYZRGBNormal> cloud (2, 1);
+  cloud.points[0].rgba = 0xFF0000;
+  cloud.points[1].rgba = 0x00FF00;
+
+  // Preserve data in all fields
+  {
+    PointCloud<PointXYZRGBNormal> cloud_out;
+    transformPointCloud (cloud, cloud_out, transform, true);
+    ASSERT_EQ (cloud.size (), cloud_out.size ());
+    EXPECT_RGBA_EQ (cloud.points[0], cloud_out.points[0]);
+    EXPECT_RGBA_EQ (cloud.points[1], cloud_out.points[1]);
+  }
+  // Preserve data in all fields (with indices)
+  {
+    PointCloud<PointXYZRGBNormal> cloud_out;
+    transformPointCloud (cloud, indices, cloud_out, transform, true);
+    ASSERT_EQ (indices.size (), cloud_out.size ());
+    EXPECT_RGBA_EQ (cloud.points[0], cloud_out.points[0]);
+  }
+  // Do not preserve data in all fields
+  {
+    PointCloud<PointXYZRGBNormal> cloud_out;
+    transformPointCloud (cloud, cloud_out, transform, false);
+    ASSERT_EQ (cloud.size (), cloud_out.size ());
+    EXPECT_RGBA_EQ (empty_point, cloud_out.points[0]);
+    EXPECT_RGBA_EQ (empty_point, cloud_out.points[1]);
+  }
+  // Do not preserve data in all fields (with indices)
+  {
+    PointCloud<PointXYZRGBNormal> cloud_out;
+    transformPointCloud (cloud, indices, cloud_out, transform, false);
+    ASSERT_EQ (indices.size (), cloud_out.size ());
+    EXPECT_RGBA_EQ (empty_point, cloud_out.points[0]);
+  }
+  // Preserve data in all fields (with normals version)
+  {
+    PointCloud<PointXYZRGBNormal> cloud_out;
+    transformPointCloudWithNormals (cloud, cloud_out, transform, true);
+    ASSERT_EQ (cloud.size (), cloud_out.size ());
+    EXPECT_RGBA_EQ (cloud.points[0], cloud_out.points[0]);
+    EXPECT_RGBA_EQ (cloud.points[1], cloud_out.points[1]);
+  }
+  // Preserve data in all fields (with normals and indices version)
+  {
+    PointCloud<PointXYZRGBNormal> cloud_out;
+    transformPointCloudWithNormals (cloud, indices, cloud_out, transform, true);
+    ASSERT_EQ (indices.size (), cloud_out.size ());
+    EXPECT_RGBA_EQ (cloud.points[0], cloud_out.points[0]);
+  }
+  // Do not preserve data in all fields (with normals version)
+  {
+    PointCloud<PointXYZRGBNormal> cloud_out;
+    transformPointCloudWithNormals (cloud, cloud_out, transform, false);
+    ASSERT_EQ (cloud.size (), cloud_out.size ());
+    EXPECT_RGBA_EQ (empty_point, cloud_out.points[0]);
+    EXPECT_RGBA_EQ (empty_point, cloud_out.points[1]);
+  }
+  // Do not preserve data in all fields (with normals and indices version)
+  {
+    PointCloud<PointXYZRGBNormal> cloud_out;
+    transformPointCloudWithNormals (cloud, indices, cloud_out, transform, false);
+    ASSERT_EQ (indices.size (), cloud_out.size ());
+    EXPECT_RGBA_EQ (empty_point, cloud_out.points[0]);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
 TEST (PCL, Matrix4Affine3Transform)
 {
   float rot_x = 2.8827f;
@@ -236,31 +313,49 @@ TEST (PCL, Matrix4Affine3Transform)
   EXPECT_NEAR (pt.y, v3t.y (), 1e-4); EXPECT_NEAR (pt.y, v4t.y (), 1e-4);
   EXPECT_NEAR (pt.z, v3t.z (), 1e-4); EXPECT_NEAR (pt.z, v4t.z (), 1e-4);
 
+  PointNormal pn;
+  pn.getVector3fMap () = p.getVector3fMap ();
+  pn.getNormalVector3fMap () = Eigen::Vector3f (0.60f, 0.48f, 0.64f);
+  Eigen::Vector3f n3 = pn.getNormalVector3fMap ();
+  Eigen::Vector4f n4 = pn.getNormalVector4fMap ();
+
+  Eigen::Vector3f n3t (affine.rotation() * n3);
+  Eigen::Vector4f n4t (transformation * n4);
+
+  PointNormal pnt = pcl::transformPointWithNormal (pn, affine);
+
+  EXPECT_NEAR (pnt.x, v3t.x (), 1e-4); EXPECT_NEAR (pnt.x, v4t.x (), 1e-4);
+  EXPECT_NEAR (pnt.y, v3t.y (), 1e-4); EXPECT_NEAR (pnt.y, v4t.y (), 1e-4);
+  EXPECT_NEAR (pnt.z, v3t.z (), 1e-4); EXPECT_NEAR (pnt.z, v4t.z (), 1e-4);
+  EXPECT_NEAR (pnt.normal_x, n3t.x (), 1e-4); EXPECT_NEAR (pnt.normal_x, n4t.x (), 1e-4);
+  EXPECT_NEAR (pnt.normal_y, n3t.y (), 1e-4); EXPECT_NEAR (pnt.normal_y, n4t.y (), 1e-4);
+  EXPECT_NEAR (pnt.normal_z, n3t.z (), 1e-4); EXPECT_NEAR (pnt.normal_z, n4t.z (), 1e-4);
+
   PointCloud<PointXYZ> c, ct;
   c.push_back (p);
   pcl::transformPointCloud (c, ct, affine);
-  EXPECT_FLOAT_EQ (pt.x, ct[0].x); 
-  EXPECT_FLOAT_EQ (pt.y, ct[0].y); 
-  EXPECT_FLOAT_EQ (pt.z, ct[0].z); 
+  EXPECT_NEAR (pt.x, ct[0].x, 1e-4);
+  EXPECT_NEAR (pt.y, ct[0].y, 1e-4);
+  EXPECT_NEAR (pt.z, ct[0].z, 1e-4);
 
   pcl::transformPointCloud (c, ct, transformation);
-  EXPECT_FLOAT_EQ (pt.x, ct[0].x); 
-  EXPECT_FLOAT_EQ (pt.y, ct[0].y); 
-  EXPECT_FLOAT_EQ (pt.z, ct[0].z); 
+  EXPECT_NEAR (pt.x, ct[0].x, 1e-4);
+  EXPECT_NEAR (pt.y, ct[0].y, 1e-4);
+  EXPECT_NEAR (pt.z, ct[0].z, 1e-4);
 
   affine = transformation;
 
   std::vector<int> indices (1); indices[0] = 0;
 
   pcl::transformPointCloud (c, indices, ct, affine);
-  EXPECT_FLOAT_EQ (pt.x, ct[0].x); 
-  EXPECT_FLOAT_EQ (pt.y, ct[0].y); 
-  EXPECT_FLOAT_EQ (pt.z, ct[0].z); 
+  EXPECT_NEAR (pt.x, ct[0].x, 1e-4);
+  EXPECT_NEAR (pt.y, ct[0].y, 1e-4);
+  EXPECT_NEAR (pt.z, ct[0].z, 1e-4);
 
   pcl::transformPointCloud (c, indices, ct, transformation);
-  EXPECT_FLOAT_EQ (pt.x, ct[0].x); 
-  EXPECT_FLOAT_EQ (pt.y, ct[0].y); 
-  EXPECT_FLOAT_EQ (pt.z, ct[0].z); 
+  EXPECT_NEAR (pt.x, ct[0].x, 1e-4);
+  EXPECT_NEAR (pt.y, ct[0].y, 1e-4);
+  EXPECT_NEAR (pt.z, ct[0].z, 1e-4);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

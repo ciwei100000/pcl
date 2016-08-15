@@ -63,6 +63,7 @@
   (pcl::PointNormal)            \
   (pcl::PointXYZRGBNormal)      \
   (pcl::PointXYZINormal)        \
+  (pcl::PointXYZLNormal)        \
   (pcl::PointWithRange)         \
   (pcl::PointWithViewpoint)     \
   (pcl::MomentInvariants)       \
@@ -77,16 +78,20 @@
   (pcl::NormalBasedSignature12) \
   (pcl::FPFHSignature33)        \
   (pcl::VFHSignature308)        \
+  (pcl::GRSDSignature21)        \
   (pcl::ESFSignature640)        \
+  (pcl::BRISKSignature512)      \
   (pcl::Narf36)                 \
   (pcl::IntensityGradient)      \
   (pcl::PointWithScale)         \
   (pcl::PointSurfel)            \
   (pcl::ShapeContext1980)       \
+  (pcl::UniqueShapeContext1960) \
   (pcl::SHOT352)                \
   (pcl::SHOT1344)               \
   (pcl::PointUV)                \
-  (pcl::ReferenceFrame)
+  (pcl::ReferenceFrame)         \
+  (pcl::PointDEM)
 
 // Define all point types that include RGB data
 #define PCL_RGB_POINT_TYPES     \
@@ -109,15 +114,18 @@
   (pcl::PointNormal)          \
   (pcl::PointXYZRGBNormal)    \
   (pcl::PointXYZINormal)      \
+  (pcl::PointXYZLNormal)      \
   (pcl::PointWithRange)       \
   (pcl::PointWithViewpoint)   \
   (pcl::PointWithScale)       \
-  (pcl::PointSurfel)
+  (pcl::PointSurfel)          \
+  (pcl::PointDEM)
 
 // Define all point types with XYZ and label
 #define PCL_XYZL_POINT_TYPES  \
   (pcl::PointXYZL)            \
-  (pcl::PointXYZRGBL)
+  (pcl::PointXYZRGBL)         \
+  (pcl::PointXYZLNormal)
 
 // Define all point types that include normal[3] data
 #define PCL_NORMAL_POINT_TYPES  \
@@ -125,6 +133,7 @@
   (pcl::PointNormal)            \
   (pcl::PointXYZRGBNormal)      \
   (pcl::PointXYZINormal)        \
+  (pcl::PointXYZLNormal)        \
   (pcl::PointSurfel)
 
 // Define all point types that represent features
@@ -137,7 +146,9 @@
   (pcl::NormalBasedSignature12) \
   (pcl::FPFHSignature33)        \
   (pcl::VFHSignature308)        \
+  (pcl::GRSDSignature21)        \
   (pcl::ESFSignature640)        \
+  (pcl::BRISKSignature512)      \
   (pcl::Narf36)
 
 namespace pcl
@@ -967,10 +978,56 @@ namespace pcl
       data[3] = 1.0f;
       normal_x = normal_y = normal_z = data_n[3] = 0.0f;
       intensity = 0.0f;
+      curvature = 0;
     }
   
     friend std::ostream& operator << (std::ostream& os, const PointXYZINormal& p);
   };
+
+//----
+  struct EIGEN_ALIGN16 _PointXYZLNormal
+  {
+    PCL_ADD_POINT4D; // This adds the members x,y,z which can also be accessed using the point (which is float[4])
+    PCL_ADD_NORMAL4D; // This adds the member normal[3] which can also be accessed using the point (which is float[4])
+    union
+    {
+      struct
+      {
+        uint32_t label;
+        float curvature;
+      };
+      float data_c[4];
+    };
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  };
+
+  PCL_EXPORTS std::ostream& operator << (std::ostream& os, const PointXYZLNormal& p);
+  /** \brief A point structure representing Euclidean xyz coordinates, a label, together with normal coordinates and the surface curvature estimate.
+    * \ingroup common
+    */
+  struct PointXYZLNormal : public _PointXYZLNormal
+  {
+    inline PointXYZLNormal (const _PointXYZLNormal &p)
+    {
+      x = p.x; y = p.y; z = p.z; data[3] = 1.0f;
+      normal_x = p.normal_x; normal_y = p.normal_y; normal_z = p.normal_z; data_n[3] = 0.0f;
+      curvature = p.curvature;
+      label = p.label;
+    }
+
+    inline PointXYZLNormal ()
+    {
+      x = y = z = 0.0f;
+      data[3] = 1.0f;
+      normal_x = normal_y = normal_z = data_n[3] = 0.0f;
+      label = 0;
+      curvature = 0;
+    }
+
+    friend std::ostream& operator << (std::ostream& os, const PointXYZLNormal& p);
+  };
+
+//  ---
 
 
   struct EIGEN_ALIGN16 _PointWithRange
@@ -1197,6 +1254,18 @@ namespace pcl
     friend std::ostream& operator << (std::ostream& os, const ShapeContext1980& p);
   };
 
+  PCL_EXPORTS std::ostream& operator << (std::ostream& os, const UniqueShapeContext1960& p);
+  /** \brief A point structure representing a Unique Shape Context.
+    * \ingroup common
+    */
+  struct UniqueShapeContext1960
+  {
+    float descriptor[1960];
+    float rf[9];
+    static int descriptorSize () { return 1960; }
+
+    friend std::ostream& operator << (std::ostream& os, const UniqueShapeContext1960& p);
+  };
 
   PCL_EXPORTS std::ostream& operator << (std::ostream& os, const SHOT352& p);
   /** \brief A point structure representing the generic Signature of Histograms of OrienTations (SHOT) - shape only.
@@ -1296,6 +1365,32 @@ namespace pcl
     static int descriptorSize () { return 308; }
 
     friend std::ostream& operator << (std::ostream& os, const VFHSignature308& p);
+  };
+  
+  PCL_EXPORTS std::ostream& operator << (std::ostream& os, const GRSDSignature21& p);
+  /** \brief A point structure representing the Global Radius-based Surface Descriptor (GRSD).
+    * \ingroup common
+    */
+  struct GRSDSignature21
+  {
+    float histogram[21];
+    static int descriptorSize () { return 21; }
+
+    friend std::ostream& operator << (std::ostream& os, const GRSDSignature21& p);
+  };
+
+  PCL_EXPORTS std::ostream& operator << (std::ostream& os, const BRISKSignature512& p);
+  /** \brief A point structure representing the Binary Robust Invariant Scalable Keypoints (BRISK).
+    * \ingroup common
+    */
+  struct BRISKSignature512
+  {
+    float scale;
+    float orientation;
+    unsigned char descriptor[64];
+    static int descriptorSize () { return 64; }
+
+    friend std::ostream& operator << (std::ostream& os, const BRISKSignature512& p);
   };
 
   PCL_EXPORTS std::ostream& operator << (std::ostream& os, const ESFSignature640& p);
@@ -1497,6 +1592,39 @@ namespace pcl
     }
   
     friend std::ostream& operator << (std::ostream& os, const PointSurfel& p);
+  };
+
+  struct EIGEN_ALIGN16 _PointDEM
+  {
+    PCL_ADD_POINT4D;
+    float intensity;
+    float intensity_variance;
+    float height_variance;
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  };
+
+  PCL_EXPORTS std::ostream& operator << (std::ostream& os, const PointDEM& p);
+  /** \brief A point structure representing Digital Elevation Map.
+    * \ingroup common
+    */
+  struct PointDEM : public _PointDEM
+  {
+    inline PointDEM (const _PointDEM &p)
+    {
+      x = p.x; y = p.y; x = p.z; data[3] = 1.0f;
+      intensity = p.intensity;
+      intensity_variance = p.intensity_variance;
+      height_variance = p.height_variance;
+    }
+
+    inline PointDEM ()
+    {
+      x = y = z = 0.0f; data[3] = 1.0f;
+      intensity = 0.0f;
+      intensity_variance = height_variance = 0.0f;
+    }
+
+    friend std::ostream& operator << (std::ostream& os, const PointDEM& p);
   };
 
   template <int N> std::ostream& 

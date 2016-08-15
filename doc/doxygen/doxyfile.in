@@ -124,6 +124,7 @@ EXCLUDE                = "@PCL_SOURCE_DIR@/cmake" \
                          "@PCL_SOURCE_DIR@/surface/include/pcl/surface/on_nurbs" \
                          "@PCL_SOURCE_DIR@/surface/include/pcl/surface/openNURBS" \
                          "@PCL_SOURCE_DIR@/surface/include/pcl/surface/impl/nurbs" \
+                         "@PCL_SOURCE_DIR@/simulation" \
                          "@PCL_SOURCE_DIR@/test/gtest-1.6.0"
 EXCLUDE_SYMLINKS       = YES
 EXCLUDE_PATTERNS       = 
@@ -248,8 +249,6 @@ MAN_LINKS              = NO
 #---------------------------------------------------------------------------
 GENERATE_XML           = NO
 XML_OUTPUT             = xml
-XML_SCHEMA             = 
-XML_DTD                = 
 XML_PROGRAMLISTING     = YES
 
 #---------------------------------------------------------------------------
@@ -277,6 +276,10 @@ INCLUDE_FILE_PATTERNS  = *.h
 #PREDEFINED            = protected=private \
 PREDEFINED =           = "HAVE_QHULL=1" \
                          "HAVE_OPENNI=1" \
+                         "HAVE_ENSENSO=1" \
+                         "HAVE_DAVIDSDK=1" \
+                         "HAVE_DSSDK=1" \
+                         "HAVE_RSSDK=1" \
                          "PCL_DEPRECATED(x)="
 EXPAND_AS_DEFINED      = 
 SKIP_FUNCTION_MACROS   = YES

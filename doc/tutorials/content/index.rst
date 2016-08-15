@@ -31,6 +31,7 @@ Table of contents
   * :ref:`segmentation_tutorial`
   * :ref:`surface_tutorial`
   * :ref:`visualization_tutorial`
+  * :ref:`gpu`
 
 .. _basic_usage:
 
@@ -82,6 +83,21 @@ Basic Usage
 
      .. |mi_2| image:: images/pcl_logo.png
                :height: 75px
+
+  * :ref:`compiling_pcl_posix`
+
+     =======  ======
+     |mi_11|  Title: **Compiling PCL from source on POSIX compliant systems**
+
+              Author: *Victor Lamoine*
+
+              Compatibility: > PCL 1.0
+
+              In this tutorial, we will explain how to compile PCL from sources on POSIX/Unix systems.
+     =======  ======
+
+     .. |mi_11| image:: images/pcl_logo.png
+               :height: 120px
 
   * :ref:`building_pcl`
 
@@ -187,21 +203,6 @@ Basic Usage
 
      .. |mi_11| image:: images/pcl_logo.png
                :height: 75px
-
-  * :ref:`qt_visualizer`
-
-     ======  ======
-     |mi_9|  Title: **Create a PCL visualizer in Qt with cmake**
-
-             Author: *Victor Lamoine*
-
-             Compatibility: > PCL 1.5
-
-             This tutorial shows you how to create a PCL visualizer within a Qt application.
-     ======  ======
-
-     .. |mi_9| image:: images/qt_visualizer/qt.png
-               :height: 128px
 
   * :ref:`matrix_transform`
 
@@ -600,6 +601,50 @@ I/O
      .. |i_o6| image:: images/dinast_cyclopes.png
                :height: 100px
 
+  * :ref:`ensenso_cameras`
+
+     ======  ======
+     |i_o7|  Title: **Grabbing point clouds from Ensenso cameras**
+
+             Author: *Victor Lamoine*
+
+             Compatibility: >= PCL 1.8.0
+
+             In this tutorial, we will learn how to acquire point cloud data from an IDS-Imaging Ensenso camera.
+     ======  ======
+
+     .. |i_o7| image:: images/ensenso/ids.png
+               :height: 165px
+
+  * :ref:`david_sdk`
+
+     ======  ======
+     |i_o8|  Title: **Grabbing point clouds / meshes from davidSDK scanners**
+
+             Author: *Victor Lamoine*
+
+             Compatibility: >= PCL 1.8.0
+
+             In this tutorial, we will learn how to acquire point cloud or mesh data from a davidSDK scanner.
+     ======  ======
+
+     .. |i_o8| image:: images/davidsdk/david.png
+               :height: 70px
+
+  * :ref:`depth_sense_grabber`
+
+     ======  ======
+     |i_o9|  Title: **Grabbing point clouds from DepthSense cameras**
+
+             Author: *Sergey Alexandrov*
+
+             Compatibility: >= PCL 1.8.0
+
+             In this tutorial we will learn how to setup and use DepthSense cameras within PCL on both Linux and Windows platforms.
+     ======  ======
+
+     .. |i_o9| image:: images/creative_camera.jpg
+               :height: 70px
 
 .. _keypoints_tutorial:
 
@@ -759,6 +804,21 @@ Recognition
      ======  ======
 
      .. |rc_2| image:: images/implicit_shape_model.png
+               :height: 100px
+
+  * :ref:`global_hypothesis_verification`
+
+     ======  ======
+     |rc_3|  Title: **Hypothesis Verification for 3D Object Recognition**
+
+             Author: *Daniele De Gregorio, Federico Tombari*
+
+             Compatibility: > PCL 1.7
+
+             This tutorial aims at explaining how to do 3D object recognition in clutter by verifying model hypotheses in cluttered and  heavily occluded 3D scenes.
+     ======  ======
+
+     .. |rc_3| image:: images/global_hypothesis_verification/multiple.png
                :height: 100px
 
 .. _registration_tutorial:
@@ -1026,7 +1086,7 @@ Segmentation
 
              Author: *Jeremie Papon*
 
-             Compatibility: >= PCL 1.7
+             Compatibility: >= PCL 1.8
 
              In this tutorial, we show to break a pointcloud into the mid-level supervoxel representation.
      ======  ======
@@ -1210,6 +1270,37 @@ Visualization
      .. |vi_5| image:: images/visualization_small.png
                :height: 120px
 
+  * :ref:`qt_visualizer`
+
+     ======  ======
+     |vi_6|  Title: **Create a PCL visualizer in Qt with cmake**
+
+             Author: *Victor Lamoine*
+
+             Compatibility: > PCL 1.5
+
+             This tutorial shows you how to create a PCL visualizer within a Qt application.
+     ======  ======
+
+     .. |vi_6| image:: images/qt_visualizer/qt.png
+               :height: 128px
+
+  * :ref:`qt_colorize_cloud`
+
+     ======  ======
+     |vi_7|  Title: **Create a PCL visualizer in Qt to colorize clouds**
+
+              Author: *Victor Lamoine*
+
+              Compatibility: > PCL 1.5
+
+              This tutorial shows you how to color point clouds within a Qt application.
+     ======  ======
+
+     .. |vi_7| image:: images/qt_visualizer/qt.png
+               :height: 128px
+
+
 .. _applications_tutorial:
 
 Applications
@@ -1274,6 +1365,57 @@ Applications
      
      .. |ap_5| image:: images/ground_based_rgbd_people_detection/Index_photo.jpg
                :height: 120px
+
+.. _gpu:
+
+GPU
+---
+
+  * :ref:`gpu_install`
+     
+     ======  ======
+     |gp_1|  Title: **GPU Installation**
+
+             Author: *Koen Buys*
+
+             Compatibility: PCL git master
+
+             This tutorial explains how to configure PCL to use with a Nvidia GPU
+     ======  ======
+     
+     .. |gp_1| image:: images/PCD_icon.png
+               :height: 100px
+
+  * :ref:`using_kinfu_large_scale`
+
+     ======  ======
+     |ap_4|  Title: **Using Kinfu Large Scale to generate a textured mesh**
+
+             Author: *Francisco Heredia and Raphael Favier*
+
+             Compatibility: PCL git master
+
+             This tutorial demonstrates how to use KinFu Large Scale to produce a mesh from a room, and apply texture information in post-processing for a more appealing visual result.
+     ======  ======
+
+     .. |ap_4| image:: images/using_kinfu_large_scale.jpg
+               :height: 100px
+
+  * :ref:`gpu_people`
+     
+     ======  ======
+     |gp_2|  Title: **People Detection**
+
+             Author: *Koen Buys*
+
+             Compatibility: PCL git master
+
+             This tutorial presents a method for people and pose detection.
+     ======  ======
+     
+     .. |gp_2| image:: images/gpu/people/c2_100.jpg
+               :height: 100px
+
  ..
   * :ref:`normal_estimation_integral_images`
     Surface normal estimation

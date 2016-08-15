@@ -1,6 +1,6 @@
 set(SUBSYS_NAME recognition)
 set(SUBSYS_DESC "Point cloud recognition library")
-set(SUBSYS_DEPS common io search kdtree octree features filters registration sample_consensus)
+set(SUBSYS_DEPS common io search kdtree octree features filters registration sample_consensus ml)
 
 set(build TRUE)
 PCL_SUBSYS_OPTION(build "${SUBSYS_NAME}" "${SUBSYS_DESC}" ON)
@@ -73,6 +73,13 @@ if(build)
         "include/pcl/${SUBSYS_NAME}/hv/greedy_verification.h"
         )
 
+    set(face_detection_incs
+        "include/pcl/${SUBSYS_NAME}/face_detection/face_common.h"
+        "include/pcl/${SUBSYS_NAME}/face_detection/face_detector_data_provider.h"
+        "include/pcl/${SUBSYS_NAME}/face_detection/rf_face_detector_trainer.h"
+        "include/pcl/${SUBSYS_NAME}/face_detection/rf_face_utils.h"
+        ) 
+
     set(cg_incs
         "include/pcl/${SUBSYS_NAME}/cg/correspondence_grouping.h"
         "include/pcl/${SUBSYS_NAME}/cg/hough_3d.h"
@@ -119,7 +126,9 @@ if(build)
         src/ransac_based/model_library.cpp
         src/ransac_based/orr_octree.cpp
         src/ransac_based/orr_octree_zprojection.cpp
-		    src/implicit_shape_model.cpp
+        src/face_detection/face_detector_data_provider.cpp
+        src/face_detection/rf_face_detector_trainer.cpp
+        src/implicit_shape_model.cpp
         )
         
     if (HAVE_METSLIB)
@@ -140,14 +149,15 @@ if(build)
 
     set(LIB_NAME "pcl_${SUBSYS_NAME}")
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
-    PCL_ADD_LIBRARY("${LIB_NAME}" "${SUBSYS_NAME}" ${srcs} ${incs} ${impl_incs} ${ransac_based_incs} ${ransac_based_impl_incs} ${hv_incs} ${hv_impl_incs} ${cg_incs} ${cg_impl_incs} ${metslib_incs})
-    target_link_libraries("${LIB_NAME}" pcl_common pcl_kdtree pcl_octree pcl_search pcl_features pcl_registration pcl_sample_consensus pcl_filters pcl_io)
+    PCL_ADD_LIBRARY("${LIB_NAME}" "${SUBSYS_NAME}" ${srcs} ${incs} ${impl_incs} ${face_detection_incs} ${ransac_based_incs} ${ransac_based_impl_incs} ${hv_incs} ${hv_impl_incs} ${cg_incs} ${cg_impl_incs} ${metslib_incs})
+    target_link_libraries("${LIB_NAME}" pcl_common pcl_kdtree pcl_octree pcl_search pcl_features pcl_registration pcl_sample_consensus pcl_filters pcl_ml pcl_io)
     PCL_MAKE_PKGCONFIG("${LIB_NAME}" "${SUBSYS_NAME}" "${SUBSYS_DESC}" "${SUBSYS_DEPS}" "" "" "" "")
     # Install include files
     PCL_ADD_INCLUDES("${SUBSYS_NAME}" "${SUBSYS_NAME}" ${incs})
     PCL_ADD_INCLUDES("${SUBSYS_NAME}" "${SUBSYS_NAME}/ransac_based" ${ransac_based_incs})
     PCL_ADD_INCLUDES("${SUBSYS_NAME}" "${SUBSYS_NAME}/hv" ${hv_incs})
     PCL_ADD_INCLUDES("${SUBSYS_NAME}" "${SUBSYS_NAME}/cg" ${cg_incs})
+    PCL_ADD_INCLUDES("${SUBSYS_NAME}" "${SUBSYS_NAME}/face_detection" ${face_detection_incs})
     
     PCL_ADD_INCLUDES("${SUBSYS_NAME}" "${SUBSYS_NAME}/impl" ${impl_incs})
     PCL_ADD_INCLUDES("${SUBSYS_NAME}" "${SUBSYS_NAME}/impl/ransac_based" ${ransac_based_impl_incs})
@@ -155,5 +165,9 @@ if(build)
     PCL_ADD_INCLUDES("${SUBSYS_NAME}" "${SUBSYS_NAME}/impl/cg" ${cg_impl_incs})
     PCL_ADD_INCLUDES("${SUBSYS_NAME}" "${SUBSYS_NAME}/linemod" ${LINEMOD_INCLUDES})
     PCL_ADD_INCLUDES("${SUBSYS_NAME}" "${SUBSYS_NAME}/impl/linemod" ${LINEMOD_IMPLS})
+
+    if (NOT HAVE_METSLIB)
+        PCL_ADD_INCLUDES("${SUBSYS_NAME}" "${SUBSYS_NAME}/3rdparty/metslib" ${metslib_incs})
+    endif(NOT HAVE_METSLIB)
 
 endif(build)
