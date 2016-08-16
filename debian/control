@@ -44,8 +44,27 @@ Depends: libboost-all-dev,
 	 libvtk6-qt-dev,
 	 libopenni-dev [!s390x !alpha !hppa !hurd-i386 !kfreebsd-any !m68k !sh4 !sparc64],
 	 libopenni2-dev [!armel !hppa !hurd-i386 !kfreebsd-any !m68k !powerpcspe],
-         libpcl1.8 (= ${binary:Version}),
-         ${misc:Depends}
+	 libpcl-apps1.8 (= ${binary:Version}),
+	 libpcl-common1.8 (= ${binary:Version}),
+	 libpcl-features1.8 (= ${binary:Version}),
+	 libpcl-filters1.8 (= ${binary:Version}),
+	 libpcl-io1.8 (= ${binary:Version}),
+	 libpcl-kdtree1.8 (= ${binary:Version}),
+	 libpcl-keypoints1.8 (= ${binary:Version}),
+	 libpcl-ml1.8 (= ${binary:Version}),
+	 libpcl-octree1.8 (= ${binary:Version}),
+	 libpcl-outofcore1.8 (= ${binary:Version}),
+	 libpcl-people1.8 (= ${binary:Version}),
+	 libpcl-recognition1.8 (= ${binary:Version}),
+	 libpcl-registration1.8 (= ${binary:Version}),
+	 libpcl-sample-consensus1.8 (= ${binary:Version}),
+	 libpcl-search1.8 (= ${binary:Version}),
+	 libpcl-segmentation1.8 (= ${binary:Version}),
+	 libpcl-stereo1.8 (= ${binary:Version}),
+	 libpcl-surface1.8 (= ${binary:Version}),
+	 libpcl-tracking1.8 (= ${binary:Version}),
+	 libpcl-visualization1.8 (= ${binary:Version}),
+	 ${misc:Depends}
 Suggests: libpcl-doc
 Description: Point Cloud Library - development files
  The Point Cloud Library (PCL) is a standalone, large scale, open
@@ -57,38 +76,6 @@ Description: Point Cloud Library - development files
  .
  This package contains development files (headers and shared library
  symbolic link).
-
-Package: libpcl1.8
-Architecture: any
-Multi-Arch: foreign
-Depends: ${misc:Depends},
-	 libpcl-apps1.8,
-	 libpcl-common1.8,
-	 libpcl-features1.8,
-	 libpcl-filters1.8,
-	 libpcl-io1.8,
-	 libpcl-kdtree1.8,
-	 libpcl-keypoints1.8,
-	 libpcl-ml1.8,
-	 libpcl-octree1.8,
-	 libpcl-outofcore1.8,
-	 libpcl-people1.8,
-	 libpcl-recognition1.8,
-	 libpcl-registration1.8,
-	 libpcl-sample-consensus1.8,
-	 libpcl-search1.8,
-	 libpcl-segmentation1.8,
-	 libpcl-stereo1.8,
-	 libpcl-surface1.8,
-	 libpcl-tracking1.8,
-	 libpcl-visualization1.8 
-Description: Point Cloud Library -- metapackage
- The Point Cloud Library (PCL) is a standalone, large scale, open
- project for 2D/3D image and point cloud processing.
- .
- The PCL framework contains numerous state-of-the art algorithms
- including filtering, feature estimation, surface reconstruction,
- registration, model fitting and segmentation.
 
 Package: libpcl-apps1.8
 Architecture: any
@@ -406,8 +393,7 @@ Description: Point Cloud Library - visualization library
 Package: pcl-tools
 Architecture: any
 Section: science
-Depends: ${misc:Depends}, ${shlibs:Depends},
-	 libpcl1.8 (>= ${binary:Version})
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Multi-Arch: foreign
 Description: Point Cloud Library - point cloud processing tools
  The Point Cloud Library (PCL) is a standalone, large scale, open
