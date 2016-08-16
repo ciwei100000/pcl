@@ -1,3 +1,13 @@
+pcl (1.8.0+dfsg1-1) experimental; urgency=medium
+
+  * Imported Upstream version 1.8.0+dfsg1
+  * Rebase patches
+  * Add patch for removed non free code
+  * Reworked debian/ files
+  * Add patch for privacy-breach-logo
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Tue, 16 Aug 2016 19:25:49 +0200
+
 pcl (1.7.2-14) unstable; urgency=medium
 
   * Add patch for gcc6 (Closes: #812015)
