@@ -3,6 +3,6 @@ version=3
 #opts=uversionmangle=s/(\d)[_.+-]?((RC|rc|pre|dev|beta|alpha)[\d.]*)$/$1~$2/ \ 
 #https://github.com/PointCloudLibrary/pcl/releases .*/pcl-(\d\S*)\.(?:zip|tgz|tbz|txz|(?:tar\.(?:gz|bz2|xz)))
 
-opts="repacksuffix=+dfsg,uversionmangle=s/(\d)[_.+-]?((RC|rc|pre|dev|beta|alpha)[\d.]*)$/$1~$2+dfsg/" \
+opts="repacksuffix=+dfsg,dversionmangle=s/(\d)[_.+-]?((RC|rc|pre|dev|beta|alpha)[\d.]*)$/$1~$2+dfsg/" \
 https://github.com/PointCloudLibrary/pcl/releases .*/pcl-(\d\S*)\.(?:zip|tgz|tbz|txz|(?:tar\.(?:gz|bz2|xz)))
 

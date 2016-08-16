@@ -283,8 +283,8 @@ Copyright: 2012, Sudarshan Srinivasan <sudarshan85@gmail.com>
 License: BSD-2-clause
 
 Files: common/src/bearing_angle_image.cpp
-       	common/include/pcl/range_image/bearing_angle_image.h
-	test/test_bearing_angle_image.cpp
+	common/include/pcl/range_image/bearing_angle_image.h
+	test/common/test_bearing_angle_image.cpp
 Copyright: 2013, Intelligent Robotics Lab, DLUT.
 License: BSD-3-clause
 
