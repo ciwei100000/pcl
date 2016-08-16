@@ -1,0 +1,21 @@
+From: Jochen Sprickerhof <git@jochen.sprickerhof.de>
+Date: Tue, 16 Aug 2016 12:08:00 +0200
+Subject: Clear privacy-breach-logo
+
+---
+ doc/doxygen/pcl.doxy | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/doc/doxygen/pcl.doxy b/doc/doxygen/pcl.doxy
+index 0e273ff..4e7b9fe 100644
+--- a/doc/doxygen/pcl.doxy
++++ b/doc/doxygen/pcl.doxy
+@@ -16,8 +16,6 @@ href="http://en.wikipedia.org/wiki/BSD_licenses#3-clause_license_.28.22New_BSD_L
+ BSD license</a> and is open source software.  <b>It is free for commercial and
+ research use.</b>
+ 
+-\image html http://www.pointclouds.org/assets/images/contents/logos/pointcloudlibrary_logo.png
+-
+ PCL is cross-platform, and has been successfully compiled and deployed on
+ Linux, MacOS, Windows, and Android. To simplify development, PCL is split into
+ a series of smaller code libraries, that can be compiled separately. This
