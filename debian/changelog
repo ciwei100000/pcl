@@ -1,3 +1,10 @@
+pcl (1.8.0+dfsg1-2) unstable; urgency=medium
+
+  * Remove superfluous libpcl1.8 package
+  * Add patch for empty 2d lib
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Mon, 22 Aug 2016 07:46:30 +0200
+
 pcl (1.8.0+dfsg1-1) experimental; urgency=medium
 
   * Imported Upstream version 1.8.0+dfsg1
