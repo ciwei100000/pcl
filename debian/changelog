@@ -1,3 +1,9 @@
+pcl (1.8.0+dfsg1-3) unstable; urgency=medium
+
+  * Disable QT on arm (Closes: #835292)
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sun, 04 Sep 2016 09:30:23 +0200
+
 pcl (1.8.0+dfsg1-2) unstable; urgency=medium
 
   * Remove superfluous libpcl1.8 package
