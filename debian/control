@@ -19,12 +19,12 @@ Build-Depends: debhelper (>= 9), dh-exec (>=0.3),
 	       libqhull-dev,
 	       libopenni-dev [!s390x !alpha !hppa !hurd-i386 !kfreebsd-any !m68k !sh4 !sparc64],
 	       libopenni2-dev [!armel !hppa !hurd-i386 !kfreebsd-any !m68k !powerpcspe],
-	       libqt5opengl5-dev [!armel !armhf],
+	       libqt5opengl5-dev,
 	       libusb-1.0-0-dev,
 	       freeglut3-dev, 
 	       libxmu-dev,
 	       libxi-dev,
-	       libvtk6-qt-dev [!armel !armhf]
+	       libvtk6-qt-dev
 Build-Depends-Indep: doxygen,
 		     doxygen-latex
 Standards-Version: 3.9.8
@@ -40,6 +40,7 @@ Depends: libboost-all-dev,
 	 libflann-dev,
 	 libvtk6-dev,
 	 libqhull-dev,
+	 libvtk6-qt-dev,
 	 libopenni-dev [!s390x !alpha !hppa !hurd-i386 !kfreebsd-any !m68k !sh4 !sparc64],
 	 libopenni2-dev [!armel !hppa !hurd-i386 !kfreebsd-any !m68k !powerpcspe],
 	 libpcl-apps1.8 (= ${binary:Version}),
