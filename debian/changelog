@@ -1,3 +1,11 @@
+pcl (1.8.0+dfsg1-4) experimental; urgency=medium
+
+  * Add patch for arm build failures.
+    Thanks to Gianfranco Costamagna
+  * Enable QT on arm again
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 17 Sep 2016 12:37:25 +0200
+
 pcl (1.8.0+dfsg1-3) unstable; urgency=medium
 
   * Disable QT on arm (Closes: #835292)
