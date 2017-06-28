@@ -1,3 +1,9 @@
+pcl (1.8.0+dfsg1-6) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Wed, 28 Jun 2017 05:59:17 +0200
+
 pcl (1.8.0+dfsg1-5) experimental; urgency=medium
 
   * Disable QT on arm again
