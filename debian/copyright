@@ -319,6 +319,19 @@ Copyright: 2014, RadiantBlue Technologies, Inc
 	   2009-2012, Willow Garage, Inc
 License: BSD-3-clause
 
+Files: registration/include/pcl/registration/ia_fpcs.h
+       registration/include/pcl/registration/impl/ia_fpcs.hpp
+       registration/include/pcl/registration/matching_candidate.h
+       registration/include/pcl/registration/ia_kfpcs.h
+       registration/include/pcl/registration/impl/ia_kfpcs.hpp
+Copyright: 2014-, Open Perception, Inc.
+           2008 Ben Gurion University of the Negev, Beer Sheva, Israel.
+License: BSD-3-clause
+
+Files: test/io/test_octree_compression.cpp
+Copyright: 2014-, Centrum Wiskunde Informatica.
+License: BSD-3-clause
+
 Files: visualization/include/pcl/visualization/vtk/vtkVertexBuffer*
 	visualization/src/vtk/vtkVertexBufferObject*
 Copyright: 1993-2008 Ken Martin, Will Schroeder, Bill Lorensen
