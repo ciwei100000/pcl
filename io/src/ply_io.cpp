@@ -301,7 +301,7 @@ namespace pcl
   boost::tuple<boost::function<void (pcl::io::ply::uint8)>, boost::function<void (pcl::io::ply::int32)>, boost::function<void ()> >
   pcl::PLYReader::listPropertyDefinitionCallback (const std::string& element_name, const std::string& property_name)
   {
-    if ((element_name == "range_grid") && (property_name == "vertex_indices"))
+    if ((element_name == "range_grid") && (property_name == "vertex_indices" || property_name == "vertex_index"))
     {
       return boost::tuple<boost::function<void (pcl::io::ply::uint8)>, boost::function<void (pcl::io::ply::int32)>, boost::function<void ()> > (
         boost::bind (&pcl::PLYReader::rangeGridVertexIndicesBeginCallback, this, _1),
@@ -309,7 +309,7 @@ namespace pcl
         boost::bind (&pcl::PLYReader::rangeGridVertexIndicesEndCallback, this)
       );
     }
-    else if ((element_name == "face") && (property_name == "vertex_indices") && polygons_)
+    else if ((element_name == "face") && (property_name == "vertex_indices" || property_name == "vertex_index") && polygons_)
     {
       return boost::tuple<boost::function<void (pcl::io::ply::uint8)>, boost::function<void (pcl::io::ply::int32)>, boost::function<void ()> > (
         boost::bind (&pcl::PLYReader::faceVertexIndicesBeginCallback, this, _1),
@@ -497,7 +497,7 @@ pcl::PLYReader::objInfoCallback (const std::string& line)
   boost::split (st, line, boost::is_any_of (std::string ( "\t ")), boost::token_compress_on);
   assert (st[0].substr (0, 8) == "obj_info");
   {
-    assert (st.size () == 3);
+    if (st.size() >= 3)
     {
       if (st[1] == "num_cols")
         cloudWidthCallback (atoi (st[2].c_str ()));
@@ -1000,7 +1000,7 @@ pcl::PLYWriter::writeContentWithCameraASCII (int nr_points,
           fs << " ";
       }
     }
-    fs << std::endl;
+    fs << '\n';
   }
   // Append sensor information
   if (origin[3] != 0)
@@ -1151,7 +1151,7 @@ pcl::PLYWriter::writeContentWithRangeGridASCII (int nr_points,
     if (is_valid_line)
     {
       grids[i].push_back (valid_points);
-      fs << line.str () << std::endl;
+      fs << line.str () << '\n';
       ++valid_points;
     }
   }
@@ -1166,7 +1166,7 @@ pcl::PLYWriter::writeContentWithRangeGridASCII (int nr_points,
            it != grids [i].end ();
            ++it)
         fs << " " << *it;
-      fs << std::endl;
+      fs << '\n';
     }
   }
 
@@ -1580,7 +1580,7 @@ pcl::io::savePLYFile (const std::string &file_name, const pcl::PolygonMesh &mesh
       PCL_ERROR ("[pcl::io::savePLYFile] Input point cloud has no XYZ data!\n");
       return (-2);
     }
-    fs << std::endl;
+    fs << '\n';
   }
 
   // Write down faces
@@ -1590,7 +1590,7 @@ pcl::io::savePLYFile (const std::string &file_name, const pcl::PolygonMesh &mesh
     size_t j = 0;
     for (j = 0; j < mesh.polygons[i].vertices.size () - 1; ++j)
       fs << mesh.polygons[i].vertices[j] << " ";
-    fs << mesh.polygons[i].vertices[j] << std::endl;
+    fs << mesh.polygons[i].vertices[j] << '\n';
   }
 
   // Close file

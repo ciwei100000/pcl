@@ -45,7 +45,7 @@
 #include <pcl/pcl_base.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include <pcl/octree/octree.h>
+#include <pcl/octree/octree_search.h>
 #include <pcl/octree/octree_pointcloud_adjacency.h>
 #include <pcl/search/search.h>
 #include <pcl/segmentation/boost.h>
@@ -278,7 +278,7 @@ namespace pcl
       typename pcl::PointCloud<PointXYZRGBA>::Ptr
       getColoredCloud () const
       { 
-        return boost::make_shared<pcl::PointCloud<PointXYZRGBA> > ();
+        return boost::shared_ptr<pcl::PointCloud<PointXYZRGBA> > (new pcl::PointCloud<PointXYZRGBA>);
       }
 
       /** \brief Returns a deep copy of the voxel centroid cloud */
@@ -303,7 +303,7 @@ namespace pcl
       pcl::PointCloud<pcl::PointXYZRGBA>::Ptr
       getColoredVoxelCloud () const
       {
-        return boost::make_shared<pcl::PointCloud<PointXYZRGBA> > ();
+        return boost::shared_ptr<pcl::PointCloud<PointXYZRGBA> > (new pcl::PointCloud<PointXYZRGBA>);
       }
 
       /** \brief Returns labeled voxelized cloud

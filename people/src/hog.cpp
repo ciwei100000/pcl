@@ -41,8 +41,6 @@
 
 #include <pcl/people/hog.h>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
 #include <string.h>
 
 #if defined(__SSE2__)
@@ -151,7 +149,7 @@ pcl::people::HOG::gradMag( float *I, int h, int w, int d, float *M, float *O ) c
   // compute gradient magnitude (M) and normalize Gx
   for( y=0; y<h4; y++ ) 
   {
-  m = 1.0f/sqrtf(M2[y]);
+  m = 1.0f / std::sqrt (M2[y]);
   m = m < 1e10f ? m : 1e10f;
     M2[y] = 1.0f / m;
     Gx[y] = ((Gx[y] * m) * acMult);
