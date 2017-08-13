@@ -104,6 +104,13 @@
 #include <boost/filesystem.hpp>
 #include <pcl/console/parse.h>
 
+// Support for VTK 7.1 upwards
+#ifdef vtkGenericDataArray_h
+#define SetTupleValue SetTypedTuple
+#define InsertNextTupleValue InsertNextTypedTuple
+#define GetTupleValue GetTypedTuple
+#endif
+
 #if defined(_WIN32)
   // Remove macros defined in Windows.h
   #undef near
@@ -1492,7 +1499,7 @@ pcl::visualization::PCLVisualizer::setPointCloudRenderingProperties (
       actor->GetMapper ()->ScalarVisibilityOn ();
       actor->GetMapper ()->SetScalarRange (range[0], range[1]);
       vtkSmartPointer<vtkLookupTable> table;
-      if (!pcl::visualization::getColormapLUT (static_cast<LookUpTableRepresentationProperties>(value), table))
+      if (!pcl::visualization::getColormapLUT (static_cast<LookUpTableRepresentationProperties>(static_cast<int>(value)), table))
         break;
       table->SetRange (range[0], range[1]);
       actor->GetMapper ()->SetLookupTable (table);
@@ -1738,7 +1745,7 @@ pcl::visualization::PCLVisualizer::setShapeRenderingProperties (
       actor->GetMapper ()->ScalarVisibilityOn ();
       actor->GetMapper ()->SetScalarRange (range[0], range[1]);
       vtkSmartPointer<vtkLookupTable> table = vtkSmartPointer<vtkLookupTable>::New ();
-      getColormapLUT (static_cast<LookUpTableRepresentationProperties>(value), table);
+      getColormapLUT (static_cast<LookUpTableRepresentationProperties>(static_cast<int>(value)), table);
       table->SetRange (range[0], range[1]);
       actor->GetMapper ()->SetLookupTable (table);
       style_->updateLookUpTableDisplay (false);
