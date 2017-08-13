@@ -4,12 +4,6 @@ Upstream-Contact: http://pointclouds.org/contact.html
 Source: http://pointclouds.org/downloads/
 Files-Excluded: cuda/common/include/pcl/cuda/cutil*.h
                 gpu/utils/include/pcl/gpu/utils/device/cutil_math.h
-                registration/include/pcl/registration/ia_fpcs.h
-                registration/include/pcl/registration/impl/ia_fpcs.hpp
-                registration/include/pcl/registration/matching_candidate.h
-                registration/include/pcl/registration/ia_kfpcs.h
-                registration/include/pcl/registration/impl/ia_kfpcs.hpp
-                test/2d/lena-grayscale.png
 
 Files: *
 Copyright: 2009-2012, Willow Garage, Inc.
