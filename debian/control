@@ -4,7 +4,7 @@ Uploaders: Thomas Moulard <thomas.moulard@gmail.com>,
 	   Jochen Sprickerhof <jspricke@debian.org>,
 	   Leopold Palomo-Avellaneda <leo@alaxarxa.net>
 Section: libs
-Priority: extra
+Priority: optional
 Build-Depends: debhelper (>= 10), dh-exec (>=0.3),
                cmake,
 	       python-sphinx,
