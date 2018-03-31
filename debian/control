@@ -30,6 +30,7 @@ Build-Depends-Indep: doxygen,
 Standards-Version: 4.0.0
 Vcs-Browser: https://salsa.debian.org/science-team/pcl
 Vcs-Git: https://salsa.debian.org/science-team/pcl.git
+Rules-Requires-Root: no
 Homepage: http://www.pointclouds.org/
 
 Package: libpcl-dev
