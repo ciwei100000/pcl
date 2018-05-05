@@ -1,3 +1,9 @@
+pcl (1.8.0+dfsg1-4+deb9u1) stretch; urgency=medium
+
+  * Add dependency to libvtk6-qt-dev (Closes: #894656)
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 05 May 2018 14:52:44 +0200
+
 pcl (1.8.0+dfsg1-3) unstable; urgency=medium
 
   * Disable QT on arm (Closes: #835292)
