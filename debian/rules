@@ -95,8 +95,3 @@ override_dh_installchangelogs:
 
 %:
 	dh  $@ --builddirectory=build
-
-
-get-orig-source:
-	uscan --verbose --force-download --repack --compress xz
-
