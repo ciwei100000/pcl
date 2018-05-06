@@ -1,3 +1,16 @@
+pcl (1.8.1+dfsg1-3) unstable; urgency=medium
+
+  * remove list-missing (now done by dh_missing)
+  * Fix priority
+  * Update Vcs URLs to salsa.d.o
+  * Add R³
+  * http -> https
+  * Add patch for GCC8 (Closes: #897833)
+  * Bump policy and debhelper versions
+  * Fix documentation location
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sun, 06 May 2018 12:15:00 +0200
+
 pcl (1.8.1+dfsg1-2) unstable; urgency=medium
 
   * Add patch for PCL_ROOT
