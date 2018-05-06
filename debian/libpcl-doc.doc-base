@@ -5,5 +5,5 @@ Abstract: Describe the PCL library C++ API.
 Section: Programming/C++
 
 Format: HTML
-Index: /usr/share/doc/libpcl-doc/html/index.html
-Files: /usr/share/doc/libpcl-doc/html/*
+Index: /usr/share/doc/libpcl-dev/html/index.html
+Files: /usr/share/doc/libpcl-dev/html/*
