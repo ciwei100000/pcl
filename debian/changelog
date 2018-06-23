@@ -1,3 +1,9 @@
+pcl (1.8.1+dfsg1-4) unstable; urgency=medium
+
+  * Disable automatic SSE detection (LP: #1771124)
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 23 Jun 2018 18:59:00 +0200
+
 pcl (1.8.1+dfsg1-3) unstable; urgency=medium
 
   * remove list-missing (now done by dh_missing)
