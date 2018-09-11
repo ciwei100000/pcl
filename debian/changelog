@@ -1,3 +1,14 @@
+pcl (1.8.1+dfsg1-5) unstable; urgency=medium
+
+  [ Gianfranco Costamagna ]
+  * Limit parallel builds on Ubuntu
+
+  [ Jochen Sprickerhof ]
+  * Add patches for Boost 1.67
+  * Bump policy version (no changes)
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Tue, 11 Sep 2018 21:56:53 +0200
+
 pcl (1.8.1+dfsg1-4) unstable; urgency=medium
 
   * Disable automatic SSE detection (LP: #1771124)
