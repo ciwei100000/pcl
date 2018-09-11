@@ -1,0 +1,23 @@
+From 6257edf55b10ee1aa0146181a83acc5f014c91ac Mon Sep 17 00:00:00 2001
+From: Sergey Alexandrov <alexandrov88@gmail.com>
+Date: Sun, 9 Sep 2018 14:50:06 -0400
+Subject: [PATCH] Newer versions of Boost complain about floating-point
+ argument
+
+---
+ test/io/test_grabbers.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/test/io/test_grabbers.cpp b/test/io/test_grabbers.cpp
+index 25c5b75e10..004bc070d1 100644
+--- a/test/io/test_grabbers.cpp
++++ b/test/io/test_grabbers.cpp
+@@ -49,7 +49,7 @@ TEST (PCL, PCDGrabber)
+   grabber.registerCallback (fxn);
+   grabber.start ();
+   // 1 second should be /plenty/ of time
+-  boost::this_thread::sleep (boost::posix_time::microseconds (1E6));
++  boost::this_thread::sleep (boost::posix_time::seconds (1));
+   grabber.stop ();
+ 
+   //// Make sure they match
