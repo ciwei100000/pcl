@@ -16,6 +16,18 @@ ifneq (,$(filter $(DEB_BUILD_ARCH),mips mipsel))
 	CXXFLAGS+=--param ggc-min-expand=20
 endif
 
+ifeq ($(shell dpkg-vendor --derives-from Ubuntu && echo yes),yes)
+        ifeq ($(DEB_HOST_ARCH),amd64)
+                export DEB_BUILD_MAINT_OPTIONS=parallel=2
+        endif
+        ifeq ($(DEB_HOST_ARCH),arm64)
+                export DEB_BUILD_MAINT_OPTIONS=parallel=2
+        endif
+        ifeq ($(DEB_HOST_ARCH),ppc64el)
+                export DEB_BUILD_MAINT_OPTIONS=parallel=2
+        endif
+endif
+
 BUILD_DOC = $(if $(shell dh_listpackages | grep libpcl-doc),-DWITH_DOCS=ON)
 
 # Multiarch.
