@@ -1,3 +1,15 @@
+pcl (1.8.1+dfsg1-6) unstable; urgency=medium
+
+  [ Jochen Sprickerhof ]
+  * use --max-parallel=2 for Ubuntu
+  * Add patch for pcl_2d-1.8.pc
+
+  [ Adrian Bunk ]
+  * Reduce the amount of debug information when building for 32bit architectures
+    (Closes: #908820)
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Fri, 14 Sep 2018 21:27:30 +0200
+
 pcl (1.8.1+dfsg1-5) unstable; urgency=medium
 
   [ Gianfranco Costamagna ]
