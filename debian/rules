@@ -11,9 +11,8 @@ LDFLAGS:=$(shell dpkg-buildflags --get LDFLAGS) -Wl,--as-needed
 CFLAGS+=$(CPPFLAGS)
 CXXFLAGS+=$(CPPFLAGS)
 
-DEB_BUILD_ARCH     ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
-ifneq (,$(filter $(DEB_BUILD_ARCH),mips mipsel))
-	CXXFLAGS+=--param ggc-min-expand=20
+ifeq (32,$(DEB_HOST_ARCH_BITS))
+	CXXFLAGS+=-g1
 endif
 
 BUILD_DOC = $(if $(shell dh_listpackages | grep libpcl-doc),-DWITH_DOCS=ON)
