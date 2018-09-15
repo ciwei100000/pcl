@@ -5,26 +5,16 @@ export DEB_BUILD_MAINT_OPTIONS=hardening=+all
 
 CPPFLAGS:=$(shell dpkg-buildflags --get CPPFLAGS)
 CFLAGS:=$(shell dpkg-buildflags --get CFLAGS)
-CXXFLAGS:=$(shell dpkg-buildflags --get CXXFLAGS)
+CXXFLAGS:=$(shell dpkg-buildflags --get CXXFLAGS) -g1
 LDFLAGS:=$(shell dpkg-buildflags --get LDFLAGS) -Wl,--as-needed
 
 CFLAGS+=$(CPPFLAGS)
 CXXFLAGS+=$(CPPFLAGS)
 
-ifeq (32,$(DEB_HOST_ARCH_BITS))
-	CXXFLAGS+=-g1
-endif
-
 BUILD_DOC = $(if $(shell dh_listpackages | grep libpcl-doc),-DWITH_DOCS=ON)
 
 # Multiarch.
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
-
-ifeq ($(shell dpkg-vendor --derives-from Ubuntu && echo yes),yes)
-  PARALLEL=--max-parallel=2
-else
-  PARALLEL=
-endif
 
 .PHONY: override_dh_auto_configure \
 	override_dh_install \
@@ -99,4 +89,4 @@ override_dh_installchangelogs:
 
 
 %:
-	dh  $@ $(PARALLEL) --builddirectory=build
+	dh  $@ --builddirectory=build
