@@ -1,3 +1,10 @@
+pcl (1.8.1+dfsg1-7) unstable; urgency=medium
+
+  [ Gianfranco Costamagna ]
+  * simplify rules
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 15 Sep 2018 13:21:39 +0200
+
 pcl (1.8.1+dfsg1-6) unstable; urgency=medium
 
   [ Jochen Sprickerhof ]
