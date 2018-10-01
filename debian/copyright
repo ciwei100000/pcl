@@ -325,7 +325,8 @@ Copyright: 2010, Willow Garage, Inc.
            1995-1996 Galacticomm, Inc.
 License: BSD-3-clause
 Comment: These files contain the inpoly algorithm by Bob Stein and Craig Yap.
- The original copyright statement for it is:
+ The license is quoted as "Freeware source code" and the original copyright
+ statement for it is:
  Please feel free to use this source code for any purpose, commercial
  or otherwise, as long as you don't restrict anyone else's use of
  this source code.  Please give credit where credit is due.
