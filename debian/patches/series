@@ -3,3 +3,4 @@
 2422.patch
 2338.patch
 0001-Generate-pkgconfig-for-2d-module.patch
+0006-Simplify-and-fix-find-flann.patch
