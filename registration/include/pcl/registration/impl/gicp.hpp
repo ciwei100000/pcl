@@ -43,14 +43,6 @@
 #include <pcl/registration/boost.h>
 #include <pcl/registration/exceptions.h>
 
-///////////////////////////////////////////////////////////////////////////////////////////
-template <typename PointSource, typename PointTarget> void
-pcl::GeneralizedIterativeClosestPoint<PointSource, PointTarget>::setInputCloud (
-    const typename pcl::GeneralizedIterativeClosestPoint<PointSource, PointTarget>::PointCloudSourceConstPtr &cloud)
-{
-  setInputSource (cloud);
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointSource, typename PointTarget>
 template<typename PointT> void
@@ -266,7 +258,7 @@ pcl::GeneralizedIterativeClosestPoint<PointSource, PointTarget>::OptimizationFun
     Vector4fMapConst p_tgt = gicp_->tmp_tgt_->points[(*gicp_->tmp_idx_tgt_)[i]].getVector4fMap ();
     Eigen::Vector4f pp (transformation_matrix * p_src);
     // Estimate the distance (cost function)
-    // The last coordiante is still guaranteed to be set to 1.0
+    // The last coordinate is still guaranteed to be set to 1.0
     Eigen::Vector3d res(pp[0] - p_tgt[0], pp[1] - p_tgt[1], pp[2] - p_tgt[2]);
     Eigen::Vector3d temp (gicp_->mahalanobis((*gicp_->tmp_idx_src_)[i]) * res);
     //increment= res'*temp/num_matches = temp'*M*temp/num_matches (we postpone 1/num_matches after the loop closes)
@@ -294,7 +286,7 @@ pcl::GeneralizedIterativeClosestPoint<PointSource, PointTarget>::OptimizationFun
     Vector4fMapConst p_tgt = gicp_->tmp_tgt_->points[(*gicp_->tmp_idx_tgt_)[i]].getVector4fMap ();
 
     Eigen::Vector4f pp (transformation_matrix * p_src);
-    // The last coordiante is still guaranteed to be set to 1.0
+    // The last coordinate is still guaranteed to be set to 1.0
     Eigen::Vector3d res (pp[0] - p_tgt[0], pp[1] - p_tgt[1], pp[2] - p_tgt[2]);
     // temp = M*res
     Eigen::Vector3d temp (gicp_->mahalanobis ((*gicp_->tmp_idx_src_)[i]) * res);
@@ -328,7 +320,7 @@ pcl::GeneralizedIterativeClosestPoint<PointSource, PointTarget>::OptimizationFun
     // The last coordinate, p_tgt[3] is guaranteed to be set to 1.0 in registration.hpp
     Vector4fMapConst p_tgt = gicp_->tmp_tgt_->points[(*gicp_->tmp_idx_tgt_)[i]].getVector4fMap ();
     Eigen::Vector4f pp (transformation_matrix * p_src);
-    // The last coordiante is still guaranteed to be set to 1.0
+    // The last coordinate is still guaranteed to be set to 1.0
     Eigen::Vector3d res (pp[0] - p_tgt[0], pp[1] - p_tgt[1], pp[2] - p_tgt[2]);
     // temp = M*res
     Eigen::Vector3d temp (gicp_->mahalanobis((*gicp_->tmp_idx_src_)[i]) * res);

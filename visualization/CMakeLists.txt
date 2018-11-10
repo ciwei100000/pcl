@@ -1,6 +1,6 @@
 set(SUBSYS_NAME visualization)
 set(SUBSYS_DESC "Point cloud visualization library")
-set(SUBSYS_DEPS common io kdtree geometry search)
+set(SUBSYS_DEPS common io kdtree geometry search octree)
 
 if(NOT VTK_FOUND)
     set(DEFAULT FALSE)
@@ -150,6 +150,8 @@ if(build)
 
     set(LIB_NAME "pcl_${SUBSYS_NAME}")
     PCL_ADD_LIBRARY("${LIB_NAME}" "${SUBSYS_NAME}" ${srcs} ${incs} ${common_incs} ${impl_incs} ${common_impl_incs} ${vtk_incs})
+
+    target_include_directories("${LIB_NAME}" PUBLIC ${VTK_INCLUDE_DIRS})
 
     # apple workaround (continued)
     if(APPLE)

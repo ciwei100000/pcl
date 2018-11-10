@@ -45,7 +45,7 @@ if(WIN32)
     set(CPACK_NSIS_PACKAGE_NAME "${CPACK_NSIS_PACKAGE_NAME}-msvc2013-${win_system_name}")
   elseif(MSVC_VERSION EQUAL 1900)
     set(CPACK_NSIS_PACKAGE_NAME "${CPACK_NSIS_PACKAGE_NAME}-msvc2015-${win_system_name}")
-  elseif(MSVC_VERSION EQUAL 1910)
+  elseif(MSVC_VERSION MATCHES "^191[0-9]$")
     set(CPACK_NSIS_PACKAGE_NAME "${CPACK_NSIS_PACKAGE_NAME}-msvc2017-${win_system_name}")
   else()
     set(CPACK_NSIS_PACKAGE_NAME "${CPACK_NSIS_PACKAGE_NAME}-${win_system_name}")
@@ -78,7 +78,7 @@ set(PCL_CPACK_CFG_FILE "${PCL_BINARY_DIR}/cpack_options.cmake")
 # Make the CPack input file.
 macro(PCL_MAKE_CPACK_INPUT)
     set(_cpack_cfg_in "${PCL_SOURCE_DIR}/cmake/cpack_options.cmake.in")
-    set(${_var} "${${_var}}\nset(CPACK_COMPONENT_GROUP_PCL_DESCRIPTION \"PCL headers and librairies\")\n")
+    set(${_var} "${${_var}}\nset(CPACK_COMPONENT_GROUP_PCL_DESCRIPTION \"PCL headers and libraries\")\n")
 
     # Prepare the components list
     set(PCL_CPACK_COMPONENTS)

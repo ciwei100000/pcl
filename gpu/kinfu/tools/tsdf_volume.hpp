@@ -155,13 +155,13 @@ pcl::TSDFVolume<VoxelT, WeightT>::save (const std::string &filename, bool binary
 
 
 template <typename VoxelT, typename WeightT> void
-pcl::TSDFVolume<VoxelT, WeightT>::convertToTsdfCloud (pcl::PointCloud<pcl::PointXYZI>::Ptr &cloud) const
+pcl::TSDFVolume<VoxelT, WeightT>::convertToTsdfCloud (pcl::PointCloud<pcl::PointXYZI>::Ptr &cloud,
+                                                      const unsigned step) const
 {
   int sx = header_.resolution(0);
   int sy = header_.resolution(1);
   int sz = header_.resolution(2);
 
-  const int step = 2;
   const int cloud_size = header_.getVolumeSize() / (step*step*step);
 
   cloud->clear();
@@ -204,7 +204,7 @@ pcl::TSDFVolume<VoxelT, WeightT>::getVoxelCoord (const PointT &point, Eigen::Vec
 }
 
 
-/** \brief Retunrs the 3D voxel coordinate and point offset wrt. to the voxel center (in mm) */
+/** \brief Returns the 3D voxel coordinate and point offset wrt. to the voxel center (in mm) */
 template <typename VoxelT, typename WeightT> template <typename PointT> void
 pcl::TSDFVolume<VoxelT, WeightT>::getVoxelCoordAndOffset (const PointT &point,
                                                                           Eigen::Vector3i &coord, Eigen::Vector3f &offset) const

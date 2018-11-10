@@ -163,7 +163,10 @@ pcl::IterativeClosestPoint<PointSource, PointTarget, Scalar>::computeTransformat
   convergence_criteria_->setMaximumIterations (max_iterations_);
   convergence_criteria_->setRelativeMSE (euclidean_fitness_epsilon_);
   convergence_criteria_->setTranslationThreshold (transformation_epsilon_);
-  convergence_criteria_->setRotationThreshold (1.0 - transformation_epsilon_);
+  if (transformation_rotation_epsilon_ > 0)
+    convergence_criteria_->setRotationThreshold (transformation_rotation_epsilon_);
+  else
+    convergence_criteria_->setRotationThreshold (1.0 - transformation_epsilon_);
 
   // Repeat until convergence
   do
@@ -218,7 +221,7 @@ pcl::IterativeClosestPoint<PointSource, PointTarget, Scalar>::computeTransformat
     // Estimate the transform
     transformation_estimation_->estimateRigidTransformation (*input_transformed, *target_, *correspondences_, transformation_);
 
-    // Tranform the data
+    // Transform the data
     transformCloud (*input_transformed, *input_transformed, transformation_);
 
     // Obtain the final transformation    

@@ -226,7 +226,7 @@ LCCPSegmentation Parameters: \n\
   {
     pcl::console::parse (argc, argv, "-o", outputname);
 
-    // If no filename is given, get output filename from inputname (strip seperators and file extension)
+    // If no filename is given, get output filename from inputname (strip separators and file extension)
     if (outputname.empty () || (outputname.at (0) == '-'))
     {
       outputname = pcd_filename;
@@ -409,8 +409,13 @@ LCCPSegmentation Parameters: \n\
           color = concave_color;
         
         // two times since we add also two points per edge
+#if (VTK_MAJOR_VERSION < 7) || (VTK_MAJOR_VERSION == 7 && VTK_MINOR_VERSION == 0)
         colors->InsertNextTupleValue (color);
         colors->InsertNextTupleValue (color);
+#else       
+        colors->InsertNextTypedTuple (color);
+        colors->InsertNextTypedTuple (color);
+#endif      
         
         pcl::Supervoxel<PointT>::Ptr supervoxel = supervoxel_clusters.at (sv_label);
         pcl::PointXYZRGBA vert_curr = supervoxel->centroid_;

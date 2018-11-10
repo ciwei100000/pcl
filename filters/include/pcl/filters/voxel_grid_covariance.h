@@ -367,7 +367,7 @@ namespace pcl
 
       }
 
-      /** \brief Get the voxels surrounding point p, not including the voxel contating point p.
+      /** \brief Get the voxels surrounding point p, not including the voxel containing point p.
        * \note Only voxels containing a sufficient number of points are used (slower than radius search in practice).
        * \param[in] reference_point the point to get the leaf structure at
        * \param[out] neighbors
@@ -520,7 +520,7 @@ namespace pcl
       /** \brief Flag to determine if voxel structure is searchable. */
       bool searchable_;
 
-      /** \brief Minimum points contained with in a voxel to allow it to be useable. */
+      /** \brief Minimum points contained with in a voxel to allow it to be usable. */
       int min_points_per_voxel_;
 
       /** \brief Minimum allowable ratio between eigenvalues to prevent singular covariance matrices. */

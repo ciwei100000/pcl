@@ -2,8 +2,8 @@
  * Software License Agreement (BSD License)
  *
  *  Point Cloud Library (PCL) - www.pointclouds.org
- *  Copyright (c) 2010-2012, Willow Garage, Inc.
- *  Copyright (c) 2012-, Open Perception, Inc.
+ *  Copyright (c) 2016-, Open Perception, Inc.
+ *  Copyright (c) 2016, Voxar Labs, CIn-UFPE / DEINFO-UFRPE
  *
  *  All rights reserved.
  *
@@ -34,19 +34,14 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id$
- *
  */
 
-#ifndef PCL_ROS_REGISTER_POINT_STRUCT_H_
-#define PCL_ROS_REGISTER_POINT_STRUCT_H_
+#include <pcl/features/impl/gasd.hpp>
 
-#ifdef __DEPRECATED
-#warning The <pcl/ros/register_point_struct.h> header is deprecated. please use \
-<pcl/register_point_struct.h> instead.
-#endif
-
-#include <pcl/register_point_struct.h>
-
-
-#endif  //#ifndef PCL_ROS_REGISTER_POINT_STRUCT_H_
+#ifndef PCL_NO_PRECOMPILE
+#include <pcl/point_types.h>
+#include <pcl/impl/instantiate.hpp>
+// Instantiations of specific point types
+PCL_INSTANTIATE_PRODUCT(GASDEstimation, ((pcl::PointXYZ)(pcl::PointXYZRGB)(pcl::PointXYZRGBA)) ((pcl::GASDSignature512)(pcl::GASDSignature984)(pcl::GASDSignature7992)))
+PCL_INSTANTIATE_PRODUCT(GASDColorEstimation, ((pcl::PointXYZRGB)(pcl::PointXYZRGBA)) ((pcl::GASDSignature512)(pcl::GASDSignature984)(pcl::GASDSignature7992)))
+#endif  // PCL_NO_PRECOMPILE
