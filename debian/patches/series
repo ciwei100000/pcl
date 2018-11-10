@@ -1,6 +1,1 @@
 0001-Fix-PCL_ROOT-path.patch
-0002-Dereference-shared_ptr-fix-for-GCC8.patch
-2422.patch
-2338.patch
-0001-Generate-pkgconfig-for-2d-module.patch
-0006-Simplify-and-fix-find-flann.patch
