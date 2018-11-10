@@ -73,16 +73,16 @@ override_dh_install:
 #	dh_shlibdeps -v -Xusr/bin/pcl_* -Lpcl-tools -l:$(CURDIR)/debian/usr/lib/${DEB_HOST_MULTIARCH}/cloud_composer_plugins: -ppcl --- -xpcl-tools -v
 
 override_dh_installchangelogs:
-	dh_installchangelogs -plibpcl-common1.8 CHANGES.md
+	dh_installchangelogs -plibpcl-common1.9 CHANGES.md
 	# Creating dh_links to share the same file
-	@for i in libpcl-dev libpcl1.8 libpcl-apps1.8 \
-		libpcl-features1.8 libpcl-filters1.8 libpcl-io1.8 libpcl-kdtree1.8 \
-		libpcl-keypoints1.8 libpcl-octree1.8 libpcl-outofcore1.8 libpcl-people1.8 \
-		libpcl-recognition1.8 libpcl-registration1.8 libpcl-sample-consensus1.8 \
-		libpcl-search1.8 libpcl-segmentation1.8 libpcl-stereo1.8 \
-		libpcl-surface1.8 libpcl-tracking1.8 libpcl-visualization1.8 \
+	@for i in libpcl-dev libpcl1.9 libpcl-apps1.9 \
+		libpcl-features1.9 libpcl-filters1.9 libpcl-io1.9 libpcl-kdtree1.9 \
+		libpcl-keypoints1.9 libpcl-octree1.9 libpcl-outofcore1.9 libpcl-people1.9 \
+		libpcl-recognition1.9 libpcl-registration1.9 libpcl-sample-consensus1.9 \
+		libpcl-search1.9 libpcl-segmentation1.9 libpcl-stereo1.9 \
+		libpcl-surface1.9 libpcl-tracking1.9 libpcl-visualization1.9 \
 		pcl-tools libpcl-doc; do \
-	cmd="dh_link -p$$i usr/share/doc/libpcl-common1.8/changelog.gz usr/share/doc/$$i/changelog.gz"; \
+	cmd="dh_link -p$$i usr/share/doc/libpcl-common1.9/changelog.gz usr/share/doc/$$i/changelog.gz"; \
 	echo $$cmd; $$cmd; \
 	done
 	dh_installchangelogs

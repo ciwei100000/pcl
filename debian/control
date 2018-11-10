@@ -24,6 +24,7 @@ Build-Depends: debhelper (>= 11), dh-exec,
 	       freeglut3-dev, 
 	       libxmu-dev,
 	       libxi-dev,
+	       libpcap-dev,
 	       libvtk7-qt-dev [!armel !armhf]
 Build-Depends-Indep: doxygen,
 		     doxygen-latex
