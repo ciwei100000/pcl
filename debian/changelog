@@ -1,3 +1,13 @@
+pcl (1.9.0+dfsg1-1) experimental; urgency=medium
+
+  * New upstream version 1.9.0+dfsg1
+  * Update copyright
+  * Drop patches merged upstream
+  * Update packaging
+  * Fix packaging
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 10 Nov 2018 15:50:55 +0100
+
 pcl (1.8.1+dfsg1-8) unstable; urgency=medium
 
   * Add comment regarding the inpoly copyright (cf. #909785)
