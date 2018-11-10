@@ -56,16 +56,6 @@
 #include <pcl/surface/qhull.h>
 
 //////////////////////////////////////////////////////////////////////////
-/** \brief Get dimension of concave hull  
-  * \return dimension
-  */                    
-template <typename PointInT> int
-pcl::ConcaveHull<PointInT>::getDim () const
-{
-  return (getDimension ());
-}
-
-//////////////////////////////////////////////////////////////////////////
 template <typename PointInT> void
 pcl::ConcaveHull<PointInT>::reconstruct (PointCloud &output)
 {
@@ -131,7 +121,7 @@ pcl::ConcaveHull<PointInT>::performReconstruction (PointCloud &alpha_shape, std:
 {
   Eigen::Vector4d xyz_centroid;
   compute3DCentroid (*input_, *indices_, xyz_centroid);
-  EIGEN_ALIGN16 Eigen::Matrix3d covariance_matrix;
+  EIGEN_ALIGN16 Eigen::Matrix3d covariance_matrix = Eigen::Matrix3d::Zero ();
   computeCovarianceMatrixNormalized (*input_, *indices_, xyz_centroid, covariance_matrix);
 
   // Check if the covariance matrix is finite or not.
@@ -252,7 +242,7 @@ pcl::ConcaveHull<PointInT>::performReconstruction (PointCloud &alpha_shape, std:
   int max_vertex_id = 0;
   FORALLvertices
   {
-    if (vertex->id + 1 > max_vertex_id)
+    if (vertex->id + 1 > unsigned (max_vertex_id))
       max_vertex_id = vertex->id + 1;
   }
 

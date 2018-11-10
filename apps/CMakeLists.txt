@@ -1,6 +1,6 @@
 set(SUBSYS_NAME apps)
 set(SUBSYS_DESC "Application examples/samples that show how PCL works")
-set(SUBSYS_DEPS common geometry io filters sample_consensus segmentation visualization kdtree features surface octree registration keypoints tracking search recognition ml stereo)
+set(SUBSYS_DEPS common geometry io filters sample_consensus segmentation visualization kdtree features surface octree registration keypoints tracking search recognition ml stereo 2d)
 
 set(DEFAULT FALSE)
 PCL_SUBSYS_OPTION(build "${SUBSYS_NAME}" "${SUBSYS_DESC}" ${DEFAULT} "${REASON}")
@@ -205,7 +205,9 @@ if(build)
 
   # OpenGL and GLUT
   if(OPENGL_FOUND AND GLUT_FOUND)
-    include_directories("${OPENGL_INCLUDE_DIR}")
+    if(NOT WIN32)
+        include_directories("${OPENGL_INCLUDE_DIR}")
+    endif()
     include_directories("${GLUT_INCLUDE_DIR}")
     PCL_ADD_EXECUTABLE_OPT_BUNDLE(pcl_grabcut_2d "${SUBSYS_NAME}" src/grabcut_2d.cpp)
     target_link_libraries (pcl_grabcut_2d pcl_common pcl_io pcl_segmentation pcl_search ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES})

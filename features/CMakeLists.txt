@@ -15,6 +15,7 @@ if(build)
         "include/pcl/${SUBSYS_NAME}/boost.h"
         "include/pcl/${SUBSYS_NAME}/eigen.h"
         "include/pcl/${SUBSYS_NAME}/board.h"
+        "include/pcl/${SUBSYS_NAME}/flare.h"
         "include/pcl/${SUBSYS_NAME}/brisk_2d.h"
         "include/pcl/${SUBSYS_NAME}/cppf.h"
         "include/pcl/${SUBSYS_NAME}/cvfh.h"
@@ -25,6 +26,7 @@ if(build)
         "include/pcl/${SUBSYS_NAME}/fpfh.h"
         "include/pcl/${SUBSYS_NAME}/fpfh_omp.h"
         "include/pcl/${SUBSYS_NAME}/from_meshes.h"
+        "include/pcl/${SUBSYS_NAME}/gasd.h"
         "include/pcl/${SUBSYS_NAME}/gfpfh.h"
         "include/pcl/${SUBSYS_NAME}/integral_image2D.h"
         "include/pcl/${SUBSYS_NAME}/integral_image_normal.h"
@@ -66,6 +68,7 @@ if(build)
 
     set(impl_incs
         "include/pcl/${SUBSYS_NAME}/impl/board.hpp"
+        "include/pcl/${SUBSYS_NAME}/impl/flare.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/brisk_2d.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/cppf.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/cvfh.hpp"
@@ -75,6 +78,7 @@ if(build)
         "include/pcl/${SUBSYS_NAME}/impl/feature.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/fpfh.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/fpfh_omp.hpp"
+        "include/pcl/${SUBSYS_NAME}/impl/gasd.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/gfpfh.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/integral_image2D.hpp"
         "include/pcl/${SUBSYS_NAME}/impl/integral_image_normal.hpp"
@@ -114,6 +118,7 @@ if(build)
 
     set(srcs
         src/board.cpp
+        src/flare.cpp
         src/brisk_2d.cpp
         src/boundary.cpp
         src/cppf.cpp
@@ -122,6 +127,7 @@ if(build)
         src/crh.cpp
         src/don.cpp
         src/fpfh.cpp
+        src/gasd.cpp
         src/gfpfh.cpp
         src/integral_image_normal.cpp
         src/intensity_gradient.cpp
@@ -153,7 +159,7 @@ if(build)
        )
 	
     if(MSVC)
-      # Workaround to aviod hitting the MSVC 4GB linker memory limit when building pcl_features.
+      # Workaround to avoid hitting the MSVC 4GB linker memory limit when building pcl_features.
       # Disable whole program optimization (/GL) and link-time code generation (/LTCG).
       string(REPLACE "/GL" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
       string(REPLACE "/LTCG" "" CMAKE_SHARED_LINKER_FLAGS_RELEASE ${CMAKE_SHARED_LINKER_FLAGS_RELEASE}) 

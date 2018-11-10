@@ -22,8 +22,9 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
       typedef std::pair<std::string, int> mv_pair;
       mv_pair pair_model_view = std::make_pair (model.id_, view_id);
 
-      std::map<mv_pair, Eigen::Matrix4f, std::less<mv_pair>, Eigen::aligned_allocator<std::pair<mv_pair, Eigen::Matrix4f> > >::iterator it =
-          poses_cache_.find (pair_model_view);
+      std::map<mv_pair, Eigen::Matrix4f,
+               std::less<mv_pair>,
+               Eigen::aligned_allocator<std::pair<const mv_pair, Eigen::Matrix4f> > >::iterator it = poses_cache_.find (pair_model_view);
 
       if (it != poses_cache_.end ())
       {
@@ -295,7 +296,7 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
               nearestKSearch (single_categories_index_[it->second], histogram, NN_, indices, distances);
               //gather NN-search results
               double score = 0;
-              for (size_t i = 0; i < NN_; ++i)
+              for (size_t i = 0; i < (size_t) NN_; ++i)
               {
                 score = distances[0][i];
                 index_score is;

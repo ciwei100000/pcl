@@ -2,15 +2,25 @@
 set(PCL_SUBSYSTEMS_MODULES ${PCL_SUBSYSTEMS})
 list(REMOVE_ITEM PCL_SUBSYSTEMS_MODULES tools cuda_apps global_tests proctor examples)
 
+
+file(GLOB PCLCONFIG_FIND_MODULES "${PCL_SOURCE_DIR}/cmake/Modules/*.cmake")
+install(FILES ${PCLCONFIG_FIND_MODULES} COMPONENT pclconfig DESTINATION ${PCLCONFIG_INSTALL_DIR}/Modules)
+
 set(PCLCONFIG_AVAILABLE_COMPONENTS)
 set(PCLCONFIG_AVAILABLE_COMPONENTS_LIST)
 set(PCLCONFIG_INTERNAL_DEPENDENCIES)
 set(PCLCONFIG_EXTERNAL_DEPENDENCIES)
 set(PCLCONFIG_OPTIONAL_DEPENDENCIES)
-set(PCLCONFIG_SSE_DEFINITIONS "${SSE_FLAGS} ${SSE_DEFINITIONS}")
+set(PCLCONFIG_SSE_DEFINITIONS "${SSE_DEFINITIONS}")
+set(PCLCONFIG_SSE_COMPILE_OPTIONS ${SSE_FLAGS})
+
 foreach(_ss ${PCL_SUBSYSTEMS_MODULES})
     PCL_GET_SUBSYS_STATUS(_status ${_ss})
-    if(_status)
+
+    # do not include test targets
+    string(REGEX MATCH "^tests_" _is_test ${_ss})
+
+    if(_status AND NOT _is_test)
         set(PCLCONFIG_AVAILABLE_COMPONENTS "${PCLCONFIG_AVAILABLE_COMPONENTS} ${_ss}")
         set(PCLCONFIG_AVAILABLE_COMPONENTS_LIST "${PCLCONFIG_AVAILABLE_COMPONENTS_LIST}\n# - ${_ss}")
         GET_IN_MAP(_deps PCL_SUBSYS_DEPS ${_ss})
@@ -33,7 +43,11 @@ foreach(_ss ${PCL_SUBSYSTEMS_MODULES})
         if(_opt_deps)
             set(PCLCONFIG_OPTIONAL_DEPENDENCIES "${PCLCONFIG_OPTIONAL_DEPENDENCIES}set(pcl_${_ss}_opt_dep ")
             foreach(_opt_dep ${_opt_deps})
-                set(PCLCONFIG_OPTIONAL_DEPENDENCIES "${PCLCONFIG_OPTIONAL_DEPENDENCIES}${_opt_dep} ")
+                string(TOUPPER "WITH_${_opt_dep}" _tmp)
+                string(REGEX REPLACE "-(.*)" "" _condition ${_tmp}) #libusb-1.0 case
+                if(${_condition})
+                  set(PCLCONFIG_OPTIONAL_DEPENDENCIES "${PCLCONFIG_OPTIONAL_DEPENDENCIES}${_opt_dep} ")
+                endif()
             endforeach(_opt_dep)
             set(PCLCONFIG_OPTIONAL_DEPENDENCIES "${PCLCONFIG_OPTIONAL_DEPENDENCIES})\n")
         endif(_opt_deps)
@@ -58,7 +72,7 @@ foreach(_ss ${PCL_SUBSYSTEMS_MODULES})
 	    endif (_sub_status)
 	  endforeach(_sub)
 	endif (${PCL_SUBSYS_SUBSYS})
-    endif(_status)
+    endif()
 endforeach(_ss)
 
 #Boost modules

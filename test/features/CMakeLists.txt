@@ -78,6 +78,10 @@ if (build)
                  FILES test_board_estimation.cpp
                  LINK_WITH pcl_gtest pcl_features pcl_io
                  ARGUMENTS "${PCL_SOURCE_DIR}/test/bun0.pcd")
+    PCL_ADD_TEST(feature_flare_estimation test_flare_estimation
+                 FILES test_flare_estimation.cpp
+                 LINK_WITH pcl_gtest pcl_features pcl_io
+                 ARGUMENTS "${PCL_SOURCE_DIR}/test/bun0.pcd")				 
     PCL_ADD_TEST(feature_shot_lrf_estimation test_shot_lrf_estimation
                  FILES test_shot_lrf_estimation.cpp
                  LINK_WITH pcl_gtest pcl_features pcl_io
@@ -97,6 +101,10 @@ if (build)
                  FILES test_rops_estimation.cpp
                  LINK_WITH pcl_gtest pcl_io pcl_features
                  ARGUMENTS "${PCL_SOURCE_DIR}/test/rops_cloud.pcd" "${PCL_SOURCE_DIR}/test/rops_indices.txt" "${PCL_SOURCE_DIR}/test/rops_triangles.txt")
+    PCL_ADD_TEST(feature_gasd_estimation test_gasd_estimation
+                 FILES test_gasd_estimation.cpp
+                 LINK_WITH pcl_gtest pcl_io pcl_features
+                 ARGUMENTS "${PCL_SOURCE_DIR}/test/bun0.pcd")
     if (BUILD_keypoints)
       PCL_ADD_TEST(feature_brisk test_brisk
                    FILES test_brisk.cpp
@@ -105,4 +113,3 @@ if (build)
     endif (BUILD_keypoints)
   endif (BUILD_io)
 endif (build)
-

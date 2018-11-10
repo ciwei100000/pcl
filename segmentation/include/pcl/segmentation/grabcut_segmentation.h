@@ -53,7 +53,7 @@ namespace pcl
     namespace grabcut
     {
       /** boost implementation of Boykov and Kolmogorov's maxflow algorithm doesn't support
-        * negative flows which makes it inappropriate for this conext.
+        * negative flows which makes it inappropriate for this context.
         * This implementation of Boykov and Kolmogorov's maxflow algorithm by Stephen Gould
         * <stephen.gould@anu.edu.au> in DARWIN under BSD does the trick however solwer than original
         * implementation.
@@ -195,7 +195,7 @@ namespace pcl
       colorDistance (const Color& c1, const Color& c2);
       /// User supplied Trimap values
       enum TrimapValue { TrimapUnknown = -1, TrimapForeground, TrimapBackground };
-      /// Grabcut derived hard segementation values
+      /// Grabcut derived hard segmentation values
       enum SegmentationValue { SegmentationForeground = 0, SegmentationBackground };
       /// Gaussian structure
       struct Gaussian
@@ -211,9 +211,9 @@ namespace pcl
         Eigen::Matrix3f inverse;
         /// weighting of this gaussian in the GMM.
         float pi;
-        /// heighest eigenvalue of covariance matrix
+        /// highest eigenvalue of covariance matrix
         float eigenvalue;
-        /// eigenvector corresponding to the heighest eigenvector
+        /// eigenvector corresponding to the highest eigenvector
         Eigen::Vector3f eigenvector;
       };
 
@@ -286,6 +286,7 @@ namespace pcl
         uint32_t count_;
         /// small value to add to covariance matrix diagonal to avoid singular values
         float epsilon_;
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
       };
 
       /** Build the initial GMMs using the Orchard and Bouman color clustering algorithm */
@@ -332,7 +333,7 @@ namespace pcl
         , nb_neighbours_ (9)
         , initialized_ (false)
       {}
-      /// Desctructor
+      /// Destructor
       virtual ~GrabCut () {};
       // /// Set input cloud
       void

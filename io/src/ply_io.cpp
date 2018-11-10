@@ -59,7 +59,7 @@ pcl::PLYReader::elementDefinitionCallback (const std::string& element_name, std:
       cloud_->width = static_cast<uint32_t> (count);
       cloud_->height = 1;
     }
-    cloud_->is_dense = false;
+    cloud_->is_dense = true;
     cloud_->point_step = 0;
     cloud_->row_step = 0;
     vertex_count_ = 0;
@@ -95,8 +95,8 @@ pcl::PLYReader::elementDefinitionCallback (const std::string& element_name, std:
 bool
 pcl::PLYReader::endHeaderCallback ()
 {
-  cloud_->data.resize (cloud_->point_step * cloud_->width * cloud_->height);
-  return (cloud_->data.size () == cloud_->point_step * cloud_->width * cloud_->height);
+  cloud_->data.resize (static_cast<size_t>(cloud_->point_step) * cloud_->width * cloud_->height);
+  return (true);
 }
 
 template<typename Scalar> void
@@ -267,6 +267,9 @@ namespace pcl
   template<typename Scalar> void
   PLYReader::vertexScalarPropertyCallback (Scalar value)
   {
+    if (!pcl_isfinite (value))
+      cloud_->is_dense = false;
+
     memcpy (&cloud_->data[vertex_count_ * cloud_->point_step + vertex_offset_before_],
             &value,
             sizeof (Scalar));
@@ -291,6 +294,9 @@ namespace pcl
   template<typename ContentType> void
   PLYReader::vertexListPropertyContentCallback (ContentType value)
   {
+    if (!pcl_isfinite (value))
+      cloud_->is_dense = false;
+
     memcpy (&cloud_->data[vertex_count_ * cloud_->point_step + vertex_offset_before_],
             &value,
             sizeof (ContentType));
@@ -375,20 +381,19 @@ namespace pcl
 void
 pcl::PLYReader::vertexColorCallback (const std::string& color_name, pcl::io::ply::uint8 color)
 {
-  static int32_t r, g, b;
   if ((color_name == "red") || (color_name == "diffuse_red"))
   {
-    r = int32_t (color);
+    r_ = int32_t (color);
     rgb_offset_before_ = vertex_offset_before_;
   }
   if ((color_name == "green") || (color_name == "diffuse_green"))
   {
-    g = int32_t (color);
+    g_ = int32_t (color);
   }
   if ((color_name == "blue") || (color_name == "diffuse_blue"))
   {
-    b = int32_t (color);
-    int32_t rgb = r << 16 | g << 8 | b;
+    b_ = int32_t (color);
+    int32_t rgb = r_ << 16 | g_ << 8 | b_;
     memcpy (&cloud_->data[vertex_count_ * cloud_->point_step + rgb_offset_before_],
             &rgb,
             sizeof (pcl::io::ply::float32));
@@ -399,17 +404,16 @@ pcl::PLYReader::vertexColorCallback (const std::string& color_name, pcl::io::ply
 void
 pcl::PLYReader::vertexAlphaCallback (pcl::io::ply::uint8 alpha)
 {
-  static uint32_t a, rgba;
-  a = uint32_t (alpha);
+  a_ = uint32_t (alpha);
   // get anscient rgb value and store it in rgba
-  memcpy (&rgba, 
+  memcpy (&rgba_, 
           &cloud_->data[vertex_count_ * cloud_->point_step + rgb_offset_before_], 
           sizeof (pcl::io::ply::float32));
   // append alpha
-  rgba = rgba | a << 24;
+  rgba_ = rgba_ | a_ << 24;
   // put rgba back
   memcpy (&cloud_->data[vertex_count_ * cloud_->point_step + rgb_offset_before_], 
-          &rgba, 
+          &rgba_, 
           sizeof (uint32_t));
 }
 
@@ -519,8 +523,7 @@ pcl::PLYReader::vertexListPropertyEndCallback () {}
 bool
 pcl::PLYReader::parse (const std::string& istream_filename)
 {
-  pcl::io::ply::ply_parser::flags_type ply_parser_flags = 0;
-  pcl::io::ply::ply_parser ply_parser (ply_parser_flags);
+  pcl::io::ply::ply_parser ply_parser;
 
   ply_parser.info_callback (boost::bind (&pcl::PLYReader::infoCallback, this, boost::ref (istream_filename), _1, _2));
   ply_parser.warning_callback (boost::bind (&pcl::PLYReader::warningCallback, this, boost::ref (istream_filename), _1, _2));

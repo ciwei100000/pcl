@@ -2,9 +2,7 @@
  * Software License Agreement (BSD License)
  *
  *  Point Cloud Library (PCL) - www.pointclouds.org
- *  Copyright (c) 2012-, Open Perception, Inc.
- *
- *  All rights reserved.
+ *  Copyright (c) 2018-, Open Perception, Inc.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
@@ -35,24 +33,29 @@
  *
  */
 
-#ifndef PCL_REGISTRATION_CORRESPONDENCE_REJECTION_IMPL_HPP_
-#define PCL_REGISTRATION_CORRESPONDENCE_REJECTION_IMPL_HPP_
+#include <gtest/gtest.h>
 
-///////////////////////////////////////////////////////////////////////////////////////////
-template <typename PointT, typename NormalT> void
-pcl::registration::DataContainer<PointT, NormalT>::setInputCloud (const typename pcl::registration::DataContainer<PointT, NormalT>::PointCloudConstPtr &cloud)
+#include <pcl/pcl_tests.h>
+#include <pcl/common/colors.h>
+
+TEST (ColorLUT, Glasbey)
 {
-  //input_ = cloud;
-  setInputSource (cloud);
+  ASSERT_EQ (pcl::GlasbeyLUT::size (), 256);
+  ASSERT_RGB_EQ (pcl::GlasbeyLUT::at (0), pcl::RGB (77, 175, 74));
+  ASSERT_RGB_EQ (pcl::GlasbeyLUT::at (255), pcl::RGB (117, 143, 207));
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////
-template <typename PointT, typename NormalT> typename pcl::registration::DataContainer<PointT, NormalT>::PointCloudConstPtr const
-pcl::registration::DataContainer<PointT, NormalT>::getInputCloud ()
+TEST (ColorLUT, Viridis)
 {
-  return (getInputSource ()); 
-  //return (input_); 
+  ASSERT_EQ (pcl::ViridisLUT::size (), 256);
+  ASSERT_RGB_EQ (pcl::ViridisLUT::at (0), pcl::RGB (68, 1, 84));
+  ASSERT_RGB_EQ (pcl::ViridisLUT::at (255), pcl::RGB (254, 231, 36));
 }
 
-#endif    // PCL_REGISTRATION_CORRESPONDENCE_REJECTION_IMPL_HPP_
+int
+main (int argc, char** argv)
+{
+  testing::InitGoogleTest (&argc, argv);
+  return (RUN_ALL_TESTS ());
+}
 
