@@ -1,3 +1,11 @@
+pcl (1.9.1+dfsg1-1) experimental; urgency=medium
+
+  * New upstream version 1.9.1+dfsg1
+  * Rebase patch
+  * Reduce parallel on mips* as they go OOM
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 08 Dec 2018 10:43:49 +0100
+
 pcl (1.9.0+dfsg1-1) experimental; urgency=medium
 
   * New upstream version 1.9.0+dfsg1
