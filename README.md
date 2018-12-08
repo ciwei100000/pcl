@@ -7,14 +7,13 @@ Continuous integration
 [![Release][release-image]][releases]
 [![License][license-image]][license]
 
-[release-image]: https://img.shields.io/badge/release-1.9.0-green.svg?style=flat
+[release-image]: https://img.shields.io/badge/release-1.9.1-green.svg?style=flat
 [releases]: https://github.com/PointCloudLibrary/pcl/releases
 
 [license-image]: https://img.shields.io/badge/license-BSD-green.svg?style=flat
 [license]: https://github.com/PointCloudLibrary/pcl/blob/master/LICENSE.txt
 
-[![Build Status](https://travis-ci.com/PointCloudLibrary/pcl.svg?branch=master)](https://travis-ci.com/PointCloudLibrary/pcl)
-[![Build Status](https://ci.appveyor.com/api/projects/status/oiep6oktpmuap7qr/branch/master?svg=true)](https://ci.appveyor.com/project/PointCloudLibrary/pcl/branch/master)
+[![Build Status](https://dev.azure.com/PointCloudLibrary/pcl/_apis/build/status/PointCloudLibrary.pcl)](https://dev.azure.com/PointCloudLibrary/pcl/_build/latest?definitionId=1)
 
 Description
 -----------
