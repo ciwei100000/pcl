@@ -1,3 +1,11 @@
+pcl (1.9.1+dfsg1-2) unstable; urgency=medium
+
+  * Upload to unstable
+  * Support visualization on arml*
+    Thanks to Adrian Bunk
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Wed, 19 Dec 2018 11:27:27 +0100
+
 pcl (1.9.1+dfsg1-1) experimental; urgency=medium
 
   * New upstream version 1.9.1+dfsg1
