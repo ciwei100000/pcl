@@ -1,3 +1,9 @@
+pcl (1.9.1+dfsg1-3) unstable; urgency=medium
+
+  * Install cmake modules (Closes: #916913)
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Thu, 20 Dec 2018 22:35:03 +0100
+
 pcl (1.9.1+dfsg1-2) unstable; urgency=medium
 
   * Upload to unstable
