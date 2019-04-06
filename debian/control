@@ -5,7 +5,7 @@ Uploaders: Thomas Moulard <thomas.moulard@gmail.com>,
 	   Leopold Palomo-Avellaneda <leo@alaxarxa.net>
 Section: libs
 Priority: optional
-Build-Depends: debhelper (>= 11), dh-exec,
+Build-Depends: debhelper-compat (= 12), dh-exec,
                cmake,
 	       python3-sphinx,
 	       libboost-system-dev,
@@ -28,7 +28,7 @@ Build-Depends: debhelper (>= 11), dh-exec,
 	       libvtk7-qt-dev,
 Build-Depends-Indep: doxygen,
 		     doxygen-latex
-Standards-Version: 4.2.1
+Standards-Version: 4.3.0
 Vcs-Browser: https://salsa.debian.org/science-team/pcl
 Vcs-Git: https://salsa.debian.org/science-team/pcl.git
 Rules-Requires-Root: no
