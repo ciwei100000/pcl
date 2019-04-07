@@ -26,6 +26,7 @@ Build-Depends: debhelper-compat (= 12), dh-exec,
 	       libxi-dev,
 	       libpcap-dev,
 	       libvtk7-qt-dev,
+	       libgtest-dev,
 Build-Depends-Indep: doxygen,
 		     doxygen-latex
 Standards-Version: 4.3.0
