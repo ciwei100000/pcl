@@ -1,2 +1,5 @@
 0001-Fix-PCL_ROOT-path.patch
 0002-Use-newly-build-libs-when-testing.patch
+0003-Don-t-test-buffers-with-char.patch
+0004-Lower-delta-for-i386.patch
+0005-Conditionally-disable-some-tests-peer-architecture.patch
