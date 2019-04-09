@@ -8,14 +8,14 @@ Subject: Conditionally disable some tests peer architecture
  2 files changed, 8 insertions(+)
 
 diff --git a/test/features/test_gasd_estimation.cpp b/test/features/test_gasd_estimation.cpp
-index f6f1cd5..18d9aad 100644
+index f6f1cd5..a0f1bcf 100644
 --- a/test/features/test_gasd_estimation.cpp
 +++ b/test/features/test_gasd_estimation.cpp
 @@ -217,10 +217,12 @@ TEST (PCL, GASDShapeAndColorEstimationNoInterp)
      0, 0, 0, 0, 0, 0, 0, 0};
  
    EXPECT_EQ (descriptor.points.size (), 1);
-+#ifndef __aarch64__
++#if !defined(__aarch64__) and !(defined(__powerpc64__)
    for (size_t i = 0; i < size_t (descriptor.points[0].descriptorSize ()); ++i)
    {
      EXPECT_NEAR (descriptor.points[0].histogram[i], ref_values[i], 1e-5);
@@ -28,7 +28,7 @@ index f6f1cd5..18d9aad 100644
      0, 0, 0, 0, 0, 0, 0, 0};
  
    EXPECT_EQ (descriptor.points.size (), 1);
-+#ifndef __aarch64__
++#if !defined(__aarch64__) and !(defined(__powerpc64__)
    for (size_t i = 0; i < size_t( descriptor.points[0].descriptorSize ()); ++i)
    {
      EXPECT_NEAR (descriptor.points[0].histogram[i], ref_values[i], 1e-5);
