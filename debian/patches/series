@@ -3,3 +3,4 @@
 0004-Lower-delta-for-i386.patch
 0005-Conditionally-disable-some-tests-peer-architecture.patch
 0005-Test-with-signed-data-types-of-different-sizes.patch
+0006-Disable-failing-test-on-mips64el.patch
