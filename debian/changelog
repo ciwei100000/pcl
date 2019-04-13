@@ -1,3 +1,11 @@
+pcl (1.9.1+dfsg1-7) experimental; urgency=medium
+
+  * Update architecture patch
+  * Use int8_t in buffers patch
+  * Add patch for failing tests on mips64el
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 13 Apr 2019 16:26:28 +0200
+
 pcl (1.9.1+dfsg1-6) experimental; urgency=medium
 
   * Add patches for some tests
