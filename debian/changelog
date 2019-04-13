@@ -1,3 +1,9 @@
+pcl (1.9.1+dfsg1-8) experimental; urgency=medium
+
+  * Fix architecture patch
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 13 Apr 2019 18:27:47 +0200
+
 pcl (1.9.1+dfsg1-7) experimental; urgency=medium
 
   * Update architecture patch
