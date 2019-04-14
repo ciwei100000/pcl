@@ -4,3 +4,4 @@
 0005-Conditionally-disable-some-tests-peer-architecture.patch
 0005-Test-with-signed-data-types-of-different-sizes.patch
 0006-Disable-failing-test-on-mips64el.patch
+0007-io-tests-increase-grabber-timeout.patch
