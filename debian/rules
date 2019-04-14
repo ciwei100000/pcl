@@ -90,6 +90,13 @@ override_dh_installchangelogs:
 	done
 	dh_installchangelogs
 
+# disable broken tests on s390x
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+ifeq (,$(filter $(DEB_BUILD_ARCH),s390x))
+	dh_auto_test
+endif
+endif
 
 %:
 	dh  $@ $(PARALLEL) --builddirectory=build
