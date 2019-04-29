@@ -67,6 +67,10 @@ Depends: libboost-all-dev,
 	 libpcl-visualization1.9 (= ${binary:Version}),
 	 ${misc:Depends}
 Suggests: libpcl-doc
+Breaks: libvtk6-dev,
+        libvtk6-java,
+        libvtk6-jni,
+        libvtk6-qt-dev,
 Description: Point Cloud Library - development files
  The Point Cloud Library (PCL) is a standalone, large scale, open
  project for 2D/3D image and point cloud processing.
