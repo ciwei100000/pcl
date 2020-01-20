@@ -54,7 +54,8 @@ pcl::ESFEstimation<PointInT, PointOutT>::computeESF (
 {
   const int binsize = 64;
   unsigned int sample_size = 20000;
-  srand (static_cast<unsigned int> (time (0)));
+  // @TODO: Replace with c++ stdlib uniform_random_generator
+  srand (static_cast<unsigned int> (time (nullptr)));
   int maxindex = static_cast<int> (pc.points.size ());
 
   int index1, index2, index3;
@@ -85,7 +86,7 @@ pcl::ESFEstimation<PointInT, PointOutT>::computeESF (
   int th1,th2,th3;
   int vxlcnt = 0;
   int pcnt1,pcnt2,pcnt3;
-  for (size_t nn_idx = 0; nn_idx < sample_size; ++nn_idx)
+  for (std::size_t nn_idx = 0; nn_idx < sample_size; ++nn_idx)
   {
     // get a new random point
     index1 = rand()%maxindex;
@@ -118,9 +119,9 @@ pcl::ESFEstimation<PointInT, PointOutT>::computeESF (
     v23.normalize ();
 
     //TODO: .dot gives nan's
-    th1 = static_cast<int> (pcl_round (acos (fabs (v21.dot (v31))) / pih * (binsize-1)));
-    th2 = static_cast<int> (pcl_round (acos (fabs (v23.dot (v31))) / pih * (binsize-1)));
-    th3 = static_cast<int> (pcl_round (acos (fabs (v23.dot (v21))) / pih * (binsize-1)));
+    th1 = static_cast<int> (pcl_round (std::acos (std::abs (v21.dot (v31))) / pih * (binsize-1)));
+    th2 = static_cast<int> (pcl_round (std::acos (std::abs (v23.dot (v31))) / pih * (binsize-1)));
+    th3 = static_cast<int> (pcl_round (std::acos (std::abs (v23.dot (v21))) / pih * (binsize-1)));
     if (th1 < 0 || th1 >= binsize)
     {
       nn_idx--;
@@ -146,12 +147,12 @@ pcl::ESFEstimation<PointInT, PointOutT>::computeESF (
     int p_cnt = 0;
     // IN, OUT, MIXED, Ratio line tracing, index1->index2
     {
-      const int xs = p1[0] < 0.0? static_cast<int>(floor(p1[0])+GRIDSIZE_H): static_cast<int>(ceil(p1[0])+GRIDSIZE_H-1);
-      const int ys = p1[1] < 0.0? static_cast<int>(floor(p1[1])+GRIDSIZE_H): static_cast<int>(ceil(p1[1])+GRIDSIZE_H-1);
-      const int zs = p1[2] < 0.0? static_cast<int>(floor(p1[2])+GRIDSIZE_H): static_cast<int>(ceil(p1[2])+GRIDSIZE_H-1);
-      const int xt = p2[0] < 0.0? static_cast<int>(floor(p2[0])+GRIDSIZE_H): static_cast<int>(ceil(p2[0])+GRIDSIZE_H-1);
-      const int yt = p2[1] < 0.0? static_cast<int>(floor(p2[1])+GRIDSIZE_H): static_cast<int>(ceil(p2[1])+GRIDSIZE_H-1);
-      const int zt = p2[2] < 0.0? static_cast<int>(floor(p2[2])+GRIDSIZE_H): static_cast<int>(ceil(p2[2])+GRIDSIZE_H-1);
+      const int xs = p1[0] < 0.0? static_cast<int>(std::floor(p1[0])+GRIDSIZE_H): static_cast<int>(std::ceil(p1[0])+GRIDSIZE_H-1);
+      const int ys = p1[1] < 0.0? static_cast<int>(std::floor(p1[1])+GRIDSIZE_H): static_cast<int>(std::ceil(p1[1])+GRIDSIZE_H-1);
+      const int zs = p1[2] < 0.0? static_cast<int>(std::floor(p1[2])+GRIDSIZE_H): static_cast<int>(std::ceil(p1[2])+GRIDSIZE_H-1);
+      const int xt = p2[0] < 0.0? static_cast<int>(std::floor(p2[0])+GRIDSIZE_H): static_cast<int>(std::ceil(p2[0])+GRIDSIZE_H-1);
+      const int yt = p2[1] < 0.0? static_cast<int>(std::floor(p2[1])+GRIDSIZE_H): static_cast<int>(std::ceil(p2[1])+GRIDSIZE_H-1);
+      const int zt = p2[2] < 0.0? static_cast<int>(std::floor(p2[2])+GRIDSIZE_H): static_cast<int>(std::ceil(p2[2])+GRIDSIZE_H-1);
       wt_d2.push_back (this->lci (xs, ys, zs, xt, yt, zt, ratio, vxlcnt, pcnt1));
       if (wt_d2.back () == 2)
         h_mix_ratio[static_cast<int> (pcl_round (ratio * (binsize-1)))]++;
@@ -160,12 +161,12 @@ pcl::ESFEstimation<PointInT, PointOutT>::computeESF (
     }
     // IN, OUT, MIXED, Ratio line tracing, index1->index3
     {
-      const int xs = p1[0] < 0.0? static_cast<int>(floor(p1[0])+GRIDSIZE_H): static_cast<int>(ceil(p1[0])+GRIDSIZE_H-1);
-      const int ys = p1[1] < 0.0? static_cast<int>(floor(p1[1])+GRIDSIZE_H): static_cast<int>(ceil(p1[1])+GRIDSIZE_H-1);
-      const int zs = p1[2] < 0.0? static_cast<int>(floor(p1[2])+GRIDSIZE_H): static_cast<int>(ceil(p1[2])+GRIDSIZE_H-1);
-      const int xt = p3[0] < 0.0? static_cast<int>(floor(p3[0])+GRIDSIZE_H): static_cast<int>(ceil(p3[0])+GRIDSIZE_H-1);
-      const int yt = p3[1] < 0.0? static_cast<int>(floor(p3[1])+GRIDSIZE_H): static_cast<int>(ceil(p3[1])+GRIDSIZE_H-1);
-      const int zt = p3[2] < 0.0? static_cast<int>(floor(p3[2])+GRIDSIZE_H): static_cast<int>(ceil(p3[2])+GRIDSIZE_H-1);
+      const int xs = p1[0] < 0.0? static_cast<int>(std::floor(p1[0])+GRIDSIZE_H): static_cast<int>(std::ceil(p1[0])+GRIDSIZE_H-1);
+      const int ys = p1[1] < 0.0? static_cast<int>(std::floor(p1[1])+GRIDSIZE_H): static_cast<int>(std::ceil(p1[1])+GRIDSIZE_H-1);
+      const int zs = p1[2] < 0.0? static_cast<int>(std::floor(p1[2])+GRIDSIZE_H): static_cast<int>(std::ceil(p1[2])+GRIDSIZE_H-1);
+      const int xt = p3[0] < 0.0? static_cast<int>(std::floor(p3[0])+GRIDSIZE_H): static_cast<int>(std::ceil(p3[0])+GRIDSIZE_H-1);
+      const int yt = p3[1] < 0.0? static_cast<int>(std::floor(p3[1])+GRIDSIZE_H): static_cast<int>(std::ceil(p3[1])+GRIDSIZE_H-1);
+      const int zt = p3[2] < 0.0? static_cast<int>(std::floor(p3[2])+GRIDSIZE_H): static_cast<int>(std::ceil(p3[2])+GRIDSIZE_H-1);
       wt_d2.push_back (this->lci (xs, ys, zs, xt, yt, zt, ratio, vxlcnt, pcnt2));
       if (wt_d2.back () == 2)
         h_mix_ratio[static_cast<int>(pcl_round (ratio * (binsize-1)))]++;
@@ -174,12 +175,12 @@ pcl::ESFEstimation<PointInT, PointOutT>::computeESF (
     }
     // IN, OUT, MIXED, Ratio line tracing, index2->index3
     {
-      const int xs = p2[0] < 0.0? static_cast<int>(floor(p2[0])+GRIDSIZE_H): static_cast<int>(ceil(p2[0])+GRIDSIZE_H-1);
-      const int ys = p2[1] < 0.0? static_cast<int>(floor(p2[1])+GRIDSIZE_H): static_cast<int>(ceil(p2[1])+GRIDSIZE_H-1);
-      const int zs = p2[2] < 0.0? static_cast<int>(floor(p2[2])+GRIDSIZE_H): static_cast<int>(ceil(p2[2])+GRIDSIZE_H-1);
-      const int xt = p3[0] < 0.0? static_cast<int>(floor(p3[0])+GRIDSIZE_H): static_cast<int>(ceil(p3[0])+GRIDSIZE_H-1);
-      const int yt = p3[1] < 0.0? static_cast<int>(floor(p3[1])+GRIDSIZE_H): static_cast<int>(ceil(p3[1])+GRIDSIZE_H-1);
-      const int zt = p3[2] < 0.0? static_cast<int>(floor(p3[2])+GRIDSIZE_H): static_cast<int>(ceil(p3[2])+GRIDSIZE_H-1);
+      const int xs = p2[0] < 0.0? static_cast<int>(std::floor(p2[0])+GRIDSIZE_H): static_cast<int>(std::ceil(p2[0])+GRIDSIZE_H-1);
+      const int ys = p2[1] < 0.0? static_cast<int>(std::floor(p2[1])+GRIDSIZE_H): static_cast<int>(std::ceil(p2[1])+GRIDSIZE_H-1);
+      const int zs = p2[2] < 0.0? static_cast<int>(std::floor(p2[2])+GRIDSIZE_H): static_cast<int>(std::ceil(p2[2])+GRIDSIZE_H-1);
+      const int xt = p3[0] < 0.0? static_cast<int>(std::floor(p3[0])+GRIDSIZE_H): static_cast<int>(std::ceil(p3[0])+GRIDSIZE_H-1);
+      const int yt = p3[1] < 0.0? static_cast<int>(std::floor(p3[1])+GRIDSIZE_H): static_cast<int>(std::ceil(p3[1])+GRIDSIZE_H-1);
+      const int zt = p3[2] < 0.0? static_cast<int>(std::floor(p3[2])+GRIDSIZE_H): static_cast<int>(std::ceil(p3[2])+GRIDSIZE_H-1);
       wt_d2.push_back (this->lci (xs,ys,zs,xt,yt,zt,ratio,vxlcnt,pcnt3));
       if (wt_d2.back () == 2)
         h_mix_ratio[static_cast<int>(pcl_round(ratio * (binsize-1)))]++;
@@ -216,7 +217,7 @@ pcl::ESFEstimation<PointInT, PointOutT>::computeESF (
   float maxd2 = 0;
   float maxd3 = 0;
 
-  for (size_t nn_idx = 0; nn_idx < sample_size; ++nn_idx)
+  for (std::size_t nn_idx = 0; nn_idx < sample_size; ++nn_idx)
   {
     // get max of Dx
     if (d2v[nn_idx] > maxd2)
@@ -231,7 +232,7 @@ pcl::ESFEstimation<PointInT, PointOutT>::computeESF (
 
   // Normalize and create histogram
   int index;
-  for (size_t nn_idx = 0; nn_idx < sample_size; ++nn_idx)
+  for (std::size_t nn_idx = 0; nn_idx < sample_size; ++nn_idx)
   {
     if (wt_d3[nn_idx] >= 0.999) // IN
     {
@@ -256,7 +257,7 @@ pcl::ESFEstimation<PointInT, PointOutT>::computeESF (
     }
   }
   //normalize and create histogram
-  for (size_t nn_idx = 0; nn_idx < d2v.size(); ++nn_idx )
+  for (std::size_t nn_idx = 0; nn_idx < d2v.size(); ++nn_idx )
   {
     if (wt_d2[nn_idx] == 0)
       h_in[static_cast<int>(pcl_round (d2v[nn_idx] / maxd2 * (binsize-1)))]++ ;
@@ -270,35 +271,35 @@ pcl::ESFEstimation<PointInT, PointOutT>::computeESF (
   float weights[10] = {0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 1.0f,  1.0f, 2.0f, 2.0f, 2.0f};
 
   hist.reserve (binsize * 10);
-  for (int i = 0; i < binsize; i++)
-    hist.push_back (h_a3_in[i] * weights[0]);
-  for (int i = 0; i < binsize; i++)
-    hist.push_back (h_a3_out[i] * weights[1]);
-  for (int i = 0; i < binsize; i++)
-    hist.push_back (h_a3_mix[i] * weights[2]);
+  for (const float &i : h_a3_in)
+    hist.push_back (i * weights[0]);
+  for (const float &i : h_a3_out)
+    hist.push_back (i * weights[1]);
+  for (const float &i : h_a3_mix)
+    hist.push_back (i * weights[2]);
 
-  for (int i = 0; i < binsize; i++)
-    hist.push_back (h_d3_in[i] * weights[3]);
-  for (int i = 0; i < binsize; i++)
-    hist.push_back (h_d3_out[i] * weights[4]);
-  for (int i = 0; i < binsize; i++)
-    hist.push_back (h_d3_mix[i] * weights[5]);
+  for (const float &i : h_d3_in)
+    hist.push_back (i * weights[3]);
+  for (const float &i : h_d3_out)
+    hist.push_back (i * weights[4]);
+  for (const float &i : h_d3_mix)
+    hist.push_back (i * weights[5]);
 
-  for (int i = 0; i < binsize; i++)
-    hist.push_back (h_in[i]*0.5f * weights[6]);
-  for (int i = 0; i < binsize; i++)
-    hist.push_back (h_out[i] * weights[7]);
-  for (int i = 0; i < binsize; i++)
-    hist.push_back (h_mix[i] * weights[8]);
-  for (int i = 0; i < binsize; i++)
-    hist.push_back (h_mix_ratio[i]*0.5f * weights[9]);
+  for (const float &i : h_in)
+    hist.push_back (i*0.5f * weights[6]);
+  for (const float &i : h_out)
+    hist.push_back (i * weights[7]);
+  for (const float &i : h_mix)
+    hist.push_back (i * weights[8]);
+  for (const float &i : h_mix_ratio)
+    hist.push_back (i*0.5f * weights[9]);
 
   float sm = 0;
-  for (size_t i = 0; i < hist.size (); i++)
-    sm += hist[i];
+  for (const float &i : hist)
+    sm += i;
 
-  for (size_t i = 0; i < hist.size (); i++)
-    hist[i] /= sm;
+  for (float &i : hist)
+    i /= sm;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -322,17 +323,17 @@ pcl::ESFEstimation<PointInT, PointOutT>::lci (
     x_inc = -1;
   else
     x_inc = 1;
-  int l = abs (dx);
+  int l = std::abs (dx);
   if (dy < 0)
     y_inc = -1 ;
   else
     y_inc = 1;
-  int m = abs (dy);
+  int m = std::abs (dy);
   if (dz < 0)
     z_inc = -1 ;
   else
     z_inc = 1;
-  int n = abs (dz);
+  int n = std::abs (dz);
   int dx2 = 2 * l;
   int dy2 = 2 * m;
   int dz2 = 2 * n;
@@ -425,11 +426,11 @@ template <typename PointInT, typename PointOutT> void
 pcl::ESFEstimation<PointInT, PointOutT>::voxelize9 (PointCloudIn &cluster)
 {
   int xi,yi,zi,xx,yy,zz;
-  for (size_t i = 0; i < cluster.points.size (); ++i)
+  for (std::size_t i = 0; i < cluster.points.size (); ++i)
   {
-    xx = cluster.points[i].x<0.0? static_cast<int>(floor(cluster.points[i].x)+GRIDSIZE_H) : static_cast<int>(ceil(cluster.points[i].x)+GRIDSIZE_H-1);
-    yy = cluster.points[i].y<0.0? static_cast<int>(floor(cluster.points[i].y)+GRIDSIZE_H) : static_cast<int>(ceil(cluster.points[i].y)+GRIDSIZE_H-1);
-    zz = cluster.points[i].z<0.0? static_cast<int>(floor(cluster.points[i].z)+GRIDSIZE_H) : static_cast<int>(ceil(cluster.points[i].z)+GRIDSIZE_H-1);
+    xx = cluster.points[i].x<0.0? static_cast<int>(std::floor(cluster.points[i].x)+GRIDSIZE_H) : static_cast<int>(std::ceil(cluster.points[i].x)+GRIDSIZE_H-1);
+    yy = cluster.points[i].y<0.0? static_cast<int>(std::floor(cluster.points[i].y)+GRIDSIZE_H) : static_cast<int>(std::ceil(cluster.points[i].y)+GRIDSIZE_H-1);
+    zz = cluster.points[i].z<0.0? static_cast<int>(std::floor(cluster.points[i].z)+GRIDSIZE_H) : static_cast<int>(std::ceil(cluster.points[i].z)+GRIDSIZE_H-1);
 
     for (int x = -1; x < 2; x++)
       for (int y = -1; y < 2; y++)
@@ -454,11 +455,11 @@ template <typename PointInT, typename PointOutT> void
 pcl::ESFEstimation<PointInT, PointOutT>::cleanup9 (PointCloudIn &cluster)
 {
   int xi,yi,zi,xx,yy,zz;
-  for (size_t i = 0; i < cluster.points.size (); ++i)
+  for (std::size_t i = 0; i < cluster.points.size (); ++i)
   {
-    xx = cluster.points[i].x<0.0? static_cast<int>(floor(cluster.points[i].x)+GRIDSIZE_H) : static_cast<int>(ceil(cluster.points[i].x)+GRIDSIZE_H-1);
-    yy = cluster.points[i].y<0.0? static_cast<int>(floor(cluster.points[i].y)+GRIDSIZE_H) : static_cast<int>(ceil(cluster.points[i].y)+GRIDSIZE_H-1);
-    zz = cluster.points[i].z<0.0? static_cast<int>(floor(cluster.points[i].z)+GRIDSIZE_H) : static_cast<int>(ceil(cluster.points[i].z)+GRIDSIZE_H-1);
+    xx = cluster.points[i].x<0.0? static_cast<int>(std::floor(cluster.points[i].x)+GRIDSIZE_H) : static_cast<int>(std::ceil(cluster.points[i].x)+GRIDSIZE_H-1);
+    yy = cluster.points[i].y<0.0? static_cast<int>(std::floor(cluster.points[i].y)+GRIDSIZE_H) : static_cast<int>(std::ceil(cluster.points[i].y)+GRIDSIZE_H-1);
+    zz = cluster.points[i].z<0.0? static_cast<int>(std::floor(cluster.points[i].z)+GRIDSIZE_H) : static_cast<int>(std::ceil(cluster.points[i].z)+GRIDSIZE_H-1);
 
     for (int x = -1; x < 2; x++)
       for (int y = -1; y < 2; y++)
@@ -489,7 +490,7 @@ pcl::ESFEstimation<PointInT, PointOutT>::scale_points_unit_sphere (
   float max_distance = 0, d;
   pcl::PointXYZ cog (0, 0, 0);
 
-  for (size_t i = 0; i < local_cloud_.points.size (); ++i)
+  for (std::size_t i = 0; i < local_cloud_.points.size (); ++i)
   {
     d = pcl::euclideanDistance(cog,local_cloud_.points[i]);
     if (d > max_distance)
@@ -547,7 +548,7 @@ pcl::ESFEstimation<PointInT, PointOutT>::computeFeature (PointCloudOut &output)
   output.width = 1;
   output.height = 1;
 
-  for (size_t d = 0; d < hist.size (); ++d)
+  for (std::size_t d = 0; d < hist.size (); ++d)
     output.points[0].histogram[d] = hist[d];
 }
 

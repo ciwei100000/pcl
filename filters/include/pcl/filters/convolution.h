@@ -37,8 +37,7 @@
  *
  */
 
-#ifndef PCL_FILTERS_CONVOLUTION_H_
-#define PCL_FILTERS_CONVOLUTION_H_
+#pragma once
 
 #include <pcl/common/eigen.h>
 #include <pcl/common/point_operators.h>
@@ -77,12 +76,12 @@ namespace pcl
     class Convolution
     {
       public:
-        typedef typename pcl::PointCloud<PointIn> PointCloudIn;
-        typedef typename PointCloudIn::Ptr PointCloudInPtr;
-        typedef typename PointCloudIn::ConstPtr PointCloudInConstPtr;
-        typedef typename pcl::PointCloud<PointOut> PointCloudOut;
-        typedef boost::shared_ptr< Convolution<PointIn, PointOut> > Ptr;
-        typedef boost::shared_ptr< const Convolution<PointIn, PointOut> > ConstPtr;
+        using PointCloudIn = pcl::PointCloud<PointIn>;
+        using PointCloudInPtr = typename PointCloudIn::Ptr;
+        using PointCloudInConstPtr = typename PointCloudIn::ConstPtr;
+        using PointCloudOut = pcl::PointCloud<PointOut>;
+        using Ptr = shared_ptr< Convolution<PointIn, PointOut> >;
+        using ConstPtr = shared_ptr< const Convolution<PointIn, PointOut> >;
 
 
         /// The borders policy available
@@ -235,5 +234,3 @@ namespace pcl
 }
 
 #include <pcl/filters/impl/convolution.hpp>
-
-#endif

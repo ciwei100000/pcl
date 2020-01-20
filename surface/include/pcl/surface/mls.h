@@ -37,19 +37,21 @@
  *
  */
 
-#ifndef PCL_MLS_H_
-#define PCL_MLS_H_
+#pragma once
+
+#include <functional>
+#include <map>
+#include <random>
 
 // PCL includes
 #include <pcl/pcl_base.h>
+#include <pcl/pcl_macros.h>
 #include <pcl/search/pcl_search.h>
 #include <pcl/common/common.h>
 
 #include <pcl/surface/boost.h>
 #include <pcl/surface/eigen.h>
 #include <pcl/surface/processing.h>
-#include <map>
-#include <boost/function.hpp>
 
 namespace pcl
 {
@@ -84,7 +86,7 @@ namespace pcl
       double v;               /**< \brief The u-coordinate of the projected point in local MLS frame. */
       Eigen::Vector3d point;  /**< \brief The projected point. */
       Eigen::Vector3d normal; /**< \brief The projected point's normal. */
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      PCL_MAKE_ALIGNED_OPERATOR_NEW
     };
 
     inline
@@ -208,7 +210,7 @@ namespace pcl
                        const std::vector<int> &nn_indices,
                        double search_radius,
                        int polynomial_order = 2,
-                       boost::function<double(const double)> weight_func = 0);
+                       std::function<double(const double)> weight_func = {});
 
     Eigen::Vector3d query_point;  /**< \brief The query point about which the mls surface was generated */
     Eigen::Vector3d mean;         /**< \brief The mean point of all the neighbors. */
@@ -220,7 +222,7 @@ namespace pcl
     float curvature;              /**< \brief The curvature at the query point. */
     int order;                    /**< \brief The order of the polynomial. If order > 1 then use polynomial fit */
     bool valid;                   /**< \brief If True, the mls results data is valid, otherwise False. */
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    PCL_MAKE_ALIGNED_OPERATOR_NEW
     private:
       /**
         * \brief The default weight function used when fitting a polynomial surface
@@ -229,7 +231,7 @@ namespace pcl
         * \return The weight for a point at squared distance from the origin of the mls frame
         */
       inline
-      double computeMLSWeight (const double sq_dist, const double sq_mls_radius) { return (exp (-sq_dist / sq_mls_radius)); }
+      double computeMLSWeight (const double sq_dist, const double sq_mls_radius) { return (std::exp (-sq_dist / sq_mls_radius)); }
 
   };
 
@@ -250,8 +252,8 @@ namespace pcl
   class MovingLeastSquares : public CloudSurfaceProcessing<PointInT, PointOutT>
   {
     public:
-      typedef boost::shared_ptr<MovingLeastSquares<PointInT, PointOutT> > Ptr;
-      typedef boost::shared_ptr<const MovingLeastSquares<PointInT, PointOutT> > ConstPtr;
+      typedef shared_ptr<MovingLeastSquares<PointInT, PointOutT> > Ptr;
+      typedef shared_ptr<const MovingLeastSquares<PointInT, PointOutT> > ConstPtr;
 
       using PCLBase<PointInT>::input_;
       using PCLBase<PointInT>::indices_;
@@ -259,20 +261,20 @@ namespace pcl
       using PCLBase<PointInT>::initCompute;
       using PCLBase<PointInT>::deinitCompute;
 
-      typedef typename pcl::search::Search<PointInT> KdTree;
-      typedef typename pcl::search::Search<PointInT>::Ptr KdTreePtr;
-      typedef pcl::PointCloud<pcl::Normal> NormalCloud;
-      typedef pcl::PointCloud<pcl::Normal>::Ptr NormalCloudPtr;
+      using KdTree = pcl::search::Search<PointInT>;
+      using KdTreePtr = typename KdTree::Ptr;
+      using NormalCloud = pcl::PointCloud<pcl::Normal>;
+      using NormalCloudPtr = NormalCloud::Ptr;
 
-      typedef pcl::PointCloud<PointOutT> PointCloudOut;
-      typedef typename PointCloudOut::Ptr PointCloudOutPtr;
-      typedef typename PointCloudOut::ConstPtr PointCloudOutConstPtr;
+      using PointCloudOut = pcl::PointCloud<PointOutT>;
+      using PointCloudOutPtr = typename PointCloudOut::Ptr;
+      using PointCloudOutConstPtr = typename PointCloudOut::ConstPtr;
 
-      typedef pcl::PointCloud<PointInT> PointCloudIn;
-      typedef typename PointCloudIn::Ptr PointCloudInPtr;
-      typedef typename PointCloudIn::ConstPtr PointCloudInConstPtr;
+      using PointCloudIn = pcl::PointCloud<PointInT>;
+      using PointCloudInPtr = typename PointCloudIn::Ptr;
+      using PointCloudInConstPtr = typename PointCloudIn::ConstPtr;
 
-      typedef boost::function<int (int, double, std::vector<int> &, std::vector<float> &)> SearchMethod;
+      using SearchMethod = std::function<int (int, double, std::vector<int> &, std::vector<float> &)>;
 
       enum UpsamplingMethod
       {
@@ -293,9 +295,7 @@ namespace pcl
 
       /** \brief Empty constructor. */
       MovingLeastSquares () : CloudSurfaceProcessing<PointInT, PointOutT> (),
-                              normals_ (),
                               distinct_cloud_ (),
-                              search_method_ (),
                               tree_ (),
                               order_ (2),
                               search_radius_ (0.0),
@@ -306,19 +306,16 @@ namespace pcl
                               upsampling_step_ (0.0),
                               desired_num_points_in_radius_ (0),
                               cache_mls_results_ (true),
-                              mls_results_ (),
                               projection_method_ (MLSResult::SIMPLE),
                               threads_ (1),
                               voxel_size_ (1.0),
                               dilation_iteration_num_ (0),
                               nr_coeff_ (),
-                              corresponding_input_indices_ (),
-                              rng_alg_ (),
                               rng_uniform_distribution_ ()
                               {};
 
       /** \brief Empty destructor */
-      virtual ~MovingLeastSquares () {}
+      ~MovingLeastSquares () {}
 
 
       /** \brief Set whether the algorithm should also store the normals computed
@@ -335,8 +332,10 @@ namespace pcl
       {
         tree_ = tree;
         // Declare the search locator definition
-        int (KdTree::*radiusSearch)(int index, double radius, std::vector<int> &k_indices, std::vector<float> &k_sqr_distances, unsigned int max_nn) const = &KdTree::radiusSearch;
-        search_method_ = boost::bind (radiusSearch, boost::ref (tree_), _1, _2, _3, _4, 0);
+        search_method_ = [this] (int index, double radius, std::vector<int>& k_indices, std::vector<float>& k_sqr_distances)
+        {
+          return tree_->radiusSearch (index, radius, k_indices, k_sqr_distances, 0);
+        };
       }
 
       /** \brief Get a pointer to the search method used. */
@@ -357,7 +356,7 @@ namespace pcl
       /** \brief Sets whether the surface and normal are approximated using a polynomial, or only via tangent estimation.
         * \param[in] polynomial_fit set to true for polynomial fit
         */
-      PCL_DEPRECATED ("[pcl::surface::MovingLeastSquares::setPolynomialFit] setPolynomialFit is deprecated. Please use setPolynomialOrder instead.")
+      [[deprecated("use setPolynomialOrder() instead")]]
       inline void
       setPolynomialFit (bool polynomial_fit)
       {
@@ -375,7 +374,7 @@ namespace pcl
       }
 
       /** \brief Get the polynomial_fit value (true if the surface and normal are approximated using a polynomial). */
-      PCL_DEPRECATED ("[pcl::surface::MovingLeastSquares::getPolynomialFit] getPolynomialFit is deprecated. Please use getPolynomialOrder instead.")
+      [[deprecated("use getPolynomialOrder() instead")]]
       inline bool
       getPolynomialFit () const { return (order_ > 1); }
 
@@ -529,7 +528,7 @@ namespace pcl
         * \param[out] output the resultant reconstructed surface model
         */
       void
-      process (PointCloudOut &output);
+      process (PointCloudOut &output) override;
 
 
       /** \brief Get the set of indices with each point in output having the
@@ -613,14 +612,14 @@ namespace pcl
           dilate ();
 
           inline void
-          getIndexIn1D (const Eigen::Vector3i &index, uint64_t &index_1d) const
+          getIndexIn1D (const Eigen::Vector3i &index, std::uint64_t &index_1d) const
           {
             index_1d = index[0] * data_size_ * data_size_ +
                        index[1] * data_size_ + index[2];
           }
 
           inline void
-          getIndexIn3D (uint64_t index_1d, Eigen::Vector3i& index_3d) const
+          getIndexIn3D (std::uint64_t index_1d, Eigen::Vector3i& index_3d) const
           {
             index_3d[0] = static_cast<Eigen::Vector3i::Scalar> (index_1d / (data_size_ * data_size_));
             index_1d -= index_3d[0] * data_size_ * data_size_;
@@ -637,7 +636,7 @@ namespace pcl
           }
 
           inline void
-          getPosition (const uint64_t &index_1d, Eigen::Vector3f &point) const
+          getPosition (const std::uint64_t &index_1d, Eigen::Vector3f &point) const
           {
             Eigen::Vector3i index_3d;
             getIndexIn3D (index_1d, index_3d);
@@ -645,12 +644,12 @@ namespace pcl
               point[i] = static_cast<Eigen::Vector3f::Scalar> (index_3d[i]) * voxel_size_ + bounding_min_[i];
           }
 
-          typedef std::map<uint64_t, Leaf> HashMap;
+          typedef std::map<std::uint64_t, Leaf> HashMap;
           HashMap voxel_grid_;
           Eigen::Vector4f bounding_min_, bounding_max_;
-          uint64_t data_size_;
+          std::uint64_t data_size_;
           float voxel_size_;
-          EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+          PCL_MAKE_ALIGNED_OPERATOR_NEW
       };
 
 
@@ -723,8 +722,8 @@ namespace pcl
       /** \brief Abstract surface reconstruction method.
         * \param[out] output the result of the reconstruction
         */
-      virtual void
-      performProcessing (PointCloudOut &output);
+      void
+      performProcessing (PointCloudOut &output) override;
 
       /** \brief Perform upsampling for the distinct-cloud and voxel-grid methods
         * \param[out] output the result of the reconstruction
@@ -733,42 +732,23 @@ namespace pcl
       performUpsampling (PointCloudOut &output);
 
     private:
-      /** \brief Boost-based random number generator algorithm. */
-      boost::mt19937 rng_alg_;
+      /** \brief Random number generator algorithm. */
+      mutable std::mt19937 rng_;
 
       /** \brief Random number generator using an uniform distribution of floats
         * \note Used only in the case of RANDOM_UNIFORM_DENSITY upsampling
         */
-      boost::shared_ptr<boost::variate_generator<boost::mt19937&,
-                                                 boost::uniform_real<float> >
-                       > rng_uniform_distribution_;
+      std::unique_ptr<std::uniform_real_distribution<>> rng_uniform_distribution_;
 
       /** \brief Abstract class get name method. */
       std::string
       getClassName () const { return ("MovingLeastSquares"); }
   };
 
-  /** \brief MovingLeastSquaresOMP implementation has been merged into MovingLeastSquares for better maintainability.
-  * \note Keeping this empty child class for backwards compatibility.
-  * \author Robert Huitl
-  * \ingroup surface
-  */
   template <typename PointInT, typename PointOutT>
-  class MovingLeastSquaresOMP : public MovingLeastSquares<PointInT, PointOutT>
-  {
-    public:
-      /** \brief Constructor for parallelized Moving Least Squares
-      * \param threads the maximum number of hardware threads to use (0 sets the value to 1)
-      */
-      MovingLeastSquaresOMP (unsigned int threads = 1)
-      {
-        this->setNumberOfThreads (threads);
-      }
-  };
+  using MovingLeastSquaresOMP [[deprecated("use MovingLeastSquares instead, it supports OpenMP now")]] = MovingLeastSquares<PointInT, PointOutT>;
 }
 
 #ifdef PCL_NO_PRECOMPILE
 #include <pcl/surface/impl/mls.hpp>
 #endif
-
-#endif  /* #ifndef PCL_MLS_H_ */

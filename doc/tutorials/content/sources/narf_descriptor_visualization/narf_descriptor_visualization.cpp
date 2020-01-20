@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include <boost/thread/thread.hpp>
 #include <pcl/point_cloud.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/range_image_visualizer.h>
@@ -108,8 +107,8 @@ main (int argc, char** argv)
   float noise_level = 0.0;
   float min_range = 0.0f;
   int border_size = 1;
-  boost::shared_ptr<pcl::RangeImage> range_image_ptr (new pcl::RangeImage);
-  pcl::RangeImage& range_image = *range_image_ptr;   
+  pcl::RangeImage::Ptr range_image_ptr (new pcl::RangeImage);
+  pcl::RangeImage& range_image = *range_image_ptr;
   range_image.createFromPointCloud (point_cloud, angular_resolution, pcl::deg2rad (360.0f), pcl::deg2rad (180.0f),
                                    scene_sensor_pose, coordinate_frame, noise_level, min_range, border_size);
   range_image.integrateFarRanges (far_ranges);
@@ -199,7 +198,7 @@ main (int argc, char** argv)
     {
       float angle = descriptor_value_idx*angle_step_size + surface_patch_rotation;
       //surface_patch_widget.markLine (patch_middle, patch_middle, patch_middle+line_length*sinf (angle),
-                                     //patch_middle+line_length*-cosf (angle), pcl::visualization::Vector3ub (0,255,0));
+                                     //patch_middle+line_length*-std::cos (angle), pcl::visualization::Vector3ub (0,255,0));
     }
     std::vector<float> rotations, strengths;
     narf.getRotations (rotations, strengths);
@@ -207,7 +206,7 @@ main (int argc, char** argv)
     for (unsigned int i=0; i<rotations.size (); ++i)
     {
       //surface_patch_widget.markLine (radius-0.5, radius-0.5, radius-0.5f + 2.0f*radius*sinf (rotations[i]),
-                                                //radius-0.5f - 2.0f*radius*cosf (rotations[i]), pcl::visualization::Vector3ub (255,0,0));
+                                                //radius-0.5f - 2.0f*radius*std::cos (rotations[i]), pcl::visualization::Vector3ub (255,0,0));
     }
     
     descriptor_widget.showFloatImage (narf.getDescriptor (), narf.getDescriptorSize (), 1, -0.1f, 0.3f, true);

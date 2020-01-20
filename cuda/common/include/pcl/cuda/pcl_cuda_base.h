@@ -32,8 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef PCL_CUDA_PCL_CUDA_BASE_H_
-#define PCL_CUDA_PCL_CUDA_BASE_H_
+
+#pragma once
 
 #include <boost/shared_ptr.hpp>
 #include <pcl/cuda/point_cloud.h>
@@ -49,9 +49,9 @@ namespace cuda
   class PCLCUDABase
   {
     public:
-      typedef CloudT PointCloud;
-      typedef typename PointCloud::Ptr PointCloudPtr;
-      typedef typename PointCloud::ConstPtr PointCloudConstPtr;
+      using PointCloud = CloudT;
+      using PointCloudPtr = typename PointCloud::Ptr;
+      using PointCloudConstPtr = typename PointCloud::ConstPtr;
 
       /** \brief Empty constructor. */
       PCLCUDABase () : input_() {};
@@ -95,5 +95,3 @@ namespace cuda
   };
 } // namespace
 } // namespace
-
-#endif  //#ifndef PCL_PCL_BASE_H_

@@ -1,15 +1,15 @@
 /*
  * Software License Agreement (BSD License)
- * 
+ *
  * Point Cloud Library (PCL) - www.pointclouds.org
  * Copyright (c) 2012-, Open Perception, Inc.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
- * are met: 
- * 
+ * are met:
+ *
  *  * Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *  * Redistributions in binary form must reproduce the above
@@ -19,7 +19,7 @@
  *  * Neither the name of the copyright holder(s) nor the names of its
  *    contributors may be used to endorse or promote products derived
  *    from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -34,13 +34,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PCL_ORGANIZED_SEGMENTATION_DEMO_H_
-#define PCL_ORGANIZED_SEGMENTATION_DEMO_H_
+#pragma once
 
 #include <pcl/apps/organized_segmentation_demo_qt.h>
 
-// Boost
-#include <boost/thread/thread.hpp>
 // PCL
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -62,7 +59,7 @@
 #include <pcl/segmentation/euclidean_cluster_comparator.h>
 #include <pcl/segmentation/organized_connected_component_segmentation.h>
 
-typedef pcl::PointXYZRGBA PointT;
+using PointT = pcl::PointXYZRGBA;
 
 // Useful macros
 #define FPS_CALC(_WHAT_) \
@@ -89,10 +86,10 @@ class OrganizedSegmentationDemo : public QMainWindow
 {
   Q_OBJECT
   public:
-    typedef pcl::PointCloud<PointT> Cloud;
-    typedef Cloud::Ptr CloudPtr;
-    typedef Cloud::ConstPtr CloudConstPtr;
-  
+    using Cloud = pcl::PointCloud<PointT>;
+    using CloudPtr = Cloud::Ptr;
+    using CloudConstPtr = Cloud::ConstPtr;
+
 
     OrganizedSegmentationDemo(pcl::Grabber& grabber);
 
@@ -101,11 +98,11 @@ class OrganizedSegmentationDemo : public QMainWindow
       if(grabber_.isRunning())
         grabber_.stop();
     }
-  
+
     void cloud_cb (const CloudConstPtr& cloud);
-  
+
   protected:
-    boost::shared_ptr<pcl::visualization::PCLVisualizer> vis_;
+    pcl::visualization::PCLVisualizer::Ptr vis_;
     pcl::Grabber& grabber_;
 
     QMutex mtx_;
@@ -116,16 +113,16 @@ class OrganizedSegmentationDemo : public QMainWindow
     pcl::PointCloud<pcl::Normal> prev_normals_;
     std::vector<pcl::PlanarRegion<PointT>, Eigen::aligned_allocator<pcl::PlanarRegion<PointT> > > prev_regions_;
     float* prev_distance_map_;
-    
+
     pcl::PointCloud<PointT>::CloudVectorType prev_clusters_;
-    
+
     pcl::IntegralImageNormalEstimation<PointT, pcl::Normal> ne;
     pcl::OrganizedMultiPlaneSegmentation<PointT, pcl::Normal, pcl::Label> mps;
 
     bool capture_;
     bool data_modified_;
-    size_t previous_data_size_;
-    size_t previous_clusters_size_;
+    std::size_t previous_data_size_;
+    std::size_t previous_clusters_size_;
 
     bool display_normals_;
     bool display_curvature_;
@@ -151,16 +148,16 @@ class OrganizedSegmentationDemo : public QMainWindow
     void useEuclideanComparatorPressed ();
     void useRGBComparatorPressed ();
     void useEdgeAwareComparatorPressed ();
-    
+
     void displayCurvaturePressed ();
     void displayDistanceMapPressed ();
     void displayNormalsPressed ();
-                                 
+
     void disableRefinementPressed ()
     {
       use_planar_refinement_ = false;
     }
-    
+
     void usePlanarRefinementPressed ()
     {
       use_planar_refinement_ = true;
@@ -175,12 +172,10 @@ class OrganizedSegmentationDemo : public QMainWindow
     {
       use_clustering_ = true;
     }
-    
+
 
   private Q_SLOTS:
   void
     timeoutSlot();
 
 };
-
-#endif    // PCL_ORGANIZED_SEGMENTATION_DEMO_H_

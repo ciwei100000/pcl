@@ -36,8 +36,8 @@
  *
  *
  */
-#ifndef PCL_REGISTRATION_TRANSFORMATION_ESTIMATION_DQ_H_
-#define PCL_REGISTRATION_TRANSFORMATION_ESTIMATION_DQ_H_
+
+#pragma once
 
 #include <pcl/registration/transformation_estimation.h>
 #include <pcl/cloud_iterator.h>
@@ -57,10 +57,10 @@ namespace pcl
     class TransformationEstimationDQ : public TransformationEstimation<PointSource, PointTarget, Scalar>
     {
       public:
-        typedef boost::shared_ptr<TransformationEstimationDQ<PointSource, PointTarget, Scalar> > Ptr;
-        typedef boost::shared_ptr<const TransformationEstimationDQ<PointSource, PointTarget, Scalar> > ConstPtr;
+        using Ptr = shared_ptr<TransformationEstimationDQ<PointSource, PointTarget, Scalar> >;
+        using ConstPtr = shared_ptr<const TransformationEstimationDQ<PointSource, PointTarget, Scalar> >;
 
-        typedef typename TransformationEstimation<PointSource, PointTarget, Scalar>::Matrix4 Matrix4;
+        using Matrix4 = typename TransformationEstimation<PointSource, PointTarget, Scalar>::Matrix4;
 
         TransformationEstimationDQ () {};
         virtual ~TransformationEstimationDQ () {};
@@ -138,5 +138,3 @@ namespace pcl
 }
 
 #include <pcl/registration/impl/transformation_estimation_dq.hpp>
-
-#endif /* PCL_REGISTRATION_TRANSFORMATION_ESTIMATION_DQ_H_ */

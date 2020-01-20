@@ -37,8 +37,7 @@
  *
  */
 
-#ifndef PCL_EUCLIDEAN_SEGMENTATION_PLANE_COEFFICIENT_COMPARATOR_H_
-#define PCL_EUCLIDEAN_SEGMENTATION_PLANE_COEFFICIENT_COMPARATOR_H_
+#pragma once
 
 #include <pcl/segmentation/boost.h>
 #include <pcl/segmentation/plane_coefficient_comparator.h>
@@ -55,14 +54,14 @@ namespace pcl
   class EuclideanPlaneCoefficientComparator: public PlaneCoefficientComparator<PointT, PointNT>
   {
     public:
-      typedef typename Comparator<PointT>::PointCloud PointCloud;
-      typedef typename Comparator<PointT>::PointCloudConstPtr PointCloudConstPtr;
-      typedef typename pcl::PointCloud<PointNT> PointCloudN;
-      typedef typename PointCloudN::Ptr PointCloudNPtr;
-      typedef typename PointCloudN::ConstPtr PointCloudNConstPtr;
+      using PointCloud = typename Comparator<PointT>::PointCloud;
+      using PointCloudConstPtr = typename Comparator<PointT>::PointCloudConstPtr;
+      using PointCloudN = pcl::PointCloud<PointNT>;
+      using PointCloudNPtr = typename PointCloudN::Ptr;
+      using PointCloudNConstPtr = typename PointCloudN::ConstPtr;
       
-      typedef boost::shared_ptr<EuclideanPlaneCoefficientComparator<PointT, PointNT> > Ptr;
-      typedef boost::shared_ptr<const EuclideanPlaneCoefficientComparator<PointT, PointNT> > ConstPtr;
+      using Ptr = shared_ptr<EuclideanPlaneCoefficientComparator<PointT, PointNT> >;
+      using ConstPtr = shared_ptr<const EuclideanPlaneCoefficientComparator<PointT, PointNT> >;
 
       using pcl::Comparator<PointT>::input_;
       using pcl::PlaneCoefficientComparator<PointT, PointNT>::normals_;
@@ -75,7 +74,7 @@ namespace pcl
       }
 
       /** \brief Destructor for PlaneCoefficientComparator. */
-      virtual
+      
       ~EuclideanPlaneCoefficientComparator ()
       {
       }
@@ -84,8 +83,8 @@ namespace pcl
         * \param[in] idx1 The index of the first point.
         * \param[in] idx2 The index of the second point.
         */
-      virtual bool
-      compare (int idx1, int idx2) const
+      bool
+      compare (int idx1, int idx2) const override
       {
         float dx = input_->points[idx1].x - input_->points[idx2].x;
         float dy = input_->points[idx1].y - input_->points[idx2].y;
@@ -97,5 +96,3 @@ namespace pcl
       }
   };
 }
-
-#endif // PCL_SEGMENTATION_PLANE_COEFFICIENT_COMPARATOR_H_

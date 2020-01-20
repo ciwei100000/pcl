@@ -5,11 +5,11 @@
  *      Author: aitor
  */
 
+#include <random>
+
 #include <pcl/apps/3d_rec_framework/pipeline/global_nn_recognizer_crh.h>
 #include <pcl/recognition/crh_alignment.h>
 #include <pcl/registration/icp.h>
-#include <boost/random.hpp>
-#include <boost/random/normal_distribution.hpp>
 #include <pcl/common/time.h>
 
 template<template<class > class Distance, typename PointInT, typename FeatureT>
@@ -19,11 +19,11 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
 
     if (use_cache_)
     {
-      typedef std::pair<std::string, int> mv_pair;
+      using mv_pair = std::pair<std::string, int>;
       mv_pair pair_model_view = std::make_pair (model.id_, view_id);
 
       std::map<mv_pair, Eigen::Matrix4f,
-               std::less<mv_pair>,
+               std::less<>,
                Eigen::aligned_allocator<std::pair<const mv_pair, Eigen::Matrix4f> > >::iterator it = poses_cache_.find (pair_model_view);
 
       if (it != poses_cache_.end ())
@@ -83,20 +83,14 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
   void
   pcl::rec_3d_framework::GlobalNNCRHRecognizer<Distance, PointInT, FeatureT>::loadFeaturesAndCreateFLANN ()
   {
-    boost::shared_ptr < std::vector<ModelT> > models = source_->getModels ();
-    for (size_t i = 0; i < models->size (); i++)
+    auto models = source_->getModels ();
+    for (std::size_t i = 0; i < models->size (); i++)
     {
       std::string path = source_->getModelDescriptorDir (models->at (i), training_dir_, descr_name_);
-      bf::path inside = path;
-      bf::directory_iterator end_itr;
 
-      for (bf::directory_iterator itr_in (inside); itr_in != end_itr; ++itr_in)
+      for (const auto& dir_entry : bf::directory_iterator(path))
       {
-#if BOOST_FILESYSTEM_VERSION == 3
-        std::string file_name = (itr_in->path ().filename ()).string();
-#else
-        std::string file_name = (itr_in->path ()).filename ();
-#endif
+        std::string file_name = (dir_entry.path ().filename ()).string();
 
         std::vector < std::string > strs;
         boost::split (strs, file_name, boost::is_any_of ("_"));
@@ -109,7 +103,7 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
           boost::split (strs1, strs[2], boost::is_any_of ("."));
           int descriptor_id = atoi (strs1[0].c_str ());
 
-          std::string full_file_name = itr_in->path ().string ();
+          std::string full_file_name = dir_entry.path ().string ();
           typename pcl::PointCloud<FeatureT>::Ptr signature (new pcl::PointCloud<FeatureT>);
           pcl::io::loadPCDFile (full_file_name, *signature);
 
@@ -174,7 +168,7 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
     std::vector<pcl::PointCloud<FeatureT>, Eigen::aligned_allocator<pcl::PointCloud<FeatureT> > > signatures;
     std::vector < Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> > centroids;
 
-    if (indices_.size ())
+    if (!indices_.empty ())
       pcl::copyPointCloud (*input_, indices_, *in);
     else
       in = input_;
@@ -188,12 +182,12 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
     crh_estimator_->getCRHHistograms (crh_histograms);
 
     std::vector<index_score> indices_scores;
-    if (signatures.size () > 0)
+    if (!signatures.empty ())
     {
 
       {
         pcl::ScopeTime t_matching ("Matching and roll...");
-        for (size_t idx = 0; idx < signatures.size (); idx++)
+        for (std::size_t idx = 0; idx < signatures.size (); idx++)
         {
 
           float* hist = signatures[idx].points[0].histogram;
@@ -291,9 +285,9 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
             crha.getTransforms (roll_transforms);
 
             //create object hypothesis
-            for (size_t k = 0; k < roll_transforms.size (); k++)
+            for (const auto &roll_transform : roll_transforms)
             {
-              Eigen::Matrix4f final_roll_trans (roll_transforms[k] * model_view_pose);
+              Eigen::Matrix4f final_roll_trans (roll_transform * model_view_pose);
               models_->push_back (m);
               transforms_->push_back (final_roll_trans);
             }
@@ -363,7 +357,7 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
         std::vector<typename pcl::PointCloud<PointInT>::ConstPtr> aligned_models;
         aligned_models.resize (models_->size ());
 
-        for (size_t i = 0; i < models_->size (); i++)
+        for (std::size_t i = 0; i < models_->size (); i++)
         {
           ConstPointInTPtr model_cloud = models_->at (i).getAssembled (0.005f);
           PointInTPtr model_aligned (new pcl::PointCloud<PointInT>);
@@ -377,13 +371,13 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
         hv_algorithm_->verify ();
         hv_algorithm_->getMask (mask_hv);
 
-        boost::shared_ptr < std::vector<ModelT> > models_temp;
-        boost::shared_ptr < std::vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> > > transforms_temp;
+        std::shared_ptr<std::vector<ModelT>> models_temp;
+        std::shared_ptr<std::vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f>>> transforms_temp;
 
         models_temp.reset (new std::vector<ModelT>);
         transforms_temp.reset (new std::vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> >);
 
-        for (size_t i = 0; i < models_->size (); i++)
+        for (std::size_t i = 0; i < models_->size (); i++)
         {
           if (!mask_hv[i])
             continue;
@@ -406,39 +400,34 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
 
     //use the source to know what has to be trained and what not, checking if the descr_name directory exists
     //unless force_retrain is true, then train everything
-    boost::shared_ptr < std::vector<ModelT> > models = source_->getModels ();
+    auto models = source_->getModels ();
     std::cout << "Models size:" << models->size () << std::endl;
 
     if (force_retrain)
     {
-      for (size_t i = 0; i < models->size (); i++)
+      for (std::size_t i = 0; i < models->size (); i++)
       {
         source_->removeDescDirectory (models->at (i), training_dir_, descr_name_);
       }
     }
 
-    for (size_t i = 0; i < models->size (); i++)
+    for (std::size_t i = 0; i < models->size (); i++)
     {
       if (!source_->modelAlreadyTrained (models->at (i), training_dir_, descr_name_))
       {
-        for (size_t v = 0; v < models->at (i).views_->size (); v++)
+        for (std::size_t v = 0; v < models->at (i).views_->size (); v++)
         {
           PointInTPtr processed (new pcl::PointCloud<PointInT>);
           PointInTPtr view = models->at (i).views_->at (v);
 
           if (noisify_)
           {
-            double noise_std = noise_;
-            boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
-            boost::posix_time::time_duration duration( time.time_of_day() );
-            boost::mt19937 rng;
-            rng.seed (static_cast<unsigned int> (duration.total_milliseconds()));
-            boost::normal_distribution<> nd (0.0, noise_std);
-            boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > var_nor (rng, nd);
+            std::random_device rd;
+            std::mt19937 rng(rd());
+            std::normal_distribution<float> nd (0.0f, noise_);
             // Noisify each point in the dataset
-            for (size_t cp = 0; cp < view->points.size (); ++cp)
-              view->points[cp].z += static_cast<float> (var_nor ());
-
+            for (std::size_t cp = 0; cp < view->points.size (); ++cp)
+              view->points[cp].z += nd (rng);
           }
 
           //pro view, compute signatures and CRH
@@ -468,7 +457,7 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
           crh_estimator_->getCRHHistograms (crh_histograms);
 
           //save signatures and centroids to disk
-          for (size_t j = 0; j < signatures.size (); j++)
+          for (std::size_t j = 0; j < signatures.size (); j++)
           {
             std::stringstream path_centroid;
             path_centroid << path << "/centroid_" << v << "_" << j << ".txt";

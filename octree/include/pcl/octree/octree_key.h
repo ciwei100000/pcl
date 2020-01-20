@@ -35,8 +35,7 @@
  *
  */
 
-#ifndef PCL_OCTREE_KEY_H
-#define PCL_OCTREE_KEY_H
+#pragma once
 
 namespace pcl
 {
@@ -69,6 +68,8 @@ namespace pcl
       {
         memcpy(key_, source.key_, sizeof(key_));
       }
+
+      OctreeKey& operator=(const OctreeKey&) = default;
 
       /** \brief Operator== for comparing octree keys with each other.
        *  \return "true" if leaf node indices are identical; "false" otherwise.
@@ -140,7 +141,7 @@ namespace pcl
       }
 
       /* \brief maximum depth that can be addressed */
-      static const unsigned char maxDepth = static_cast<unsigned char>(sizeof(uint32_t)*8);
+      static const unsigned char maxDepth = static_cast<unsigned char>(sizeof(std::uint32_t)*8);
 
       // Indices addressing a voxel at (X, Y, Z)
 
@@ -148,16 +149,14 @@ namespace pcl
       {
         struct
         {
-          uint32_t x;
-          uint32_t y;
-          uint32_t z;
+          std::uint32_t x;
+          std::uint32_t y;
+          std::uint32_t z;
         };
-        uint32_t key_[3];
+        std::uint32_t key_[3];
       };
 
 
     };
   }
 }
-
-#endif

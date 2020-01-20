@@ -63,7 +63,7 @@ pcl::SHOTLocalReferenceFrameEstimation<PointInT, PointOutT>::getLocalRF (const i
 
   int valid_nn_points = 0;
 
-  for (size_t i_idx = 0; i_idx < n_indices.size (); ++i_idx)
+  for (std::size_t i_idx = 0; i_idx < n_indices.size (); ++i_idx)
   {
     Eigen::Vector4f pt = surface_->points[n_indices[i_idx]].getVector4fMap ();
     if (pt.head<3> () == central_point.head<3> ())
@@ -98,7 +98,7 @@ pcl::SHOTLocalReferenceFrameEstimation<PointInT, PointOutT>::getLocalRF (const i
   const double& e2c = solver.eigenvalues ()[1];
   const double& e3c = solver.eigenvalues ()[2];
 
-  if (!pcl_isfinite (e1c) || !pcl_isfinite (e2c) || !pcl_isfinite (e3c))
+  if (!std::isfinite (e1c) || !std::isfinite (e2c) || !std::isfinite (e3c))
   {
     //PCL_ERROR ("[pcl::%s::getLocalRF] Warning! Eigenvectors are NaN. Aborting Local RF computation of feature point (%lf, %lf, %lf)\n", "SHOTLocalReferenceFrameEstimation", central_point[0], central_point[1], central_point[2]);
     rf.setConstant (std::numeric_limits<float>::quiet_NaN ());
@@ -178,7 +178,7 @@ pcl::SHOTLocalReferenceFrameEstimation<PointInT, PointOutT>::computeFeature (Poi
   }
   tree_->setSortedResults (true);
 
-  for (size_t i = 0; i < indices_->size (); ++i)
+  for (std::size_t i = 0; i < indices_->size (); ++i)
   {
     // point result
     Eigen::Matrix3f rf;

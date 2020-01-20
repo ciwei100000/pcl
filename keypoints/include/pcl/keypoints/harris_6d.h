@@ -34,8 +34,7 @@
  *  @author Suat Gedikli
  */
 
-#ifndef PCL_HARRIS_KEYPOINT_6D_H_
-#define PCL_HARRIS_KEYPOINT_6D_H_
+#pragma once
 
 #include <pcl/keypoints/keypoint.h>
 
@@ -50,13 +49,13 @@ namespace pcl
   class HarrisKeypoint6D : public Keypoint<PointInT, PointOutT>
   {
     public:
-      typedef boost::shared_ptr<HarrisKeypoint6D<PointInT, PointOutT, NormalT> > Ptr;
-      typedef boost::shared_ptr<const HarrisKeypoint6D<PointInT, PointOutT, NormalT> > ConstPtr;
+      using Ptr = shared_ptr<HarrisKeypoint6D<PointInT, PointOutT, NormalT> >;
+      using ConstPtr = shared_ptr<const HarrisKeypoint6D<PointInT, PointOutT, NormalT> >;
 
-      typedef typename Keypoint<PointInT, PointOutT>::PointCloudIn PointCloudIn;
-      typedef typename Keypoint<PointInT, PointOutT>::PointCloudOut PointCloudOut;
-      typedef typename Keypoint<PointInT, PointOutT>::KdTree KdTree;
-      typedef typename PointCloudIn::ConstPtr PointCloudInConstPtr;
+      using PointCloudIn = typename Keypoint<PointInT, PointOutT>::PointCloudIn;
+      using PointCloudOut = typename Keypoint<PointInT, PointOutT>::PointCloudOut;
+      using KdTree = typename Keypoint<PointInT, PointOutT>::KdTree;
+      using PointCloudInConstPtr = typename PointCloudIn::ConstPtr;
 
       using Keypoint<PointInT, PointOutT>::name_;
       using Keypoint<PointInT, PointOutT>::input_;
@@ -133,12 +132,9 @@ namespace pcl
       bool refine_;
       bool nonmax_;
       unsigned int threads_;    
-      boost::shared_ptr<pcl::PointCloud<NormalT> > normals_;
-      boost::shared_ptr<pcl::PointCloud<pcl::IntensityGradient> > intensity_gradients_;
+      typename pcl::PointCloud<NormalT>::Ptr normals_;
+      pcl::PointCloud<pcl::IntensityGradient>::Ptr intensity_gradients_;
   } ;
 }
 
 #include <pcl/keypoints/impl/harris_6d.hpp>
-
-#endif // #ifndef PCL_HARRIS_KEYPOINT_6D_H_
-

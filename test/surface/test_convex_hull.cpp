@@ -39,6 +39,8 @@
 
 #include <gtest/gtest.h>
 
+#include <random>
+
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/vtk_io.h>
@@ -99,12 +101,12 @@ TEST (PCL, ConvexHull_bunny)
 
   // compare the face vertices (polygons2) to the output from the original test --- they should be identical
   ASSERT_EQ (polygons.size (), polygons2.size ());
-  for (size_t i = 0; i < polygons.size (); ++i)
+  for (std::size_t i = 0; i < polygons.size (); ++i)
   {
     const pcl::Vertices & face1 = polygons[i];
     const pcl::Vertices & face2 = polygons2[i];
     ASSERT_EQ (face1.vertices.size (), face2.vertices.size ());
-    for (size_t j = 0; j < face1.vertices.size (); ++j)
+    for (std::size_t j = 0; j < face1.vertices.size (); ++j)
     {
       ASSERT_EQ (face1.vertices[j], face2.vertices[j]);
     }
@@ -125,7 +127,7 @@ TEST (PCL, ConvexHull_bunny)
 
   // compare the PointCloud (hull2) to the output from the original test --- they should be identical
   ASSERT_EQ (hull.points.size (), hull2.points.size ());
-  for (size_t i = 0; i < hull.points.size (); ++i)
+  for (std::size_t i = 0; i < hull.points.size (); ++i)
   {
     const PointXYZ & p1 = hull.points[i];
     const PointXYZ & p2 = hull2.points[i];
@@ -136,12 +138,12 @@ TEST (PCL, ConvexHull_bunny)
 
   // compare the face vertices (mesh.polygons) to the output from the original test --- they should be identical
   ASSERT_EQ (polygons.size (), mesh.polygons.size ());
-  for (size_t i = 0; i < polygons.size (); ++i)
+  for (std::size_t i = 0; i < polygons.size (); ++i)
   {
     const pcl::Vertices & face1 = polygons[i];
     const pcl::Vertices & face2 = mesh.polygons[i];
     ASSERT_EQ (face1.vertices.size (), face2.vertices.size ());
-    for (size_t j = 0; j < face1.vertices.size (); ++j)
+    for (std::size_t j = 0; j < face1.vertices.size (); ++j)
     {
       ASSERT_EQ (face1.vertices[j], face2.vertices[j]);
     }
@@ -190,9 +192,9 @@ TEST (PCL, ConvexHull_LTable)
   cloud_out_ltable.points.resize (100);
 
   int npoints = 0;
-  for (size_t i = 0; i < 8; i++)
+  for (std::size_t i = 0; i < 8; i++)
   {
-    for (size_t j = 0; j <= 2; j++)
+    for (std::size_t j = 0; j <= 2; j++)
     {
       cloud_out_ltable.points[npoints].x = float (i) * 0.5f;
       cloud_out_ltable.points[npoints].y = -float (j) * 0.5f;
@@ -201,9 +203,9 @@ TEST (PCL, ConvexHull_LTable)
     }
   }
 
-  for (size_t i = 0; i <= 2; i++)
+  for (std::size_t i = 0; i <= 2; i++)
   {
-    for (size_t j = 3; j < 8; j++)
+    for (std::size_t j = 3; j < 8; j++)
     {
       cloud_out_ltable.points[npoints].x = float (i) * 0.5f;
       cloud_out_ltable.points[npoints].y = -float (j) * 0.5f;
@@ -261,12 +263,12 @@ TEST (PCL, ConvexHull_LTable)
 
   // compare the face vertices (polygons2) to the output from the original test --- they should be identical
   ASSERT_EQ (polygons.size (), polygons2.size ());
-  for (size_t i = 0; i < polygons.size (); ++i)
+  for (std::size_t i = 0; i < polygons.size (); ++i)
   {
     const pcl::Vertices & face1 = polygons[i];
     const pcl::Vertices & face2 = polygons2[i];
     ASSERT_EQ (face1.vertices.size (), face2.vertices.size ());
-    for (size_t j = 0; j < face1.vertices.size (); ++j)
+    for (std::size_t j = 0; j < face1.vertices.size (); ++j)
     {
       ASSERT_EQ (face1.vertices[j], face2.vertices[j]);
     }
@@ -287,7 +289,7 @@ TEST (PCL, ConvexHull_LTable)
 
   // compare the PointCloud (hull2) to the output from the original test --- they should be identical
   ASSERT_EQ (hull.points.size (), hull2.points.size ());
-  for (size_t i = 0; i < hull.points.size (); ++i)
+  for (std::size_t i = 0; i < hull.points.size (); ++i)
   {
     const PointXYZ & p1 = hull.points[i];
     const PointXYZ & p2 = hull2.points[i];
@@ -298,12 +300,12 @@ TEST (PCL, ConvexHull_LTable)
 
   // compare the face vertices (mesh.polygons) to the output from the original test --- they should be identical
   ASSERT_EQ (polygons.size (), mesh.polygons.size ());
-  for (size_t i = 0; i < polygons.size (); ++i)
+  for (std::size_t i = 0; i < polygons.size (); ++i)
   {
     const pcl::Vertices & face1 = polygons[i];
     const pcl::Vertices & face2 = mesh.polygons[i];
     ASSERT_EQ (face1.vertices.size (), face2.vertices.size ());
-    for (size_t j = 0; j < face1.vertices.size (); ++j)
+    for (std::size_t j = 0; j < face1.vertices.size (); ++j)
     {
       ASSERT_EQ (face1.vertices[j], face2.vertices[j]);
     }
@@ -321,15 +323,14 @@ TEST (PCL, ConvexHull_2dsquare)
   input_cloud->points.resize (input_cloud->width * input_cloud->height);
   
   //rng
-  boost::mt19937 rng_alg;
-  boost::uniform_01<boost::mt19937> rng (rng_alg);
-  rng.base ().seed (12345u);
+  std::mt19937 rng(12345u);
+  std::uniform_real_distribution<float> rd (-1.0f, 1.0f);
 
-  for (size_t i = 0; i < input_cloud->points.size (); i++)
+  for (auto &point : input_cloud->points)
   {
-    input_cloud->points[i].x = (2.0f * float (rng ()))-1.0f;
-    input_cloud->points[i].y = (2.0f * float (rng ()))-1.0f;
-    input_cloud->points[i].z = 1.0f;
+    point.x = rd (rng);
+    point.y = rd (rng);
+    point.z = 1.0f;
   }
 
   //Set up for creating a hull
@@ -348,21 +349,21 @@ TEST (PCL, ConvexHull_2dsquare)
 
   //Make sure they're actually near some edge
   std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > facets;
-  facets.push_back (Eigen::Vector4f (-1.0, 0.0, 0.0, 1.0));
-  facets.push_back (Eigen::Vector4f (-1.0, 0.0, 0.0, -1.0));
-  facets.push_back (Eigen::Vector4f (0.0, -1.0, 0.0, 1.0));
-  facets.push_back (Eigen::Vector4f (0.0, -1.0, 0.0, -1.0));
+  facets.emplace_back(-1.0, 0.0, 0.0, 1.0);
+  facets.emplace_back(-1.0, 0.0, 0.0, -1.0);
+  facets.emplace_back(0.0, -1.0, 0.0, 1.0);
+  facets.emplace_back(0.0, -1.0, 0.0, -1.0);
 
   //Make sure they're in the plane
-  for (size_t i = 0; i < hull.points.size (); i++)
+  for (const auto &point : hull.points)
   {
-    float dist = fabs (hull.points[i].getVector4fMap ().dot (plane_normal));
+    float dist = std::abs (point.getVector4fMap ().dot (plane_normal));
     EXPECT_NEAR (dist, 0.0, 1e-2);
 
     float min_dist = std::numeric_limits<float>::infinity ();
-    for (size_t j = 0; j < facets.size (); j++)
+    for (const auto &facet : facets)
     {
-      float d2 = fabs (hull.points[i].getVector4fMap ().dot (facets[j]));
+      float d2 = std::abs (point.getVector4fMap ().dot (facet));
       
       if (d2 < min_dist)
         min_dist = d2;
@@ -380,16 +381,15 @@ TEST (PCL, ConvexHull_3dcube)
   input_cloud->height = 1;
   input_cloud->points.resize (input_cloud->width * input_cloud->height);
   
-  //rng
-  boost::mt19937 rng_alg;
-  boost::uniform_01<boost::mt19937> rng (rng_alg);
-  rng.base ().seed (12345u);
+  //rd
+  std::mt19937 gen(12345u);
+  std::uniform_real_distribution<float> rd (-1.0f, 1.0f);
 
-  for (size_t i = 0; i < input_cloud->points.size (); i++)
+  for (auto &point : input_cloud->points)
   {
-    input_cloud->points[i].x =  (2.0f * float (rng ()))-1.0f;
-    input_cloud->points[i].y =  (2.0f * float (rng ()))-1.0f;
-    input_cloud->points[i].z =  (2.0f * float (rng ()))-1.0f;
+    point.x = rd (gen);
+    point.y = rd (gen);
+    point.z = rd (gen);
   }
 
   //Set up for creating a hull
@@ -404,20 +404,20 @@ TEST (PCL, ConvexHull_3dcube)
   
   //Make sure they're actually near some edge
   std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > facets;
-  facets.push_back (Eigen::Vector4f (-1.0f, 0.0f, 0.0f, 1.0f));
-  facets.push_back (Eigen::Vector4f (-1.0f, 0.0f, 0.0f, -1.0f));
-  facets.push_back (Eigen::Vector4f (0.0f, -1.0f, 0.0f, 1.0f));
-  facets.push_back (Eigen::Vector4f (0.0f, -1.0f, 0.0f, -1.0f));
-  facets.push_back (Eigen::Vector4f (0.0f, 0.0f, -1.0f, 1.0f));
-  facets.push_back (Eigen::Vector4f (0.0f, 0.0f, -1.0f, -1.0f));
+  facets.emplace_back(-1.0f, 0.0f, 0.0f, 1.0f);
+  facets.emplace_back(-1.0f, 0.0f, 0.0f, -1.0f);
+  facets.emplace_back(0.0f, -1.0f, 0.0f, 1.0f);
+  facets.emplace_back(0.0f, -1.0f, 0.0f, -1.0f);
+  facets.emplace_back(0.0f, 0.0f, -1.0f, 1.0f);
+  facets.emplace_back(0.0f, 0.0f, -1.0f, -1.0f);
 
   //Make sure they're near a facet
-  for (size_t i = 0; i < hull.points.size (); i++)
+  for (const auto &point : hull.points)
   {
     float min_dist = std::numeric_limits<float>::infinity ();
-    for (size_t j = 0; j < facets.size (); j++)
+    for (const auto &facet : facets)
     {
-      float dist = fabs (hull.points[i].getVector4fMap ().dot (facets[j]));
+      float dist = std::abs (point.getVector4fMap ().dot (facet));
       
       if (dist < min_dist)
         min_dist = dist;
@@ -449,7 +449,7 @@ TEST (PCL, ConvexHull_4points)
   cloud_4->push_back (p);
 
   cloud_4->height = 1;
-  cloud_4->width = uint32_t (cloud_4->size ());
+  cloud_4->width = std::uint32_t (cloud_4->size ());
 
   ConvexHull<PointXYZ> convex_hull;
   convex_hull.setComputeAreaVolume (true);

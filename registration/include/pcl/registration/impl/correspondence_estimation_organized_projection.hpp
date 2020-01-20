@@ -76,7 +76,7 @@ pcl::registration::CorrespondenceEstimationOrganizedProjection<PointSource, Poin
     return;
 
   correspondences.resize (indices_->size ());
-  size_t c_index = 0;
+  std::size_t c_index = 0;
 
   for (std::vector<int>::const_iterator src_it = indices_->begin (); src_it != indices_->end (); ++src_it)
   {
@@ -100,7 +100,7 @@ pcl::registration::CorrespondenceEstimationOrganizedProjection<PointSource, Poin
         if (!isFinite (pt_tgt))
           continue;
         /// Check if the depth difference is larger than the threshold
-        if (fabs (uv[2] - pt_tgt.z) > depth_threshold_)
+        if (std::abs (uv[2] - pt_tgt.z) > depth_threshold_)
           continue;
 
         double dist = (p_src3 - pt_tgt.getVector3fMap ()).norm ();

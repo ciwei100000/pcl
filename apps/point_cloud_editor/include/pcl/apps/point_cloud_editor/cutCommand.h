@@ -38,8 +38,7 @@
 /// points from the cloud and filling the copy buffer.
 /// @author  Yue Li and Matthew Hielsberg
 
-#ifndef CUT_COMMAND_H_
-#define CUT_COMMAND_H_
+#pragma once
 
 #include <pcl/apps/point_cloud_editor/command.h>
 #include <pcl/apps/point_cloud_editor/localTypes.h>
@@ -55,7 +54,14 @@ class CutCommand : public Command
     /// @param cloud_ptr a shared pointer pointing to the cloud object.
     CutCommand (CopyBufferPtr copy_buffer_ptr,
                 SelectionPtr selection_ptr,
-                CloudPtr cloud_ptr);
+                const CloudPtr& cloud_ptr);
+
+    /// @brief Copy constructor - commands are non-copyable
+    CutCommand (const CutCommand&) = delete;
+
+    /// @brief Equal operator - commands are non-copyable
+    CutCommand&
+    operator= (const CutCommand&) = delete;
 
     /// @brief Destructor
     ~CutCommand ();
@@ -66,33 +72,14 @@ class CutCommand : public Command
     /// @pre Assumes the constructor was given appropriate pointers to the
     /// required objects.
     void
-    execute ();
+    execute () override;
 
     /// @brief Returns the cut points to the cloud.  This does not reconstruct
     /// the original ordering of the point cloud.
     void
-    undo ();
+    undo () override;
 
   private:
-    /// @brief Default constructor - object is not default constructable
-    CutCommand () : cut_selection_(CloudPtr())
-    {
-      assert(false);
-    }
-    
-    /// @brief Copy constructor - commands are non-copyable
-    CutCommand (const CutCommand&) : cut_selection_(CloudPtr())
-    {
-      assert(false);
-    }
-
-    /// @brief Equal operator - commands are non-copyable
-    CutCommand&
-    operator= (const CutCommand&)
-    {
-      assert(false); return (*this);
-    }
-
     /// A shared pointer pointing to the selection object.
     SelectionPtr selection_ptr_;
 
@@ -108,7 +95,4 @@ class CutCommand : public Command
 
     /// The copy buffer which backs up the points removed from the cloud.
     CopyBuffer cut_cloud_buffer_;
-
 };
-
-#endif // CUT_COMMAND_H_

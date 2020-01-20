@@ -70,7 +70,7 @@ class PCDOrganizedMultiPlaneSegmentation
       //viewer.setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.15, "cloud");
       viewer.addCoordinateSystem (1.0, "global");
       viewer.initCameraParameters ();
-      viewer.registerKeyboardCallback(&PCDOrganizedMultiPlaneSegmentation::keyboard_callback, *this, 0);
+      viewer.registerKeyboardCallback(&PCDOrganizedMultiPlaneSegmentation::keyboard_callback, *this, nullptr);
     }
 
     void keyboard_callback (const pcl::visualization::KeyboardEvent& event, void*)
@@ -163,7 +163,7 @@ class PCDOrganizedMultiPlaneSegmentation
       
       pcl::PlanarPolygon<PointT> approx_polygon;
       //Draw Visualization
-      for (size_t i = 0; i < regions.size (); i++)
+      for (std::size_t i = 0; i < regions.size (); i++)
       {
         Eigen::Vector3f centroid = regions[i].getCentroid ();
         Eigen::Vector4f model = regions[i].getCoefficients ();
@@ -186,7 +186,7 @@ class PCDOrganizedMultiPlaneSegmentation
         
 //        sprintf (name, "approx_plane_%02d", int (i));
 //        viewer.addPolygon<PointT> (approx_contour_const, 0.5 * red[i], 0.5 * grn[i], 0.5 * blu[i], name);
-        for (unsigned idx = 0; idx < approx_contour->points.size (); ++idx)
+        for (std::size_t idx = 0; idx < approx_contour->points.size (); ++idx)
         {
           sprintf (name, "approx_plane_%02d_%03d", int (i), int(idx));
           viewer.addLine (approx_contour->points [idx], approx_contour->points [(idx+1)%approx_contour->points.size ()], 0.5 * red[i], 0.5 * grn[i], 0.5 * blu[i], name);

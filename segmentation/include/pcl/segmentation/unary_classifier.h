@@ -37,9 +37,9 @@
  *
  */
 
-#ifndef PCL_UNARY_CLASSIFIER_H_
-#define PCL_UNARY_CLASSIFIER_H_
+#pragma once
 
+#include <pcl/pcl_macros.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
@@ -168,12 +168,10 @@ namespace pcl
       //typename pcl::PointCloud<PointT>::Ptr cloud_for_segmentation_;
 
     public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      PCL_MAKE_ALIGNED_OPERATOR_NEW
  };
 }
 
 #ifdef PCL_NO_PRECOMPILE
 #include <pcl/segmentation/impl/unary_classifier.hpp>
-#endif
-
 #endif

@@ -35,11 +35,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef PCL_PCL_VISUALIZER_COMMON_IO_H_
-#define PCL_PCL_VISUALIZER_COMMON_IO_H_
+
+#pragma once
 
 #include <pcl/visualization/common/actor_map.h>
-#include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/console/print.h>
 
 class vtkPolyData;
@@ -67,8 +66,6 @@ namespace pcl
       * \ingroup visualization
       */
     PCL_EXPORTS bool 
-    savePointData (vtkPolyData* data, const std::string &out_file, const boost::shared_ptr<CloudActorMap> &actors);
+    savePointData (vtkPolyData* data, const std::string &out_file, const CloudActorMapPtr &actors);
   }
 }
-
-#endif

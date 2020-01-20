@@ -36,9 +36,9 @@
  *
  */
 
-#ifndef PCL_COMMON_CENTROID_H_
-#define PCL_COMMON_CENTROID_H_
+#pragma once
 
+#include <pcl/pcl_macros.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_traits.h>
 #include <pcl/PointIndices.h>
@@ -840,7 +840,7 @@ namespace pcl
   template<typename PointT, typename Scalar>
   struct NdCentroidFunctor
   {
-    typedef typename traits::POD<PointT>::type Pod;
+    using Pod = typename traits::POD<PointT>::type;
 
     NdCentroidFunctor (const PointT &p, Eigen::Matrix<Scalar, Eigen::Dynamic, 1> &centroid)
       : f_idx_ (0),
@@ -849,12 +849,12 @@ namespace pcl
 
     template<typename Key> inline void operator() ()
     {
-      typedef typename pcl::traits::datatype<PointT, Key>::type T;
-      const uint8_t* raw_ptr = reinterpret_cast<const uint8_t*>(&p_) + pcl::traits::offset<PointT, Key>::value;
+      using T = typename pcl::traits::datatype<PointT, Key>::type;
+      const std::uint8_t* raw_ptr = reinterpret_cast<const std::uint8_t*>(&p_) + pcl::traits::offset<PointT, Key>::value;
       const T* data_ptr = reinterpret_cast<const T*>(raw_ptr);
 
       // Check if the value is invalid
-      if (!pcl_isfinite (*data_ptr))
+      if (!std::isfinite (*data_ptr))
       {
         f_idx_++;
         return;
@@ -971,30 +971,14 @@ namespace pcl
     * taking into account the meaning of the data inside fields. Currently the
     * following fields are supported:
     *
-    * - XYZ (\c x, \c y, \c z)
-    *
-    *   Separate average for each field.
-    *
-    * - Normal (\c normal_x, \c normal_y, \c normal_z)
-    *
-    *   Separate average for each field, and the resulting vector is normalized.
-    *
-    * - Curvature (\c curvature)
-    *
-    *   Average.
-    *
-    * - RGB/RGBA (\c rgb or \c rgba)
-    *
-    *   Separate average for R, G, B, and alpha channels.
-    *
-    * - Intensity (\c intensity)
-    *
-    *   Average.
-    *
-    * - Label (\c label)
-    *
-    *   Majority vote. If several labels have the same largest support then the
-    *   smaller label wins.
+    *  Data      | Point fields                          | Algorithm
+    *  --------- | ------------------------------------- | -------------------------------------------------------------------------------------------
+    *  XYZ       | \c x, \c y, \c z                      | Average (separate for each field)
+    *  Normal    | \c normal_x, \c normal_y, \c normal_z | Average (separate for each field), resulting vector is normalized
+    *  Curvature | \c curvature                          | Average
+    *  Color     | \c rgb or \c rgba                     | Average (separate for R, G, B, and alpha channels)
+    *  Intensity | \c intensity                          | Average
+    *  Label     | \c label                              | Majority vote; if several labels have the same largest support then the  smaller label wins
     *
     * The template parameter defines the type of points that may be accumulated
     * with this class. This may be an arbitrary PCL point type, and centroid
@@ -1039,22 +1023,14 @@ namespace pcl
 
     public:
 
-      CentroidPoint ()
-      : num_points_ (0)
-      {
-      }
+      CentroidPoint () = default;
 
       /** Add a new point to the centroid computation.
         *
         * In this function only the accumulators and point counter are updated,
         * actual centroid computation does not happen until get() is called. */
       void
-      add (const PointT& point)
-      {
-        // Invoke add point on each accumulator
-        boost::fusion::for_each (accumulators_, detail::AddPoint<PointT> (point));
-        ++num_points_;
-      }
+      add (const PointT& point);
 
       /** Retrieve the current centroid.
         *
@@ -1066,30 +1042,20 @@ namespace pcl
         * If the number of accumulated points is zero, then the point will be
         * left untouched. */
       template <typename PointOutT> void
-      get (PointOutT& point) const
-      {
-        if (num_points_ != 0)
-        {
-          // Filter accumulators so that only those that are compatible with
-          // both PointT and requested point type remain
-          typename pcl::detail::Accumulators<PointT, PointOutT>::type ca (accumulators_);
-          // Invoke get point on each accumulator in filtered list
-          boost::fusion::for_each (ca, detail::GetPoint<PointOutT> (point, num_points_));
-        }
-      }
+      get (PointOutT& point) const;
 
       /** Get the total number of points that were added. */
-      size_t
+      inline std::size_t
       getSize () const
       {
         return (num_points_);
       }
 
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      PCL_MAKE_ALIGNED_OPERATOR_NEW
 
     private:
 
-      size_t num_points_;
+      std::size_t num_points_ = 0;
       typename pcl::detail::Accumulators<PointT>::type accumulators_;
 
   };
@@ -1110,7 +1076,7 @@ namespace pcl
     * not valid.
     *
     * \ingroup common */
-  template <typename PointInT, typename PointOutT> size_t
+  template <typename PointInT, typename PointOutT> std::size_t
   computeCentroid (const pcl::PointCloud<PointInT>& cloud,
                    PointOutT& centroid);
 
@@ -1122,7 +1088,7 @@ namespace pcl
     * documentation for computeCentroid().
     *
     * \ingroup common */
-  template <typename PointInT, typename PointOutT> size_t
+  template <typename PointInT, typename PointOutT> std::size_t
   computeCentroid (const pcl::PointCloud<PointInT>& cloud,
                    const std::vector<int>& indices,
                    PointOutT& centroid);
@@ -1130,5 +1096,3 @@ namespace pcl
 }
 /*@}*/
 #include <pcl/common/impl/centroid.hpp>
-
-#endif  //#ifndef PCL_COMMON_CENTROID_H_

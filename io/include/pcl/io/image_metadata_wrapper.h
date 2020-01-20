@@ -38,8 +38,6 @@
  */
 
 #pragma once
-#ifndef PCL_IO_IMAGE_METADATA_WRAPPER_H_
-#define PCL_IO_IMAGE_METADATA_WRAPPER_H_
 
 #include <pcl/pcl_config.h>
 #include <pcl/pcl_macros.h>
@@ -55,7 +53,11 @@ namespace pcl
     class FrameWrapper
     {
       public:
-        typedef boost::shared_ptr<FrameWrapper> Ptr;
+        using Ptr = shared_ptr<FrameWrapper>;
+        using ConstPtr = shared_ptr<const FrameWrapper>;
+
+        virtual
+        ~FrameWrapper() = default;
 
         virtual const void*
         getData () const = 0;
@@ -73,11 +75,9 @@ namespace pcl
         getFrameID () const = 0;
 
         // Microseconds from some arbitrary start point
-        virtual pcl::uint64_t
+        virtual std::uint64_t
         getTimestamp () const = 0;
     };
 
   } // namespace
 }
-
-#endif // PCL_IO_IMAGE_METADATA_WRAPPER_H_

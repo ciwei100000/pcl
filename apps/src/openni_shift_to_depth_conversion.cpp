@@ -44,11 +44,12 @@
 
 #include <iostream>
 #include <vector>
-#include <stdio.h>
+#include <cstdio>
 #include <sstream>
-#include <stdlib.h>
+#include <cstdlib>
 #include <iostream>
 #include <string>
+#include <thread>
 
 #include <boost/asio.hpp>
 
@@ -58,14 +59,14 @@ using namespace pcl;
 using namespace pcl::io;
 
 using namespace std;
-
+using namespace std::chrono_literals;
 
 class SimpleOpenNIViewer
 {
   public:
     SimpleOpenNIViewer () :
       viewer_ ("Input Point Cloud - Shift-to-depth conversion viewer"),
-      grabber_(0)
+      grabber_(nullptr)
     {
     }
 
@@ -76,21 +77,21 @@ class SimpleOpenNIViewer
     }
 
     void
-    image_callback (const boost::shared_ptr<openni_wrapper::Image> &image,
-                    const boost::shared_ptr<openni_wrapper::DepthImage> &depth_image, float)
+    image_callback (const openni_wrapper::Image::Ptr &image,
+                    const openni_wrapper::DepthImage::Ptr &depth_image, float)
     {
 
-      vector<uint16_t> raw_shift_data;
-      vector<uint16_t> raw_depth_data;
+      std::vector<std::uint16_t> raw_shift_data;
+      std::vector<std::uint16_t> raw_depth_data;
 
-      vector<uint8_t> rgb_data;
+      std::vector<std::uint8_t> rgb_data;
 
-      uint32_t width=depth_image->getWidth ();
-      uint32_t height=depth_image->getHeight ();
+      std::uint32_t width=depth_image->getWidth ();
+      std::uint32_t height=depth_image->getHeight ();
 
       // copy raw shift data from depth_image
       raw_shift_data.resize(width*height);
-      depth_image->fillDepthImageRaw (width, height, &raw_shift_data[0], static_cast<unsigned int> (width * sizeof (uint16_t)));
+      depth_image->fillDepthImageRaw (width, height, &raw_shift_data[0], static_cast<unsigned int> (width * sizeof (std::uint16_t)));
 
       // convert raw shift data to raw depth data
       raw_depth_data.resize(width*height);
@@ -101,7 +102,7 @@ class SimpleOpenNIViewer
       {
         // copy raw rgb data from image
         rgb_data.resize(width*height*3);
-        image->fillRGB(width, height, &rgb_data[0], static_cast<unsigned int> (width * sizeof (uint8_t) * 3));
+        image->fillRGB(width, height, &rgb_data[0], static_cast<unsigned int> (width * sizeof (std::uint8_t) * 3));
       }
 
       // empty pointcloud
@@ -132,16 +133,19 @@ class SimpleOpenNIViewer
       grabber_->getDevice ()->setDepthOutputFormat (static_cast<openni_wrapper::OpenNIDevice::DepthMode> (depthformat));
 
       // define image callback
-      boost::function<void
-      (const boost::shared_ptr<openni_wrapper::Image>&, const boost::shared_ptr<openni_wrapper::DepthImage>&, float)> image_cb =
-          boost::bind (&SimpleOpenNIViewer::image_callback, this, _1, _2, _3);
+      std::function<void
+      (const openni_wrapper::Image::Ptr&, const openni_wrapper::DepthImage::Ptr&, float)> image_cb =
+          [this] (const openni_wrapper::Image::Ptr& img, const openni_wrapper::DepthImage::Ptr& depth, float f)
+          {
+            image_callback (img, depth, f);
+          };
       boost::signals2::connection image_connection = grabber_->registerCallback (image_cb);
 
       // start grabber thread
       grabber_->start ();
       while (true)
       {
-        boost::this_thread::sleep (boost::posix_time::seconds (1));
+        std::this_thread::sleep_for(1s);
       }
       grabber_->stop ();
 
@@ -151,41 +155,38 @@ protected:
 
   /* helper method to convert depth&rgb data to pointcloud*/
   void
-  convert (std::vector<uint16_t>& depthData_arg,
-           std::vector<uint8_t>& rgbData_arg,
-           size_t width_arg,
-           size_t height_arg,
+  convert (std::vector<std::uint16_t>& depthData_arg,
+           std::vector<std::uint8_t>& rgbData_arg,
+           std::size_t width_arg,
+           std::size_t height_arg,
            float focalLength_arg,
            pcl::PointCloud<PointXYZRGB>& cloud_arg) const
   {
-    size_t i;
-    size_t cloud_size = width_arg * height_arg;
-
-    int x, y, centerX, centerY;
+    std::size_t cloud_size = width_arg * height_arg;
 
     // Reset point cloud
     cloud_arg.points.clear ();
     cloud_arg.points.reserve (cloud_size);
 
     // Define point cloud parameters
-    cloud_arg.width = static_cast<uint32_t> (width_arg);
-    cloud_arg.height = static_cast<uint32_t> (height_arg);
+    cloud_arg.width = static_cast<std::uint32_t> (width_arg);
+    cloud_arg.height = static_cast<std::uint32_t> (height_arg);
     cloud_arg.is_dense = false;
 
     // Calculate center of disparity image
-    centerX = static_cast<int> (width_arg / 2);
-    centerY = static_cast<int> (height_arg / 2);
+    int centerX = static_cast<int> (width_arg / 2);
+    int centerY = static_cast<int> (height_arg / 2);
 
     const float fl_const = 1.0f / focalLength_arg;
     static const float bad_point = std::numeric_limits<float>::quiet_NaN ();
 
-    i = 0;
-    for (y = -centerY; y < +centerY; ++y)
-      for (x = -centerX; x < +centerX; ++x)
+    std::size_t i = 0;
+    for (int y = -centerY; y < +centerY; ++y)
+      for (int x = -centerX; x < +centerX; ++x)
       {
         PointXYZRGB newPoint;
 
-        const uint16_t& pixel_depth = depthData_arg[i];
+        const std::uint16_t& pixel_depth = depthData_arg[i];
 
         if (pixel_depth)
         {
@@ -196,20 +197,16 @@ protected:
           newPoint.x = static_cast<float> (x) * depth * fl_const;
           newPoint.y = static_cast<float> (y) * depth * fl_const;
 
-          const uint8_t& pixel_r = rgbData_arg[i * 3 + 0];
-          const uint8_t& pixel_g = rgbData_arg[i * 3 + 1];
-          const uint8_t& pixel_b = rgbData_arg[i * 3 + 2];
-
           // Define point color
-          uint32_t rgb = (static_cast<uint32_t> (pixel_r) << 16 | static_cast<uint32_t> (pixel_g) << 8
-              | static_cast<uint32_t> (pixel_b));
-          newPoint.rgb = *reinterpret_cast<float*> (&rgb);
+          newPoint.r = rgbData_arg[i * 3 + 0];
+          newPoint.g = rgbData_arg[i * 3 + 1];
+          newPoint.b = rgbData_arg[i * 3 + 2];
         }
         else
         {
           // Define bad point
           newPoint.x = newPoint.y = newPoint.z = bad_point;
-          newPoint.rgb = 0.0f;
+          newPoint.rgba = 0;
         }
 
         // Add point to cloud

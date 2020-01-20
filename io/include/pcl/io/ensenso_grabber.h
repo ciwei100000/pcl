@@ -36,10 +36,9 @@
  *  Author: Victor Lamoine (victor.lamoine@gmail.com)
  */
 
-#include <pcl/pcl_config.h>
+#pragma once
 
-#ifndef __PCL_IO_ENSENSO_GRABBER__
-#define __PCL_IO_ENSENSO_GRABBER__
+#include <pcl/pcl_config.h>
 
 #include <pcl/common/time.h>
 #include <pcl/common/io.h>
@@ -47,13 +46,13 @@
 #include <Eigen/Geometry>
 #include <Eigen/StdVector>
 #include <pcl/io/boost.h>
-#include <boost/thread.hpp>
-#include <boost/lexical_cast.hpp> // TODO: Remove when setExtrinsicCalibration is fixed
 
 #include <pcl/io/grabber.h>
 #include <pcl/common/synchronizer.h>
 
 #include <nxLib.h> // Ensenso SDK
+
+#include <thread>
 
 namespace pcl
 {
@@ -68,23 +67,20 @@ namespace pcl
    */
   class PCL_EXPORTS EnsensoGrabber : public Grabber
   {
-      typedef std::pair<pcl::PCLImage, pcl::PCLImage> PairOfImages;
+      using PairOfImages = std::pair<pcl::PCLImage, pcl::PCLImage>;
 
     public:
       /** @cond */
-      typedef boost::shared_ptr<EnsensoGrabber> Ptr;
-      typedef boost::shared_ptr<const EnsensoGrabber> ConstPtr;
+      using Ptr = shared_ptr<EnsensoGrabber>;
+      using ConstPtr = shared_ptr<const EnsensoGrabber>;
 
       // Define callback signature typedefs
-      typedef void
-      (sig_cb_ensenso_point_cloud) (const pcl::PointCloud<pcl::PointXYZ>::Ptr &);
+      using sig_cb_ensenso_point_cloud = void(const pcl::PointCloud<pcl::PointXYZ>::Ptr&);
 
-      typedef void
-      (sig_cb_ensenso_images) (const boost::shared_ptr<PairOfImages> &);
+      using sig_cb_ensenso_images = void(const shared_ptr<PairOfImages>&);
 
-      typedef void
-      (sig_cb_ensenso_point_cloud_images) (const pcl::PointCloud<pcl::PointXYZ>::Ptr &,
-                                           const boost::shared_ptr<PairOfImages> &);
+      using sig_cb_ensenso_point_cloud_images = void(const pcl::PointCloud<pcl::PointXYZ>::Ptr&,const shared_ptr<PairOfImages>&);
+
      /** @endcond */
 
       /** @brief Constructor */
@@ -429,7 +425,7 @@ namespace pcl
       /** @brief Reference to the NxLib tree root
        * @warning You must handle NxLib exceptions manually when playing with @ref root_ !
        * See ensensoExceptionHandling in ensenso_grabber.cpp */
-      boost::shared_ptr<const NxLibItem> root_;
+      shared_ptr<const NxLibItem> root_;
 
       /** @brief Reference to the camera tree
        *  @warning You must handle NxLib exceptions manually when playing with @ref camera_ ! */
@@ -437,7 +433,7 @@ namespace pcl
 
     protected:
       /** @brief Grabber thread */
-      boost::thread grabber_thread_;
+      std::thread grabber_thread_;
 
       /** @brief Boost point cloud signal */
       boost::signals2::signal<sig_cb_ensenso_point_cloud>* point_cloud_signal_;
@@ -461,14 +457,14 @@ namespace pcl
       pcl::EventFrequency frequency_;
 
       /** @brief Mutual exclusion for FPS computation */
-      mutable boost::mutex fps_mutex_;
+      mutable std::mutex fps_mutex_;
 
       /** @brief Convert an Ensenso time stamp into a PCL/ROS time stamp
        * @param[in] ensenso_stamp
        * @return PCL stamp
        * The Ensenso API returns the time elapsed from January 1st, 1601 (UTC); on Linux OS the reference time is January 1st, 1970 (UTC).
        * See [time-stamp page](http://www.ensenso.de/manual/index.html?json_types.htm) for more info about the time stamp conversion. */
-      pcl::uint64_t
+      std::uint64_t
       static
       getPCLStamp (const double ensenso_stamp);
 
@@ -490,6 +486,3 @@ namespace pcl
       processGrabbing ();
   };
 }  // namespace pcl
-
-#endif // __PCL_IO_ENSENSO_GRABBER__
-

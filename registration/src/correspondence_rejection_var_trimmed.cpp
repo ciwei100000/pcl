@@ -48,7 +48,7 @@ pcl::registration::CorrespondenceRejectorVarTrimmed::getRemainingCorrespondences
   std::vector <double> dists;
   dists.resize (original_correspondences.size ());
 
-  for (size_t i = 0; i < original_correspondences.size (); ++i)
+  for (std::size_t i = 0; i < original_correspondences.size (); ++i)
   {
     if (data_container_)
     {
@@ -66,7 +66,7 @@ pcl::registration::CorrespondenceRejectorVarTrimmed::getRemainingCorrespondences
   unsigned int number_valid_correspondences = 0;
   remaining_correspondences.resize (original_correspondences.size ());
 
-  for (size_t i = 0; i < original_correspondences.size (); ++i)
+  for (std::size_t i = 0; i < original_correspondences.size (); ++i)
   {
     if ( dists[i] < trimmed_distance_)
     {
@@ -84,10 +84,10 @@ pcl::registration::CorrespondenceRejectorVarTrimmed::optimizeInlierRatio (std::v
   unsigned int points_nbr = static_cast<unsigned int> (dists.size ());
   std::sort (dists.begin (), dists.end ());
 
-  const int min_el = int (floor (min_ratio_ * points_nbr));
-  const int max_el = int (floor (max_ratio_ * points_nbr));
+  const int min_el = int (std::floor (min_ratio_ * points_nbr));
+  const int max_el = int (std::floor (max_ratio_ * points_nbr));
 
-  typedef Eigen::Array <double, Eigen::Dynamic, 1> LineArray;
+  using LineArray = Eigen::Array <double, Eigen::Dynamic, 1>;
   Eigen::Map<LineArray> sorted_dist (&dists[0], points_nbr);
 
   const LineArray trunk_sorted_dist = sorted_dist.segment (min_el, max_el-min_el);

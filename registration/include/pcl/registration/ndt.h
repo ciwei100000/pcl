@@ -38,9 +38,9 @@
  *
  */
 
-#ifndef PCL_REGISTRATION_NDT_H_
-#define PCL_REGISTRATION_NDT_H_
+#pragma once
 
+#include <pcl/pcl_macros.h>
 #include <pcl/registration/registration.h>
 #include <pcl/filters/voxel_grid_covariance.h>
 
@@ -64,31 +64,31 @@ namespace pcl
   {
     protected:
 
-      typedef typename Registration<PointSource, PointTarget>::PointCloudSource PointCloudSource;
-      typedef typename PointCloudSource::Ptr PointCloudSourcePtr;
-      typedef typename PointCloudSource::ConstPtr PointCloudSourceConstPtr;
+      using PointCloudSource = typename Registration<PointSource, PointTarget>::PointCloudSource;
+      using PointCloudSourcePtr = typename PointCloudSource::Ptr;
+      using PointCloudSourceConstPtr = typename PointCloudSource::ConstPtr;
 
-      typedef typename Registration<PointSource, PointTarget>::PointCloudTarget PointCloudTarget;
-      typedef typename PointCloudTarget::Ptr PointCloudTargetPtr;
-      typedef typename PointCloudTarget::ConstPtr PointCloudTargetConstPtr;
+      using PointCloudTarget = typename Registration<PointSource, PointTarget>::PointCloudTarget;
+      using PointCloudTargetPtr = typename PointCloudTarget::Ptr;
+      using PointCloudTargetConstPtr = typename PointCloudTarget::ConstPtr;
 
-      typedef PointIndices::Ptr PointIndicesPtr;
-      typedef PointIndices::ConstPtr PointIndicesConstPtr;
+      using PointIndicesPtr = PointIndices::Ptr;
+      using PointIndicesConstPtr = PointIndices::ConstPtr;
 
       /** \brief Typename of searchable voxel grid containing mean and covariance. */
-      typedef VoxelGridCovariance<PointTarget> TargetGrid;
+      using TargetGrid = VoxelGridCovariance<PointTarget>;
       /** \brief Typename of pointer to searchable voxel grid. */
-      typedef TargetGrid* TargetGridPtr;
+      using TargetGridPtr = TargetGrid *;
       /** \brief Typename of const pointer to searchable voxel grid. */
-      typedef const TargetGrid* TargetGridConstPtr;
+      using TargetGridConstPtr = const TargetGrid *;
       /** \brief Typename of const pointer to searchable voxel grid leaf. */
-      typedef typename TargetGrid::LeafConstPtr TargetGridLeafConstPtr;
+      using TargetGridLeafConstPtr = typename TargetGrid::LeafConstPtr;
 
 
     public:
 
-      typedef boost::shared_ptr< NormalDistributionsTransform<PointSource, PointTarget> > Ptr;
-      typedef boost::shared_ptr< const NormalDistributionsTransform<PointSource, PointTarget> > ConstPtr;
+      using Ptr = shared_ptr< NormalDistributionsTransform<PointSource, PointTarget> >;
+      using ConstPtr = shared_ptr< const NormalDistributionsTransform<PointSource, PointTarget> >;
 
 
       /** \brief Constructor.
@@ -97,13 +97,13 @@ namespace pcl
       NormalDistributionsTransform ();
       
       /** \brief Empty destructor */
-      virtual ~NormalDistributionsTransform () {}
+      ~NormalDistributionsTransform () {}
 
       /** \brief Provide a pointer to the input target (e.g., the point cloud that we want to align the input source to).
         * \param[in] cloud the input point cloud target
         */
       inline void
-      setInputTarget (const PointCloudTargetConstPtr &cloud)
+      setInputTarget (const PointCloudTargetConstPtr &cloud) override
       {
         Registration<PointSource, PointTarget>::setInputTarget (cloud);
         init ();
@@ -245,8 +245,8 @@ namespace pcl
         * \param[out] output the resultant input transformed point cloud dataset
         * \param[in] guess the initial gross estimation of the transformation
         */
-      virtual void
-      computeTransformation (PointCloudSource &output, const Eigen::Matrix4f &guess);
+      void
+      computeTransformation (PointCloudSource &output, const Eigen::Matrix4f &guess) override;
 
       /** \brief Initiate covariance voxel structure. */
       void inline
@@ -459,12 +459,8 @@ namespace pcl
       Eigen::Matrix<double, 18, 6> point_hessian_;
 
     public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
+      PCL_MAKE_ALIGNED_OPERATOR_NEW
   };
-
 }
 
 #include <pcl/registration/impl/ndt.hpp>
-
-#endif // PCL_REGISTRATION_NDT_H_

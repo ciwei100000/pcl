@@ -335,6 +335,11 @@ pcl::SACSegmentation<PointT>::initSAC (const int method_type)
     // Set maximum distance for radius search during random sampling
     model_->setSamplesMaxDist (samples_radius_, samples_radius_search_);
   }
+  if (sac_->getNumberOfThreads () != threads_)
+  {
+    PCL_DEBUG ("[pcl::%s::initSAC] Setting the number of threads to %i\n", getClassName ().c_str (), threads_);
+    sac_->setNumberOfThreads (threads_);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -349,7 +354,7 @@ pcl::SACSegmentationFromNormals<PointT, PointNT>::initSACModel (const int model_
   // Check if input is synced with the normals
   if (input_->points.size () != normals_->points.size ())
   {
-    PCL_ERROR ("[pcl::%s::initSACModel] The number of points inthe input point cloud differs than the number of points in the normals!\n", getClassName ().c_str ());
+    PCL_ERROR ("[pcl::%s::initSACModel] The number of points in the input point cloud differs than the number of points in the normals!\n", getClassName ().c_str ());
     return (false);
   }
 

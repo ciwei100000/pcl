@@ -63,7 +63,7 @@ pcl::solvePlaneParameters (const Eigen::Matrix3f &covariance_matrix,
 {
   // Avoid getting hung on Eigen's optimizers
 //  for (int i = 0; i < 9; ++i)
-//    if (!pcl_isfinite (covariance_matrix.coeff (i)))
+//    if (!std::isfinite (covariance_matrix.coeff (i)))
 //    {
 //      //PCL_WARN ("[pcl::solvePlaneParameteres] Covariance matrix has NaN/Inf values!\n");
 //      nx = ny = nz = curvature = std::numeric_limits<float>::quiet_NaN ();
@@ -81,7 +81,7 @@ pcl::solvePlaneParameters (const Eigen::Matrix3f &covariance_matrix,
   // Compute the curvature surface change
   float eig_sum = covariance_matrix.coeff (0) + covariance_matrix.coeff (4) + covariance_matrix.coeff (8);
   if (eig_sum != 0)
-    curvature = fabsf (eigen_value / eig_sum);
+    curvature = std::abs (eigen_value / eig_sum);
   else
     curvature = 0;
 }
@@ -143,10 +143,11 @@ pcl::Feature<PointInT, PointOutT>::initCompute ()
     {
       search_parameter_ = search_radius_;
       // Declare the search locator definition
-      int (KdTree::*radiusSearchSurface)(const PointCloudIn &cloud, int index, double radius,
-                                         std::vector<int> &k_indices, std::vector<float> &k_distances,
-                                         unsigned int max_nn) const = &pcl::search::Search<PointInT>::radiusSearch;
-      search_method_surface_ = boost::bind (radiusSearchSurface, boost::ref (tree_), _1, _2, _3, _4, _5, 0);
+      search_method_surface_ = [this] (const PointCloudIn &cloud, int index, double radius,
+                                       std::vector<int> &k_indices, std::vector<float> &k_distances)
+      {
+        return tree_->radiusSearch (cloud, index, radius, k_indices, k_distances, 0);
+      };
     }
   }
   else
@@ -155,9 +156,11 @@ pcl::Feature<PointInT, PointOutT>::initCompute ()
     {
       search_parameter_ = k_;
       // Declare the search locator definition
-      int (KdTree::*nearestKSearchSurface)(const PointCloudIn &cloud, int index, int k, std::vector<int> &k_indices,
-                                           std::vector<float> &k_distances) const = &KdTree::nearestKSearch;
-      search_method_surface_ = boost::bind (nearestKSearchSurface, boost::ref (tree_), _1, _2, _3, _4, _5);
+      search_method_surface_ = [this] (const PointCloudIn &cloud, int index, int k, std::vector<int> &k_indices,
+                                       std::vector<float> &k_distances)
+      {
+        return tree_->nearestKSearch (cloud, index, k, k_indices, k_distances);
+      };
     }
     else
     {
@@ -206,7 +209,7 @@ pcl::Feature<PointInT, PointOutT>::compute (PointCloudOut &output)
   // If the input width or height are not set, set output width as size
   if (indices_->size () != input_->points.size () || input_->width * input_->height == 0)
   {
-    output.width = static_cast<uint32_t> (indices_->size ());
+    output.width = static_cast<std::uint32_t> (indices_->size ());
     output.height = 1;
   }
   else
@@ -290,7 +293,7 @@ pcl::FeatureFromLabels<PointInT, PointLT, PointOutT>::initCompute ()
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointInT, typename PointRFT> bool
-pcl::FeatureWithLocalReferenceFrames<PointInT, PointRFT>::initLocalReferenceFrames (const size_t& indices_size,
+pcl::FeatureWithLocalReferenceFrames<PointInT, PointRFT>::initLocalReferenceFrames (const std::size_t& indices_size,
                                                                                     const LRFEstimationPtr& lrf_estimation)
 {
   if (frames_never_defined_)

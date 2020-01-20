@@ -46,7 +46,7 @@
 using namespace pcl;
 using namespace std;
 
-typedef search::KdTree<PointXYZ>::Ptr KdTreePtr;
+using KdTreePtr = search::KdTree<PointXYZ>::Ptr;
 PointCloud<PointXYZ> cloud;
 KdTreePtr tree;
 
@@ -86,7 +86,7 @@ TEST(PCL, IntegralImage1D)
       {
         for(unsigned xIdx = 0; xIdx < width - window_width; ++xIdx)
         {
-          //cout << xIdx << " : " << yIdx << " - " << window_width << " x " << window_height << " :: " << integral_image1.getFirstOrderSum (xIdx, yIdx, window_width, window_height) * 2 << endl;
+          //std::cout << xIdx << " : " << yIdx << " - " << window_width << " x " << window_height << " :: " << integral_image1.getFirstOrderSum (xIdx, yIdx, window_width, window_height) * 2 << std::endl;
           EXPECT_EQ (window_height * window_width * (window_width + 2 * xIdx - 1), integral_image1.getFirstOrderSum (xIdx, yIdx, window_width, window_height) * 2);
           EXPECT_EQ (window_height * window_width * (window_width + 2 * xIdx - 1), integral_image2.getFirstOrderSum (xIdx, yIdx, window_width, window_height) * 2);
           EXPECT_EQ (window_height * window_width, integral_image1.getFiniteElementsCount (xIdx, yIdx, window_width, window_height));
@@ -358,11 +358,11 @@ TEST (PCL, NormalEstimation)
   EXPECT_EQ (output.width, cloud.width);
   EXPECT_EQ (output.height, cloud.height);
 
-  for (size_t i = 0; i < cloud.points.size (); ++i)
+  for (std::size_t i = 0; i < cloud.points.size (); ++i)
   {
-    EXPECT_NEAR (fabs (output.points[i].normal_x),   0, 1e-2);
-    EXPECT_NEAR (fabs (output.points[i].normal_y),   0, 1e-2);
-    EXPECT_NEAR (fabs (output.points[i].normal_z), 1.0, 1e-2);
+    EXPECT_NEAR (std::abs (output.points[i].normal_x),   0, 1e-2);
+    EXPECT_NEAR (std::abs (output.points[i].normal_y),   0, 1e-2);
+    EXPECT_NEAR (std::abs (output.points[i].normal_z), 1.0, 1e-2);
   }
 }
 
@@ -378,18 +378,18 @@ TEST (PCL, IINormalEstimationCovariance)
   EXPECT_EQ (output.width, cloud.width);
   EXPECT_EQ (output.height, cloud.height);
 
-  for (size_t v = 0; v < cloud.height; ++v)
+  for (std::size_t v = 0; v < cloud.height; ++v)
   {
-    for (size_t u = 0; u < cloud.width; ++u)
+    for (std::size_t u = 0; u < cloud.width; ++u)
     {
-      if (!pcl_isfinite(output (u, v).normal_x) &&
-          !pcl_isfinite(output (u, v).normal_y) &&
-          !pcl_isfinite(output (u, v).normal_z))
+      if (!std::isfinite(output (u, v).normal_x) &&
+          !std::isfinite(output (u, v).normal_y) &&
+          !std::isfinite(output (u, v).normal_z))
         continue;
 
-      EXPECT_NEAR (fabs (output (u, v).normal_x),   0, 1e-2);
-      EXPECT_NEAR (fabs (output (u, v).normal_y),   0, 1e-2);
-      EXPECT_NEAR (fabs (output (u, v).normal_z), 1.0, 1e-2);
+      EXPECT_NEAR (std::abs (output (u, v).normal_x),   0, 1e-2);
+      EXPECT_NEAR (std::abs (output (u, v).normal_y),   0, 1e-2);
+      EXPECT_NEAR (std::abs (output (u, v).normal_z), 1.0, 1e-2);
     }
   }
 }
@@ -406,22 +406,22 @@ TEST (PCL, IINormalEstimationAverage3DGradient)
   EXPECT_EQ (output.width, cloud.width);
   EXPECT_EQ (output.height, cloud.height);
 
-  for (size_t v = 0; v < cloud.height; ++v)
+  for (std::size_t v = 0; v < cloud.height; ++v)
   {
-    for (size_t u = 0; u < cloud.width; ++u)
+    for (std::size_t u = 0; u < cloud.width; ++u)
     {
-      if (!pcl_isfinite(output (u, v).normal_x) &&
-          !pcl_isfinite(output (u, v).normal_y) &&
-          !pcl_isfinite(output (u, v).normal_z))
+      if (!std::isfinite(output (u, v).normal_x) &&
+          !std::isfinite(output (u, v).normal_y) &&
+          !std::isfinite(output (u, v).normal_z))
         continue;
 
-      if (fabs(fabs (output (u, v).normal_z) - 1) > 1e-2)
+      if (std::abs(fabs (output (u, v).normal_z) - 1) > 1e-2)
       {
         std::cout << "T:" << u << " , " << v << " : " << output (u, v).normal_x << " , " << output (u, v).normal_y << " , " << output (u, v).normal_z <<std::endl;
       }
-      EXPECT_NEAR (fabs (output (u, v).normal_x),   0, 1e-2);
-      EXPECT_NEAR (fabs (output (u, v).normal_y),   0, 1e-2);
-      //EXPECT_NEAR (fabs (output (u, v).normal_z), 1.0, 1e-2);
+      EXPECT_NEAR (std::abs (output (u, v).normal_x),   0, 1e-2);
+      EXPECT_NEAR (std::abs (output (u, v).normal_y),   0, 1e-2);
+      //EXPECT_NEAR (std::abs (output (u, v).normal_z), 1.0, 1e-2);
     }
   }
 }
@@ -438,22 +438,22 @@ TEST (PCL, IINormalEstimationAverageDepthChange)
   EXPECT_EQ (output.width, cloud.width);
   EXPECT_EQ (output.height, cloud.height);
 
-  for (size_t v = 0; v < cloud.height; ++v)
+  for (std::size_t v = 0; v < cloud.height; ++v)
   {
-    for (size_t u = 0; u < cloud.width; ++u)
+    for (std::size_t u = 0; u < cloud.width; ++u)
     {
-      if (!pcl_isfinite(output (u, v).normal_x) &&
-          !pcl_isfinite(output (u, v).normal_y) &&
-          !pcl_isfinite(output (u, v).normal_z))
+      if (!std::isfinite(output (u, v).normal_x) &&
+          !std::isfinite(output (u, v).normal_y) &&
+          !std::isfinite(output (u, v).normal_z))
         continue;
 
-      if (fabs(fabs (output (u, v).normal_z) - 1) > 1e-2)
+      if (std::abs(fabs (output (u, v).normal_z) - 1) > 1e-2)
       {
         std::cout << "T:" << u << " , " << v << " : " << output (u, v).normal_x << " , " << output (u, v).normal_y << " , " << output (u, v).normal_z <<std::endl;
       }
-      EXPECT_NEAR (fabs (output (u, v).normal_x),   0, 1e-2);
-      EXPECT_NEAR (fabs (output (u, v).normal_y),   0, 1e-2);
-      //EXPECT_NEAR (fabs (output (u, v).normal_z), 1.0, 1e-2);
+      EXPECT_NEAR (std::abs (output (u, v).normal_x),   0, 1e-2);
+      EXPECT_NEAR (std::abs (output (u, v).normal_y),   0, 1e-2);
+      //EXPECT_NEAR (std::abs (output (u, v).normal_z), 1.0, 1e-2);
     }
   }
 }
@@ -470,22 +470,22 @@ TEST (PCL, IINormalEstimationSimple3DGradient)
   EXPECT_EQ (output.width, cloud.width);
   EXPECT_EQ (output.height, cloud.height);
 
-  for (size_t v = 0; v < cloud.height; ++v)
+  for (std::size_t v = 0; v < cloud.height; ++v)
   {
-    for (size_t u = 0; u < cloud.width; ++u)
+    for (std::size_t u = 0; u < cloud.width; ++u)
     {
-      if (!pcl_isfinite(output (u, v).normal_x) &&
-          !pcl_isfinite(output (u, v).normal_y) &&
-          !pcl_isfinite(output (u, v).normal_z))
+      if (!std::isfinite(output (u, v).normal_x) &&
+          !std::isfinite(output (u, v).normal_y) &&
+          !std::isfinite(output (u, v).normal_z))
         continue;
 
-      if (fabs(fabs (output (u, v).normal_z) - 1) > 1e-2)
+      if (std::abs(fabs (output (u, v).normal_z) - 1) > 1e-2)
       {
         std::cout << "T:" << u << " , " << v << " : " << output (u, v).normal_x << " , " << output (u, v).normal_y << " , " << output (u, v).normal_z <<std::endl;
       }
-      EXPECT_NEAR (fabs (output (u, v).normal_x),   0, 1e-2);
-      EXPECT_NEAR (fabs (output (u, v).normal_y),   0, 1e-2);
-      //EXPECT_NEAR (fabs (output (u, v).normal_z), 1.0, 1e-2);
+      EXPECT_NEAR (std::abs (output (u, v).normal_x),   0, 1e-2);
+      EXPECT_NEAR (std::abs (output (u, v).normal_y),   0, 1e-2);
+      //EXPECT_NEAR (std::abs (output (u, v).normal_z), 1.0, 1e-2);
     }
   }
 }
@@ -514,9 +514,9 @@ main (int argc, char** argv)
   cloud.height = 480;
   cloud.points.resize (cloud.width * cloud.height);
   cloud.is_dense = true;
-  for (size_t v = 0; v < cloud.height; ++v)
+  for (std::size_t v = 0; v < cloud.height; ++v)
   {
-    for (size_t u = 0; u < cloud.width; ++u)
+    for (std::size_t u = 0; u < cloud.width; ++u)
     {
       cloud (u, v).x = static_cast<float> (u);
       cloud (u, v).y = static_cast<float> (v);

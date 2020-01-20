@@ -36,8 +36,7 @@
  * $Id$
  */
 
-#ifndef PCL_OCTREE_POINTCLOUD_H
-#define PCL_OCTREE_POINTCLOUD_H
+#pragma once
 
 #include <pcl/octree/octree_base.h>
 
@@ -73,39 +72,35 @@ namespace pcl
     class OctreePointCloud : public OctreeT
     {
       public:
-        typedef OctreeT Base;
+        using Base = OctreeT;
 
-        typedef typename OctreeT::LeafNode LeafNode;
-        typedef typename OctreeT::BranchNode BranchNode;
+        using LeafNode = typename OctreeT::LeafNode;
+        using BranchNode = typename OctreeT::BranchNode;
 
         /** \brief Octree pointcloud constructor.
          * \param[in] resolution_arg octree resolution at lowest octree level
          */
         OctreePointCloud (const double resolution_arg);
 
-        /** \brief Empty deconstructor. */
-        virtual
-        ~OctreePointCloud ();
-
         // public typedefs
-        typedef boost::shared_ptr<std::vector<int> > IndicesPtr;
-        typedef boost::shared_ptr<const std::vector<int> > IndicesConstPtr;
+        using IndicesPtr = shared_ptr<std::vector<int> >;
+        using IndicesConstPtr = shared_ptr<const std::vector<int> >;
 
-        typedef pcl::PointCloud<PointT> PointCloud;
-        typedef boost::shared_ptr<PointCloud> PointCloudPtr;
-        typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
+        using PointCloud = pcl::PointCloud<PointT>;
+        using PointCloudPtr = typename PointCloud::Ptr;
+        using PointCloudConstPtr = typename PointCloud::ConstPtr;
 
         // public typedefs for single/double buffering
-        typedef OctreePointCloud<PointT, LeafContainerT, BranchContainerT, OctreeBase<LeafContainerT> > SingleBuffer;
-       // typedef OctreePointCloud<PointT, LeafContainerT, BranchContainerT, Octree2BufBase<LeafContainerT> > DoubleBuffer;
+        using SingleBuffer = OctreePointCloud<PointT, LeafContainerT, BranchContainerT, OctreeBase<LeafContainerT> >;
+       // using DoubleBuffer = OctreePointCloud<PointT, LeafContainerT, BranchContainerT, Octree2BufBase<LeafContainerT> >;
 
         // Boost shared pointers
-        typedef boost::shared_ptr<OctreePointCloud<PointT, LeafContainerT, BranchContainerT, OctreeT> > Ptr;
-        typedef boost::shared_ptr<const OctreePointCloud<PointT, LeafContainerT, BranchContainerT, OctreeT> > ConstPtr;
+        using Ptr = shared_ptr<OctreePointCloud<PointT, LeafContainerT, BranchContainerT, OctreeT> >;
+        using ConstPtr = shared_ptr<const OctreePointCloud<PointT, LeafContainerT, BranchContainerT, OctreeT> >;
 
         // Eigen aligned allocator
-        typedef std::vector<PointT, Eigen::aligned_allocator<PointT> > AlignedPointTVector;
-        typedef std::vector<PointXYZ, Eigen::aligned_allocator<PointXYZ> > AlignedPointXYZVector;
+        using AlignedPointTVector = std::vector<PointT, Eigen::aligned_allocator<PointT> >;
+        using AlignedPointXYZVector = std::vector<PointXYZ, Eigen::aligned_allocator<PointXYZ> >;
 
         /** \brief Provide a pointer to the input data set.
          * \param[in] cloud_arg the const boost shared pointer to a PointCloud message
@@ -371,12 +366,12 @@ namespace pcl
          *  \param maxObjsPerLeaf: maximum number of DataT objects per leaf
          * */
         inline void
-        enableDynamicDepth ( size_t maxObjsPerLeaf )
+        enableDynamicDepth ( std::size_t maxObjsPerLeaf )
         {
           assert(this->leaf_count_==0);
           max_objs_per_leaf_ = maxObjsPerLeaf;
 
-          this->dynamic_depth_enabled_ = static_cast<bool> (max_objs_per_leaf_>0);
+          this->dynamic_depth_enabled_ = max_objs_per_leaf_ > 0;
         }
 
 
@@ -550,6 +545,3 @@ namespace pcl
 #ifdef PCL_NO_PRECOMPILE
 #include <pcl/octree/impl/octree_pointcloud.hpp>
 #endif
-
-#endif
-

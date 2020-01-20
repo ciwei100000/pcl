@@ -100,7 +100,7 @@ few lines of the *run()* method:
 .. code-block:: cpp
 
     pcl::OpenNIGrabber grabber (device_id_);
-    boost::function<void (const CloudConstPtr&)> handler_function = boost::bind (&PCLMobileServer::handleIncomingCloud, this, _1);
+    std::function<void (const CloudConstPtr&)> handler_function = [this] (const CloudConstPtr& cloud) { handleIncomingCloud (cloud); };
     grabber.registerCallback (handler_function);
     grabber.start ();
 
@@ -124,7 +124,7 @@ method:
       PointCloudBuffers::Ptr new_buffers = PointCloudBuffers::Ptr (new PointCloudBuffers);
       CopyPointCloudToBuffers (temp_cloud, *new_buffers);
 
-      boost::mutex::scoped_lock lock (mutex_);
+      std::lock_guard<std::mutex> lock (mutex_);
       filtered_cloud_ = temp_cloud;
       buffers_ = new_buffers;
     }
@@ -138,7 +138,7 @@ socket to the client:
 
     struct PointCloudBuffers
     {
-      typedef boost::shared_ptr<PointCloudBuffers> Ptr;
+      typedef pcl::shared_ptr<PointCloudBuffers> Ptr;
       std::vector<short> points;
       std::vector<unsigned char> rgb;
     };
@@ -164,7 +164,7 @@ that lie outside of the predefined bounding box or contain NaN values.
     void
     CopyPointCloudToBuffers (pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr cloud, PointCloudBuffers& cloud_buffers)
     {
-      const size_t nr_points = cloud->points.size ();
+      const std::size_t nr_points = cloud->points.size ();
 
       cloud_buffers.points.resize (nr_points*3);
       cloud_buffers.rgb.resize (nr_points*3);
@@ -172,8 +172,8 @@ that lie outside of the predefined bounding box or contain NaN values.
       const pcl::PointXYZ  bounds_min (-0.9, -0.8, 1.0);
       const pcl::PointXYZ  bounds_max (0.9, 3.0, 3.3);
 
-      size_t j = 0;
-      for (size_t i = 0; i < nr_points; ++i)
+      std::size_t j = 0;
+      for (std::size_t i = 0; i < nr_points; ++i)
       {
 
         const pcl::PointXYZRGBA& point = cloud->points[i];

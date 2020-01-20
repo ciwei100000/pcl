@@ -36,8 +36,7 @@
  *
  */
 
-#ifndef PCL_FEATURES_GASD_H_
-#define PCL_FEATURES_GASD_H_
+#pragma once
 
 #include <pcl/features/feature.h>
 #include <pcl/common/common.h>
@@ -79,8 +78,8 @@ namespace pcl
     public:
       using typename Feature<PointInT, PointOutT>::PointCloudIn;
       using typename Feature<PointInT, PointOutT>::PointCloudOut;
-      typedef boost::shared_ptr<GASDEstimation<PointInT, PointOutT> > Ptr;
-      typedef boost::shared_ptr<const GASDEstimation<PointInT, PointOutT> > ConstPtr;
+      using Ptr = shared_ptr<GASDEstimation<PointInT, PointOutT> >;
+      using ConstPtr = shared_ptr<const GASDEstimation<PointInT, PointOutT> >;
 
       /** \brief Constructor.
        * \param[in] view_direction view direction
@@ -89,8 +88,8 @@ namespace pcl
        * \param[in] shape_interp shape histograms interpolation method
        */
       GASDEstimation (const Eigen::Vector3f &view_direction = Eigen::Vector3f (0.0f, 0.0f, 1.0f),
-                      const size_t shape_half_grid_size = 4,
-                      const size_t shape_hists_size = 1,
+                      const std::size_t shape_half_grid_size = 4,
+                      const std::size_t shape_hists_size = 1,
                       const HistogramInterpolationMethod shape_interp = INTERP_TRILINEAR) :
           view_direction_ (view_direction),
           shape_half_grid_size_ (shape_half_grid_size),
@@ -115,7 +114,7 @@ namespace pcl
        * \param[in] shgs shape half grid size
        */
       inline void
-      setShapeHalfGridSize (const size_t shgs)
+      setShapeHalfGridSize (const std::size_t shgs)
       {
         shape_half_grid_size_ = shgs;
       }
@@ -126,7 +125,7 @@ namespace pcl
        * \param[in] shs shape histograms size
        */
       inline void
-      setShapeHistsSize (const size_t shs)
+      setShapeHistsSize (const std::size_t shs)
       {
         shape_hists_size_ = shs;
       }
@@ -173,7 +172,7 @@ namespace pcl
       float hist_incr_;
 
       /** \brief Current position of output descriptor point cloud. */
-      size_t pos_;
+      std::size_t pos_;
 
       /** \brief add a sample to its respective histogram, optionally performing interpolation.
        * \param[in] p histogram sample
@@ -187,7 +186,7 @@ namespace pcl
       void
       addSampleToHistograms (const Eigen::Vector4f &p,
                              const float max_coord,
-                             const size_t half_grid_size,
+                             const std::size_t half_grid_size,
                              const HistogramInterpolationMethod interp,
                              const float hbin,
                              const float hist_incr,
@@ -198,7 +197,7 @@ namespace pcl
        * \param[out] output the resultant point cloud model dataset containing the GASD feature
        */
       void
-      computeFeature (PointCloudOut &output);
+      computeFeature (PointCloudOut &output) override;
 
     private:
       /** \brief Transform that aligns the point cloud to the canonical coordinate system. */
@@ -208,10 +207,10 @@ namespace pcl
       Eigen::Vector3f view_direction_;
 
       /** \brief Half size of the regular grid used to compute the shape descriptor. */
-      size_t shape_half_grid_size_;
+      std::size_t shape_half_grid_size_;
 
       /** \brief Size of the histograms of normalized distances between each sample and the cloud centroid. */
-      size_t shape_hists_size_;
+      std::size_t shape_hists_size_;
 
       /** \brief Interpolation method to be used while computing the shape descriptor. */
       HistogramInterpolationMethod shape_interp_;
@@ -228,11 +227,11 @@ namespace pcl
        * \param[in,out] pos current position of output descriptor point cloud
        */
       void
-      copyShapeHistogramsToOutput (const size_t grid_size,
-                                   const size_t hists_size,
+      copyShapeHistogramsToOutput (const std::size_t grid_size,
+                                   const std::size_t hists_size,
                                    const std::vector<Eigen::VectorXf> &hists,
                                    PointCloudOut &output,
-                                   size_t &pos);
+                                   std::size_t &pos);
   };
 
   /** \brief GASDColorEstimation estimates the Globally Aligned Spatial Distribution (GASD) descriptor for a given
@@ -260,8 +259,8 @@ namespace pcl
   {
     public:
       using typename Feature<PointInT, PointOutT>::PointCloudOut;
-      typedef boost::shared_ptr<GASDColorEstimation<PointInT, PointOutT> > Ptr;
-      typedef boost::shared_ptr<const GASDColorEstimation<PointInT, PointOutT> > ConstPtr;
+      using Ptr = shared_ptr<GASDColorEstimation<PointInT, PointOutT> >;
+      using ConstPtr = shared_ptr<const GASDColorEstimation<PointInT, PointOutT> >;
 
       /** \brief Constructor.
        * \param[in] view_direction view direction
@@ -273,10 +272,10 @@ namespace pcl
        * \param[in] color_interp color histograms interpolation method
        */
       GASDColorEstimation (const Eigen::Vector3f &view_direction = Eigen::Vector3f (0.0f, 0.0f, 1.0f),
-                           const size_t shape_half_grid_size = 3,
-                           const size_t shape_hists_size = 1,
-                           const size_t color_half_grid_size = 2,
-                           const size_t color_hists_size = 12,
+                           const std::size_t shape_half_grid_size = 3,
+                           const std::size_t shape_hists_size = 1,
+                           const std::size_t color_half_grid_size = 2,
+                           const std::size_t color_hists_size = 12,
                            const HistogramInterpolationMethod shape_interp = INTERP_NONE,
                            const HistogramInterpolationMethod color_interp = INTERP_NONE) :
           GASDEstimation<PointInT, PointOutT> (view_direction, shape_half_grid_size, shape_hists_size, shape_interp),
@@ -291,7 +290,7 @@ namespace pcl
        * \param[in] chgs color half grid size
        */
       inline void
-      setColorHalfGridSize (const size_t chgs)
+      setColorHalfGridSize (const std::size_t chgs)
       {
         color_half_grid_size_ = chgs;
       }
@@ -300,7 +299,7 @@ namespace pcl
        * \param[in] chs color histograms size
        */
       inline void
-      setColorHistsSize (const size_t chs)
+      setColorHistsSize (const std::size_t chs)
       {
         color_hists_size_ = chs;
       }
@@ -328,10 +327,10 @@ namespace pcl
 
     private:
       /** \brief Half size of the regular grid used to compute the color descriptor. */
-      size_t color_half_grid_size_;
+      std::size_t color_half_grid_size_;
 
       /** \brief Size of the hue histograms. */
-      size_t color_hists_size_;
+      std::size_t color_hists_size_;
 
       /** \brief Interpolation method to be used while computing the color descriptor. */
       HistogramInterpolationMethod color_interp_;
@@ -344,23 +343,21 @@ namespace pcl
        * \param[in,out] pos current position of output descriptor point cloud
        */
       void
-      copyColorHistogramsToOutput (const size_t grid_size,
-                                   const size_t hists_size,
+      copyColorHistogramsToOutput (const std::size_t grid_size,
+                                   const std::size_t hists_size,
                                    std::vector<Eigen::VectorXf> &hists,
                                    PointCloudOut &output,
-                                   size_t &pos);
+                                   std::size_t &pos);
 
       /** \brief Estimate GASD color descriptor
        *
        * \param[out] output the resultant point cloud model dataset containing the GASD color feature
        */
       void
-      computeFeature (PointCloudOut &output);
+      computeFeature (PointCloudOut &output) override;
   };
 }  // namespace pcl
 
 #ifdef PCL_NO_PRECOMPILE
 #include <pcl/features/impl/gasd.hpp>
 #endif
-
-#endif  //#ifndef PCL_FEATURES_GASD_H_

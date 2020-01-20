@@ -50,9 +50,9 @@ using namespace pcl;
 using namespace pcl::io;
 using namespace pcl::console;
 
-typedef PointXYZ PointType;
-typedef PointCloud<PointXYZ> Cloud;
-typedef const Cloud::ConstPtr ConstCloudPtr;
+using PointType = PointXYZ;
+using Cloud = PointCloud<PointXYZ>;
+using ConstCloudPtr = const Cloud::ConstPtr;
 
 float default_radius = 1.0f;
 
@@ -114,15 +114,15 @@ saveCloud (const std::string &filename, const Cloud &output)
 }
 
 int
-batchProcess (const vector<string> &pcd_files, string &output_dir,
+batchProcess (const std::vector<string> &pcd_files, string &output_dir,
               float radius)
 {
-  vector<string> st;
-  for (size_t i = 0; i < pcd_files.size (); ++i)
+  std::vector<string> st;
+  for (const auto &pcd_file : pcd_files)
   {
     // Load the first file
     Cloud::Ptr cloud (new Cloud);
-    if (!loadCloud (pcd_files[i], *cloud)) 
+    if (!loadCloud (pcd_file, *cloud)) 
       return (-1);
 
     // Perform the feature estimation
@@ -130,7 +130,7 @@ batchProcess (const vector<string> &pcd_files, string &output_dir,
     compute (cloud, output, radius);
 
     // Prepare output file name
-    string filename = pcd_files[i];
+    string filename = pcd_file;
     boost::trim (filename);
     boost::split (st, filename, boost::is_any_of ("/\\"), boost::token_compress_on);
     
@@ -199,9 +199,9 @@ main (int argc, char** argv)
   }
   else
   {
-    if (input_dir != "" && boost::filesystem::exists (input_dir))
+    if (!input_dir.empty() && boost::filesystem::exists (input_dir))
     {
-      vector<string> pcd_files;
+      std::vector<string> pcd_files;
       boost::filesystem::directory_iterator end_itr;
       for (boost::filesystem::directory_iterator itr (input_dir); itr != end_itr; ++itr)
       {

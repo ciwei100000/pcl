@@ -37,8 +37,7 @@
  *
  */
 
-#ifndef PCL_REGISTRATION_CORRESPONDENCE_ESTIMATION_BACK_PROJECTION_H_
-#define PCL_REGISTRATION_CORRESPONDENCE_ESTIMATION_BACK_PROJECTION_H_
+#pragma once
 
 #include <pcl/registration/correspondence_types.h>
 #include <pcl/registration/correspondence_estimation.h>
@@ -56,8 +55,8 @@ namespace pcl
     class CorrespondenceEstimationBackProjection : public CorrespondenceEstimationBase <PointSource, PointTarget, Scalar>
     {
       public:
-        typedef boost::shared_ptr<CorrespondenceEstimationBackProjection<PointSource, PointTarget, NormalT, Scalar> > Ptr;
-        typedef boost::shared_ptr<const CorrespondenceEstimationBackProjection<PointSource, PointTarget, NormalT, Scalar> > ConstPtr;
+        using Ptr = shared_ptr<CorrespondenceEstimationBackProjection<PointSource, PointTarget, NormalT, Scalar> >;
+        using ConstPtr = shared_ptr<const CorrespondenceEstimationBackProjection<PointSource, PointTarget, NormalT, Scalar> >;
 
         using CorrespondenceEstimationBase<PointSource, PointTarget, Scalar>::initCompute;
         using CorrespondenceEstimationBase<PointSource, PointTarget, Scalar>::initComputeReciprocal;
@@ -69,20 +68,20 @@ namespace pcl
         using CorrespondenceEstimationBase<PointSource, PointTarget, Scalar>::point_representation_;
         using CorrespondenceEstimationBase<PointSource, PointTarget, Scalar>::target_indices_;
 
-        typedef typename pcl::search::KdTree<PointTarget> KdTree;
-        typedef typename pcl::search::KdTree<PointTarget>::Ptr KdTreePtr;
+        using KdTree = pcl::search::KdTree<PointTarget>;
+        using KdTreePtr = typename KdTree::Ptr;
 
-        typedef pcl::PointCloud<PointSource> PointCloudSource;
-        typedef typename PointCloudSource::Ptr PointCloudSourcePtr;
-        typedef typename PointCloudSource::ConstPtr PointCloudSourceConstPtr;
+        using PointCloudSource = pcl::PointCloud<PointSource>;
+        using PointCloudSourcePtr = typename PointCloudSource::Ptr;
+        using PointCloudSourceConstPtr = typename PointCloudSource::ConstPtr;
 
-        typedef pcl::PointCloud<PointTarget> PointCloudTarget;
-        typedef typename PointCloudTarget::Ptr PointCloudTargetPtr;
-        typedef typename PointCloudTarget::ConstPtr PointCloudTargetConstPtr;
+        using PointCloudTarget = pcl::PointCloud<PointTarget>;
+        using PointCloudTargetPtr = typename PointCloudTarget::Ptr;
+        using PointCloudTargetConstPtr = typename PointCloudTarget::ConstPtr;
 
-        typedef pcl::PointCloud<NormalT> PointCloudNormals;
-        typedef typename PointCloudNormals::Ptr NormalsPtr;
-        typedef typename PointCloudNormals::ConstPtr NormalsConstPtr;
+        using PointCloudNormals = pcl::PointCloud<NormalT>;
+        using NormalsPtr = typename PointCloudNormals::Ptr;
+        using NormalsConstPtr = typename PointCloudNormals::ConstPtr;
 
         /** \brief Empty constructor. 
           *
@@ -188,7 +187,7 @@ namespace pcl
         getKSearch () const { return (k_); }
         
         /** \brief Clone and cast to CorrespondenceEstimationBase */
-        virtual boost::shared_ptr< CorrespondenceEstimationBase<PointSource, PointTarget, Scalar> > 
+        virtual typename CorrespondenceEstimationBase<PointSource, PointTarget, Scalar>::Ptr
         clone () const
         {
           Ptr copy (new CorrespondenceEstimationBackProjection<PointSource, PointTarget, NormalT, Scalar> (*this));
@@ -224,5 +223,3 @@ namespace pcl
 }
 
 #include <pcl/registration/impl/correspondence_estimation_backprojection.hpp>
-
-#endif /* PCL_REGISTRATION_CORRESPONDENCE_ESTIMATION_BACK_PROJECTION_H_ */

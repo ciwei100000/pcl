@@ -44,7 +44,7 @@ pcl::registration::TransformationEstimation2D<PointSource, PointTarget, Scalar>:
     const pcl::PointCloud<PointTarget> &cloud_tgt,
     Matrix4 &transformation_matrix) const
 {
-  size_t nr_points = cloud_src.points.size ();
+  std::size_t nr_points = cloud_src.points.size ();
   if (cloud_tgt.points.size () != nr_points)
   {
     PCL_ERROR ("[pcl::TransformationEstimation2D::estimateRigidTransformation] Number or points in source (%lu) differs than target (%lu)!\n", nr_points, cloud_tgt.points.size ());
@@ -149,12 +149,12 @@ pcl::registration::TransformationEstimation2D<PointSource, PointTarget, Scalar>:
   // Assemble the correlation matrix H = source * target'
   Eigen::Matrix<Scalar, 3, 3> H = (cloud_src_demean * cloud_tgt_demean.transpose ()).topLeftCorner (3, 3);
   
-  float angle = atan2 ((H (0, 1) - H (1, 0)), (H(0, 0) + H (1, 1)));
+  float angle = std::atan2 ((H (0, 1) - H (1, 0)), (H(0, 0) + H (1, 1)));
   
   Eigen::Matrix<Scalar, 3, 3> R (Eigen::Matrix<Scalar, 3, 3>::Identity ());
-  R (0, 0) = R (1, 1) = cos (angle);
-  R (0, 1) = -sin (angle);
-  R (1, 0) = sin (angle);
+  R (0, 0) = R (1, 1) = std::cos (angle);
+  R (0, 1) = -std::sin (angle);
+  R (1, 0) = std::sin (angle);
 
   // Return the correct transformation
   transformation_matrix.topLeftCorner (3, 3).matrix () = R;

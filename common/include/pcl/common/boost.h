@@ -36,8 +36,7 @@
  *
  */
 
-#ifndef PCL_COMMON_BOOST_H_
-#define PCL_COMMON_BOOST_H_
+#pragma once
 
 #ifdef __GNUC__
 #pragma GCC system_header 
@@ -50,13 +49,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/mpl/size.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/function.hpp>
-//#include <boost/timer.hpp>
-#include <boost/thread.hpp>
-#include <boost/thread/condition.hpp>
 #include <boost/signals2.hpp>
 #include <boost/signals2/slot.hpp>
 #include <boost/algorithm/string.hpp>
 #endif
-
-#endif    // PCL_COMMON_BOOST_H_

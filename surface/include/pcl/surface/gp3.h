@@ -37,8 +37,7 @@
  *
  */
 
-#ifndef PCL_GP3_H_
-#define PCL_GP3_H_
+#pragma once
 
 // PCL includes
 #include <pcl/surface/reconstruction.h>
@@ -46,7 +45,6 @@
 
 #include <pcl/conversions.h>
 #include <pcl/kdtree/kdtree.h>
-#include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/PolygonMesh.h>
 
 #include <fstream>
@@ -113,20 +111,16 @@ namespace pcl
     }
     if (intersection_outside_XR)
       return true;
-    else
-    {
-      if (S1[0] > S2[0])
-        return (x <= S2[0]) || (x >= S1[0]);
-      else if (S1[0] < S2[0])
-        return (x >= S2[0]) || (x <= S1[0]);
-      else if (S1[1] > S2[1])
-        return (y <= S2[1]) || (y >= S1[1]);
-      else if (S1[1] < S2[1])                                                                                                                     
-        return (y >= S2[1]) || (y <= S1[1]);
-      else
-        return false;
-    }
-  }  
+    if (S1[0] > S2[0])
+      return (x <= S2[0]) || (x >= S1[0]);
+    if (S1[0] < S2[0])
+      return (x >= S2[0]) || (x <= S1[0]);
+    if (S1[1] > S2[1])
+      return (y <= S2[1]) || (y >= S1[1]);
+    if (S1[1] < S2[1])                                                                                                                     
+      return (y >= S2[1]) || (y <= S1[1]);
+    return false;
+  }
 
   /** \brief GreedyProjectionTriangulation is an implementation of a greedy triangulation algorithm for 3D points
     * based on local 2D projections. It assumes locally smooth surfaces and relatively smooth transitions between
@@ -138,19 +132,19 @@ namespace pcl
   class GreedyProjectionTriangulation : public MeshConstruction<PointInT>
   {
     public:
-      typedef boost::shared_ptr<GreedyProjectionTriangulation<PointInT> > Ptr;
-      typedef boost::shared_ptr<const GreedyProjectionTriangulation<PointInT> > ConstPtr;
+      using Ptr = shared_ptr<GreedyProjectionTriangulation<PointInT> >;
+      using ConstPtr = shared_ptr<const GreedyProjectionTriangulation<PointInT> >;
 
       using MeshConstruction<PointInT>::tree_;
       using MeshConstruction<PointInT>::input_;
       using MeshConstruction<PointInT>::indices_;
 
-      typedef typename pcl::KdTree<PointInT> KdTree;
-      typedef typename pcl::KdTree<PointInT>::Ptr KdTreePtr;
+      using KdTree = pcl::KdTree<PointInT>;
+      using KdTreePtr = typename KdTree::Ptr;
 
-      typedef pcl::PointCloud<PointInT> PointCloudIn;
-      typedef typename PointCloudIn::Ptr PointCloudInPtr;
-      typedef typename PointCloudIn::ConstPtr PointCloudInConstPtr;
+      using PointCloudIn = pcl::PointCloud<PointInT>;
+      using PointCloudInPtr = typename PointCloudIn::Ptr;
+      using PointCloudInConstPtr = typename PointCloudIn::ConstPtr;
 
       enum GP3Type
       { 
@@ -171,16 +165,8 @@ namespace pcl
         eps_angle_(M_PI/4), //45 degrees,
         consistent_(false), 
         consistent_ordering_ (false),
-        triangle_ (),
-        coords_ (),
         angles_ (),
         R_ (),
-        state_ (),
-        source_ (),
-        ffn_ (),
-        sfn_ (),
-        part_ (),
-        fringe_queue_ (),
         is_current_free_ (false),
         current_index_ (),
         prev_is_ffn_ (false),
@@ -190,15 +176,7 @@ namespace pcl
         changed_1st_fn_ (false),
         changed_2nd_fn_ (false),
         new2boundary_ (),
-        already_connected_ (false),
-        proj_qp_ (),
-        u_ (),
-        v_ (),
-        uvn_ffn_ (),
-        uvn_sfn_ (),
-        uvn_next_ffn_ (),
-        uvn_next_sfn_ (),
-        tmp_ ()
+        already_connected_ (false)
       {};
 
       /** \brief Set the multiplier of the nearest neighbor distance to obtain the final search radius for each point
@@ -347,7 +325,7 @@ namespace pcl
       /** \brief Struct for storing the edges starting from a fringe point **/
       struct doubleEdge
       {
-        doubleEdge () : index (0), first (), second () {}
+        doubleEdge () : index (0) {}
         int index;
         Eigen::Vector2f first;
         Eigen::Vector2f second;
@@ -423,13 +401,13 @@ namespace pcl
         * \param[out] output the resultant polygonal mesh
         */
       void 
-      performReconstruction (pcl::PolygonMesh &output);
+      performReconstruction (pcl::PolygonMesh &output) override;
 
       /** \brief The actual surface reconstruction method.
         * \param[out] polygons the resultant polygons, as a set of vertices. The Vertices structure contains an array of point indices.
         */
       void 
-      performReconstruction (std::vector<pcl::Vertices> &polygons);
+      performReconstruction (std::vector<pcl::Vertices> &polygons) override;
 
       /** \brief The actual surface reconstruction method.
         * \param[out] polygons the resultant polygons, as a set of vertices. The Vertices structure contains an array of point indices.
@@ -439,7 +417,7 @@ namespace pcl
 
       /** \brief Class get name method. */
       std::string 
-      getClassName () const { return ("GreedyProjectionTriangulation"); }
+      getClassName () const override { return ("GreedyProjectionTriangulation"); }
 
       /** \brief Forms a new triangle by connecting the current neighbor to the query point 
         * and the previous neighbor
@@ -470,7 +448,7 @@ namespace pcl
       /** \brief Get the list of containing triangles for each vertex in a PolygonMesh
         * \param[in] polygonMesh the input polygon mesh
         */
-      std::vector<std::vector<size_t> >
+      std::vector<std::vector<std::size_t> >
       getTriangleList (const pcl::PolygonMesh &input);
 
       /** \brief Add a new triangle to the current polygon mesh
@@ -533,8 +511,7 @@ namespace pcl
       {
         if (a1.visible == a2.visible)
           return (a1.angle < a2.angle);
-        else
-          return a1.visible;
+        return a1.visible;
       }
   };
 
@@ -543,6 +520,3 @@ namespace pcl
 #ifdef PCL_NO_PRECOMPILE
 #include <pcl/surface/impl/gp3.hpp>
 #endif
-
-#endif  //#ifndef PCL_GP3_H_
-

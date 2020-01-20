@@ -44,8 +44,7 @@
  *      Author: papazov
  */
 
-#ifndef TRIMMED_ICP_H_
-#define TRIMMED_ICP_H_
+#pragma once
 
 #include <pcl/registration/transformation_estimation_svd.h>
 #include <pcl/kdtree/kdtree_flann.h>
@@ -53,6 +52,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/pcl_exports.h>
 #include <limits>
+#include <pcl/recognition/ransac_based/auxiliary.h>
 
 namespace pcl
 {
@@ -62,17 +62,17 @@ namespace pcl
     class PCL_EXPORTS TrimmedICP: public pcl::registration::TransformationEstimationSVD<PointT, PointT, Scalar>
     {
       public:
-        typedef pcl::PointCloud<PointT> PointCloud;
-        typedef typename PointCloud::ConstPtr PointCloudConstPtr;
+        using PointCloud = pcl::PointCloud<PointT>;
+        using PointCloudConstPtr = typename PointCloud::ConstPtr;
 
-        typedef typename Eigen::Matrix<Scalar, 4, 4> Matrix4;
+        using Matrix4 = typename Eigen::Matrix<Scalar, 4, 4>;
 
       public:
         TrimmedICP ()
         : new_to_old_energy_ratio_ (0.99f)
         {}
 
-        virtual ~TrimmedICP ()
+        ~TrimmedICP ()
         {}
 
         /** \brief Call this method before calling align().
@@ -172,7 +172,7 @@ namespace pcl
         static inline bool
         compareCorrespondences (const pcl::Correspondence& a, const pcl::Correspondence& b)
         {
-          return static_cast<bool> (a.distance < b.distance);
+          return a.distance < b.distance;
         }
 
       protected:
@@ -182,6 +182,3 @@ namespace pcl
     };
   } // namespace recognition
 } // namespace pcl
-
-
-#endif /* TRIMMED_ICP_H_ */

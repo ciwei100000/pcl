@@ -5,8 +5,7 @@
  *      Author: aitor
  */
 
-#ifndef REC_FRAMEWORK_CVFH_ESTIMATOR_H_
-#define REC_FRAMEWORK_CVFH_ESTIMATOR_H_
+#pragma once
 
 #include <pcl/apps/3d_rec_framework/feature_wrapper/global/global_estimator.h>
 #include <pcl/apps/3d_rec_framework/feature_wrapper/normal_estimator.h>
@@ -21,7 +20,7 @@ namespace pcl
     class CVFHEstimation : public GlobalEstimator<PointInT, FeatureT>
     {
 
-      typedef typename pcl::PointCloud<PointInT>::Ptr PointInTPtr;
+      using PointInTPtr = typename pcl::PointCloud<PointInT>::Ptr;
       using GlobalEstimator<PointInT, FeatureT>::normal_estimator_;
       using GlobalEstimator<PointInT, FeatureT>::normals_;
       float eps_angle_threshold_;
@@ -53,7 +52,7 @@ namespace pcl
       void
       estimate (PointInTPtr & in, PointInTPtr & processed,
                 typename pcl::PointCloud<FeatureT>::CloudVectorType & signatures,
-                std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> > & centroids)
+                std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> > & centroids) override
       {
 
         if (!normal_estimator_)
@@ -98,7 +97,7 @@ namespace pcl
         /*normals_.reset(new pcl::PointCloud<pcl::Normal>);
         normal_estimator_->estimate (in, processed, normals_);*/
 
-        typedef typename pcl::CVFHEstimation<PointInT, pcl::Normal, FeatureT> CVFHEstimation;
+        using CVFHEstimation = pcl::CVFHEstimation<PointInT, pcl::Normal, FeatureT>;
         pcl::PointCloud<FeatureT> cvfh_signatures;
         typename pcl::search::KdTree<PointInT>::Ptr cvfh_tree (new pcl::search::KdTree<PointInT>);
 
@@ -134,7 +133,7 @@ namespace pcl
 
         cvfh.compute (cvfh_signatures);
 
-        for (size_t i = 0; i < cvfh_signatures.points.size (); i++)
+        for (std::size_t i = 0; i < cvfh_signatures.points.size (); i++)
         {
           pcl::PointCloud<FeatureT> vfh_signature;
           vfh_signature.points.resize (1);
@@ -151,7 +150,7 @@ namespace pcl
       }
 
       bool
-      computedNormals ()
+      computedNormals () override
       {
         return true;
       }
@@ -162,5 +161,3 @@ namespace pcl
     };
   }
 }
-
-#endif /* REC_FRAMEWORK_CVFH_ESTIMATOR_H_ */

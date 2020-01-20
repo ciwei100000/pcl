@@ -36,8 +36,9 @@
  * $Id$
  */
 
-#ifndef PCL_OCTREE_CHANGEDETECTOR_H
-#define PCL_OCTREE_CHANGEDETECTOR_H
+#pragma once
+
+#include <boost/shared_ptr.hpp>
 
 #include <pcl/octree/octree_pointcloud.h>
 #include <pcl/octree/octree2buf_base.h>
@@ -68,17 +69,15 @@ namespace pcl
 
       public:
 
+        using Ptr = shared_ptr<OctreePointCloudChangeDetector<PointT, LeafContainerT, BranchContainerT>>;
+        using ConstPtr = shared_ptr<const OctreePointCloudChangeDetector<PointT, LeafContainerT, BranchContainerT>>;
+
         /** \brief Constructor.
          *  \param resolution_arg:  octree resolution at lowest octree level
          * */
         OctreePointCloudChangeDetector (const double resolution_arg) :
             OctreePointCloud<PointT, LeafContainerT, BranchContainerT,
                 Octree2BufBase<LeafContainerT, BranchContainerT> > (resolution_arg)
-        {
-        }
-
-        /** \brief Empty class constructor. */
-        virtual ~OctreePointCloudChangeDetector ()
         {
         }
 
@@ -94,13 +93,10 @@ namespace pcl
           std::vector<OctreeContainerPointIndices*> leaf_containers;
           this->serializeNewLeafs (leaf_containers);
 
-          std::vector<OctreeContainerPointIndices*>::iterator it;
-          std::vector<OctreeContainerPointIndices*>::const_iterator it_end = leaf_containers.end();
-
-          for (it=leaf_containers.begin(); it!=it_end; ++it)
+          for (const auto &leaf_container : leaf_containers)
           {
-            if (static_cast<int> ((*it)->getSize ()) >= minPointsPerLeaf_arg)
-              (*it)->getPointIndices(indicesVector_arg);
+            if (static_cast<int> (leaf_container->getSize ()) >= minPointsPerLeaf_arg)
+              leaf_container->getPointIndices(indicesVector_arg);
           }
 
           return (indicesVector_arg.size ());
@@ -110,6 +106,3 @@ namespace pcl
 }
 
 #define PCL_INSTANTIATE_OctreePointCloudChangeDetector(T) template class PCL_EXPORTS pcl::octree::OctreePointCloudChangeDetector<T>;
-
-#endif
-

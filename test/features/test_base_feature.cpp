@@ -47,10 +47,10 @@ using namespace pcl;
 using namespace pcl::io;
 using namespace std;
 
-typedef search::KdTree<PointXYZ>::Ptr KdTreePtr;
+using KdTreePtr = search::KdTree<PointXYZ>::Ptr;
 
 PointCloud<PointXYZ> cloud;
-vector<int> indices;
+std::vector<int> indices;
 KdTreePtr tree;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -137,18 +137,18 @@ TEST (PCL, BaseFeature)
   Eigen::Vector4f plane_parameters;
   float curvature;
   solvePlaneParameters (covariance_matrix, centroid3, plane_parameters, curvature);
-  EXPECT_NEAR (fabs (plane_parameters[0]), 0.035592, 1e-4);
-  EXPECT_NEAR (fabs (plane_parameters[1]), 0.369596, 1e-4);
-  EXPECT_NEAR (fabs (plane_parameters[2]), 0.928511, 1e-4);
-  EXPECT_NEAR (fabs (plane_parameters[3]), 0.0622552, 1e-4);
+  EXPECT_NEAR (std::abs (plane_parameters[0]), 0.035592, 1e-4);
+  EXPECT_NEAR (std::abs (plane_parameters[1]), 0.369596, 1e-4);
+  EXPECT_NEAR (std::abs (plane_parameters[2]), 0.928511, 1e-4);
+  EXPECT_NEAR (std::abs (plane_parameters[3]), 0.0622552, 1e-4);
   EXPECT_NEAR (curvature, 0.0693136, 1e-4);
 
   // solvePlaneParameters
   float nx, ny, nz;
   solvePlaneParameters (covariance_matrix, nx, ny, nz, curvature);
-  EXPECT_NEAR (fabs (nx), 0.035592, 1e-4);
-  EXPECT_NEAR (fabs (ny), 0.369596, 1e-4);
-  EXPECT_NEAR (fabs (nz), 0.928511, 1e-4);
+  EXPECT_NEAR (std::abs (nx), 0.035592, 1e-4);
+  EXPECT_NEAR (std::abs (ny), 0.369596, 1e-4);
+  EXPECT_NEAR (std::abs (nz), 0.928511, 1e-4);
   EXPECT_NEAR (curvature, 0.0693136, 1e-4);
 }
 
@@ -169,7 +169,7 @@ main (int argc, char** argv)
   }
 
   indices.resize (cloud.points.size ());
-  for (size_t i = 0; i < indices.size (); ++i)
+  for (std::size_t i = 0; i < indices.size (); ++i)
     indices[i] = static_cast<int> (i);
 
   tree.reset (new search::KdTree<PointXYZ> (false));

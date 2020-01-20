@@ -38,8 +38,7 @@
  *
  */
 
-#ifndef PCL_GEOMETRY_GET_BOUNDARY_H
-#define PCL_GEOMETRY_GET_BOUNDARY_H
+#pragma once
 
 #include <vector>
 
@@ -57,12 +56,12 @@ namespace pcl
     template <class MeshT> void
     getBoundBoundaryHalfEdges (const MeshT&                                   mesh,
                                std::vector <typename MeshT::HalfEdgeIndices>& boundary_he_collection,
-                               const size_t                                   expected_size = 3)
+                               const std::size_t                                   expected_size = 3)
     {
-      typedef MeshT                                            Mesh;
-      typedef typename Mesh::HalfEdgeIndex                     HalfEdgeIndex;
-      typedef typename Mesh::HalfEdgeIndices                   HalfEdgeIndices;
-      typedef typename Mesh::InnerHalfEdgeAroundFaceCirculator IHEAFC;
+      using Mesh = MeshT;
+      using HalfEdgeIndex = typename Mesh::HalfEdgeIndex;
+      using HalfEdgeIndices = typename Mesh::HalfEdgeIndices;
+      using IHEAFC = typename Mesh::InnerHalfEdgeAroundFaceCirculator;
 
       boundary_he_collection.clear ();
 
@@ -91,5 +90,3 @@ namespace pcl
 
   } // End namespace geometry
 } // End namespace pcl
-
-#endif // PCL_GEOMETRY_GET_BOUNDARY_H

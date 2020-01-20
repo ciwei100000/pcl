@@ -97,18 +97,18 @@ pcl::OURCVFHEstimation<PointInT, PointNT, PointOutT>::extractEuclideanClustersSm
   std::vector<int> nn_indices;
   std::vector<float> nn_distances;
   // Process all points in the indices vector
-  for (int i = 0; i < static_cast<int> (cloud.points.size ()); ++i)
+  for (std::size_t i = 0; i < cloud.points.size (); ++i)
   {
     if (processed[i])
       continue;
 
-    std::vector<unsigned int> seed_queue;
-    int sq_idx = 0;
+    std::vector<std::size_t> seed_queue;
+    std::size_t sq_idx = 0;
     seed_queue.push_back (i);
 
     processed[i] = true;
 
-    while (sq_idx < static_cast<int> (seed_queue.size ()))
+    while (sq_idx < seed_queue.size ())
     {
       // Search for sq_idx
       if (!tree->radiusSearch (seed_queue[sq_idx], tolerance, nn_indices, nn_distances))
@@ -117,7 +117,7 @@ pcl::OURCVFHEstimation<PointInT, PointNT, PointOutT>::extractEuclideanClustersSm
         continue;
       }
 
-      for (size_t j = 1; j < nn_indices.size (); ++j) // nn_indices[0] should be sq_idx
+      for (std::size_t j = 1; j < nn_indices.size (); ++j) // nn_indices[0] should be sq_idx
       {
         if (processed[nn_indices[j]]) // Has this point been processed before ?
           continue;
@@ -129,7 +129,7 @@ pcl::OURCVFHEstimation<PointInT, PointNT, PointOutT>::extractEuclideanClustersSm
             + normals.points[seed_queue[sq_idx]].normal[1] * normals.points[nn_indices[j]].normal[1] + normals.points[seed_queue[sq_idx]].normal[2]
             * normals.points[nn_indices[j]].normal[2];
 
-        if (fabs (acos (dot_p)) < eps_angle)
+        if (std::abs (std::acos (dot_p)) < eps_angle)
         {
           processed[nn_indices[j]] = true;
           seed_queue.push_back (nn_indices[j]);
@@ -144,7 +144,7 @@ pcl::OURCVFHEstimation<PointInT, PointNT, PointOutT>::extractEuclideanClustersSm
     {
       pcl::PointIndices r;
       r.indices.resize (seed_queue.size ());
-      for (size_t j = 0; j < seed_queue.size (); ++j)
+      for (std::size_t j = 0; j < seed_queue.size (); ++j)
         r.indices[j] = seed_queue[j];
 
       std::sort (r.indices.begin (), r.indices.end ());
@@ -166,19 +166,19 @@ pcl::OURCVFHEstimation<PointInT, PointNT, PointOutT>::filterNormalsWithHighCurva
   indices_out.resize (cloud.points.size ());
   indices_in.resize (cloud.points.size ());
 
-  size_t in, out;
+  std::size_t in, out;
   in = out = 0;
 
-  for (int i = 0; i < static_cast<int> (indices_to_use.size ()); i++)
+  for (const int &index : indices_to_use)
   {
-    if (cloud.points[indices_to_use[i]].curvature > threshold)
+    if (cloud.points[index].curvature > threshold)
     {
-      indices_out[out] = indices_to_use[i];
+      indices_out[out] = index;
       out++;
     }
     else
     {
-      indices_in[in] = indices_to_use[i];
+      indices_in[in] = index;
       in++;
     }
   }
@@ -206,7 +206,7 @@ pcl::OURCVFHEstimation<PointInT, PointNT, PointOutT>::sgurf (Eigen::Vector3f & c
   Eigen::Affine3f transformPC (Eigen::AngleAxisf (static_cast<float> (rotation), axis));
 
   grid->points.resize (processed->points.size ());
-  for (size_t k = 0; k < processed->points.size (); k++)
+  for (std::size_t k = 0; k < processed->points.size (); k++)
     grid->points[k].getVector4fMap () = processed->points[k].getVector4fMap ();
 
   pcl::transformPointCloud (*grid, *grid, transformPC);
@@ -237,15 +237,14 @@ pcl::OURCVFHEstimation<PointInT, PointNT, PointOutT>::sgurf (Eigen::Vector3f & c
   scatter.setZero ();
   float sum_w = 0.f;
 
-  //for (int k = 0; k < static_cast<intgrid->points[k].getVector3fMap ();> (grid->points.size ()); k++)
-  for (int k = 0; k < static_cast<int> (indices.indices.size ()); k++)
+  for (const int &index : indices.indices)
   {
-    Eigen::Vector3f pvector = grid->points[indices.indices[k]].getVector3fMap ();
+    Eigen::Vector3f pvector = grid->points[index].getVector3fMap ();
     float d_k = (pvector).norm ();
     float w = (max_dist - d_k);
     Eigen::Vector3f diff = (pvector);
     Eigen::Matrix3f mat = diff * diff.transpose ();
-    scatter = scatter + mat * w;
+    scatter += mat * w;
     sum_w += w;
   }
 
@@ -263,9 +262,9 @@ pcl::OURCVFHEstimation<PointInT, PointNT, PointOutT>::sgurf (Eigen::Vector3f & c
   s_xplus = s_xminus = s_yplus = s_yminus = 0.f;
 
   //disambiguate rf using all points
-  for (int k = 0; k < static_cast<int> (grid->points.size ()); k++)
+  for (const auto& point: grid->points)
   {
-    Eigen::Vector3f pvector = grid->points[k].getVector3fMap ();
+    Eigen::Vector3f pvector = point.getVector3fMap ();
     float dist_x, dist_y;
     dist_x = std::abs (evx.dot (pvector));
     dist_y = std::abs (evy.dot (pvector));
@@ -380,7 +379,7 @@ pcl::OURCVFHEstimation<PointInT, PointNT, PointOutT>::computeRFAndShapeDistribut
   cluster_axes_.clear ();
   cluster_axes_.resize (centroids_dominant_orientations_.size ());
 
-  for (size_t i = 0; i < centroids_dominant_orientations_.size (); i++)
+  for (std::size_t i = 0; i < centroids_dominant_orientations_.size (); i++)
   {
 
     std::vector < Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> > transformations;
@@ -390,11 +389,11 @@ pcl::OURCVFHEstimation<PointInT, PointNT, PointOutT>::computeRFAndShapeDistribut
     // Make a note of how many transformations correspond to each cluster
     cluster_axes_[i] = transformations.size ();
     
-    for (size_t t = 0; t < transformations.size (); t++)
+    for (const auto &transformation : transformations)
     {
 
-      pcl::transformPointCloud (*processed, *grid, transformations[t]);
-      transforms_.push_back (transformations[t]);
+      pcl::transformPointCloud (*processed, *grid, transformation);
+      transforms_.push_back (transformation);
       valid_transforms_.push_back (true);
 
       std::vector < Eigen::VectorXf > quadrants (8);
@@ -420,9 +419,9 @@ pcl::OURCVFHEstimation<PointInT, PointNT, PointOutT>::computeRFAndShapeDistribut
       float sigma = 0.01f; //1cm
       float sigma_sq = sigma * sigma;
 
-      for (int k = 0; k < static_cast<int> (grid->points.size ()); k++)
+      for (const auto& point: grid->points)
       {
-        Eigen::Vector4f p = grid->points[k].getVector4fMap ();
+        Eigen::Vector4f p = point.getVector4fMap ();
         p[3] = 0.f;
         float d = p.norm ();
 
@@ -434,65 +433,65 @@ pcl::OURCVFHEstimation<PointInT, PointNT, PointOutT>::computeRFAndShapeDistribut
         //distribute the weights using the x-coordinate
         if (p[0] >= 0)
         {
-          for (size_t ii = 0; ii <= 3; ii++)
+          for (std::size_t ii = 0; ii <= 3; ii++)
             weights[ii] = 0.5f - wx * 0.5f;
 
-          for (size_t ii = 4; ii <= 7; ii++)
+          for (std::size_t ii = 4; ii <= 7; ii++)
             weights[ii] = 0.5f + wx * 0.5f;
         }
         else
         {
-          for (size_t ii = 0; ii <= 3; ii++)
+          for (std::size_t ii = 0; ii <= 3; ii++)
             weights[ii] = 0.5f + wx * 0.5f;
 
-          for (size_t ii = 4; ii <= 7; ii++)
+          for (std::size_t ii = 4; ii <= 7; ii++)
             weights[ii] = 0.5f - wx * 0.5f;
         }
 
         //distribute the weights using the y-coordinate
         if (p[1] >= 0)
         {
-          for (size_t ii = 0; ii <= 1; ii++)
+          for (std::size_t ii = 0; ii <= 1; ii++)
             weights[ii] *= 0.5f - wy * 0.5f;
-          for (size_t ii = 4; ii <= 5; ii++)
+          for (std::size_t ii = 4; ii <= 5; ii++)
             weights[ii] *= 0.5f - wy * 0.5f;
 
-          for (size_t ii = 2; ii <= 3; ii++)
+          for (std::size_t ii = 2; ii <= 3; ii++)
             weights[ii] *= 0.5f + wy * 0.5f;
 
-          for (size_t ii = 6; ii <= 7; ii++)
+          for (std::size_t ii = 6; ii <= 7; ii++)
             weights[ii] *= 0.5f + wy * 0.5f;
         }
         else
         {
-          for (size_t ii = 0; ii <= 1; ii++)
+          for (std::size_t ii = 0; ii <= 1; ii++)
             weights[ii] *= 0.5f + wy * 0.5f;
-          for (size_t ii = 4; ii <= 5; ii++)
+          for (std::size_t ii = 4; ii <= 5; ii++)
             weights[ii] *= 0.5f + wy * 0.5f;
 
-          for (size_t ii = 2; ii <= 3; ii++)
+          for (std::size_t ii = 2; ii <= 3; ii++)
             weights[ii] *= 0.5f - wy * 0.5f;
 
-          for (size_t ii = 6; ii <= 7; ii++)
+          for (std::size_t ii = 6; ii <= 7; ii++)
             weights[ii] *= 0.5f - wy * 0.5f;
         }
 
         //distribute the weights using the z-coordinate
         if (p[2] >= 0)
         {
-          for (size_t ii = 0; ii <= 7; ii += 2)
+          for (std::size_t ii = 0; ii <= 7; ii += 2)
             weights[ii] *= 0.5f - wz * 0.5f;
 
-          for (size_t ii = 1; ii <= 7; ii += 2)
+          for (std::size_t ii = 1; ii <= 7; ii += 2)
             weights[ii] *= 0.5f + wz * 0.5f;
 
         }
         else
         {
-          for (size_t ii = 0; ii <= 7; ii += 2)
+          for (std::size_t ii = 0; ii <= 7; ii += 2)
             weights[ii] *= 0.5f + wz * 0.5f;
 
-          for (size_t ii = 1; ii <= 7; ii += 2)
+          for (std::size_t ii = 1; ii <= 7; ii += 2)
             weights[ii] *= 0.5f - wz * 0.5f;
         }
 
@@ -531,7 +530,7 @@ pcl::OURCVFHEstimation<PointInT, PointNT, PointOutT>::computeRFAndShapeDistribut
     }
   }
 
-  if (ourcvfh_output.points.size ())
+  if (!ourcvfh_output.points.empty ())
   {
     ourcvfh_output.height = 1;
   }
@@ -572,14 +571,14 @@ pcl::OURCVFHEstimation<PointInT, PointNT, PointOutT>::computeFeature (PointCloud
   filterNormalsWithHighCurvature (*normals_, *indices_, indices_out, indices_in, curv_threshold_);
 
   pcl::PointCloud<pcl::PointNormal>::Ptr normals_filtered_cloud (new pcl::PointCloud<pcl::PointNormal> ());
-  normals_filtered_cloud->width = static_cast<uint32_t> (indices_in.size ());
+  normals_filtered_cloud->width = static_cast<std::uint32_t> (indices_in.size ());
   normals_filtered_cloud->height = 1;
   normals_filtered_cloud->points.resize (normals_filtered_cloud->width);
 
   std::vector<int> indices_from_nfc_to_indices;
   indices_from_nfc_to_indices.resize (indices_in.size ());
 
-  for (size_t i = 0; i < indices_in.size (); ++i)
+  for (std::size_t i = 0; i < indices_in.size (); ++i)
   {
     normals_filtered_cloud->points[i].x = surface_->points[indices_in[i]].x;
     normals_filtered_cloud->points[i].y = surface_->points[indices_in[i]].y;
@@ -611,7 +610,7 @@ pcl::OURCVFHEstimation<PointInT, PointNT, PointOutT>::computeFeature (PointCloud
 
     std::vector<pcl::PointIndices> clusters_filtered;
     int cluster_filtered_idx = 0;
-    for (size_t i = 0; i < clusters.size (); i++)
+    for (const auto &cluster : clusters)
     {
 
       pcl::PointIndices pi;
@@ -624,32 +623,32 @@ pcl::OURCVFHEstimation<PointInT, PointNT, PointOutT>::computeFeature (PointCloud
       Eigen::Vector4f avg_normal = Eigen::Vector4f::Zero ();
       Eigen::Vector4f avg_centroid = Eigen::Vector4f::Zero ();
 
-      for (size_t j = 0; j < clusters[i].indices.size (); j++)
+      for (const auto &index : cluster.indices)
       {
-        avg_normal += normals_filtered_cloud->points[clusters[i].indices[j]].getNormalVector4fMap ();
-        avg_centroid += normals_filtered_cloud->points[clusters[i].indices[j]].getVector4fMap ();
+        avg_normal += normals_filtered_cloud->points[index].getNormalVector4fMap ();
+        avg_centroid += normals_filtered_cloud->points[index].getVector4fMap ();
       }
 
-      avg_normal /= static_cast<float> (clusters[i].indices.size ());
-      avg_centroid /= static_cast<float> (clusters[i].indices.size ());
+      avg_normal /= static_cast<float> (cluster.indices.size ());
+      avg_centroid /= static_cast<float> (cluster.indices.size ());
       avg_normal.normalize ();
 
       Eigen::Vector3f avg_norm (avg_normal[0], avg_normal[1], avg_normal[2]);
       Eigen::Vector3f avg_dominant_centroid (avg_centroid[0], avg_centroid[1], avg_centroid[2]);
 
-      for (size_t j = 0; j < clusters[i].indices.size (); j++)
+      for (const auto &index : cluster.indices)
       {
         //decide if normal should be added
-        double dot_p = avg_normal.dot (normals_filtered_cloud->points[clusters[i].indices[j]].getNormalVector4fMap ());
-        if (fabs (acos (dot_p)) < (eps_angle_threshold_ * refine_clusters_))
+        double dot_p = avg_normal.dot (normals_filtered_cloud->points[index].getNormalVector4fMap ());
+        if (std::abs (std::acos (dot_p)) < (eps_angle_threshold_ * refine_clusters_))
         {
-          clusters_[cluster_filtered_idx].indices.push_back (indices_from_nfc_to_indices[clusters[i].indices[j]]);
-          clusters_filtered[cluster_filtered_idx].indices.push_back (clusters[i].indices[j]);
+          clusters_[cluster_filtered_idx].indices.push_back (indices_from_nfc_to_indices[index]);
+          clusters_filtered[cluster_filtered_idx].indices.push_back (index);
         }
       }
 
       //remove last cluster if no points found...
-      if (clusters_[cluster_filtered_idx].indices.size () == 0)
+      if (clusters_[cluster_filtered_idx].indices.empty ())
       {
         clusters_.pop_back ();
         clusters_filtered.pop_back ();
@@ -673,38 +672,33 @@ pcl::OURCVFHEstimation<PointInT, PointNT, PointOutT>::computeFeature (PointCloud
   output.height = 1;
 
   // ---[ Step 1b : check if any dominant cluster was found
-  if (clusters.size () > 0)
+  if (!clusters.empty ())
   { // ---[ Step 1b.1 : If yes, compute CVFH using the cluster information
-
-    for (size_t i = 0; i < clusters.size (); ++i) //for each cluster
-
+    for (const auto &cluster : clusters) //for each cluster
     {
       Eigen::Vector4f avg_normal = Eigen::Vector4f::Zero ();
       Eigen::Vector4f avg_centroid = Eigen::Vector4f::Zero ();
 
-      for (size_t j = 0; j < clusters[i].indices.size (); j++)
+      for (const auto &index : cluster.indices)
       {
-        avg_normal += normals_filtered_cloud->points[clusters[i].indices[j]].getNormalVector4fMap ();
-        avg_centroid += normals_filtered_cloud->points[clusters[i].indices[j]].getVector4fMap ();
+        avg_normal += normals_filtered_cloud->points[index].getNormalVector4fMap ();
+        avg_centroid += normals_filtered_cloud->points[index].getVector4fMap ();
       }
 
-      avg_normal /= static_cast<float> (clusters[i].indices.size ());
-      avg_centroid /= static_cast<float> (clusters[i].indices.size ());
+      avg_normal /= static_cast<float> (cluster.indices.size ());
+      avg_centroid /= static_cast<float> (cluster.indices.size ());
       avg_normal.normalize ();
 
-      Eigen::Vector3f avg_norm (avg_normal[0], avg_normal[1], avg_normal[2]);
-      Eigen::Vector3f avg_dominant_centroid (avg_centroid[0], avg_centroid[1], avg_centroid[2]);
-
       //append normal and centroid for the clusters
-      dominant_normals_.push_back (avg_norm);
-      centroids_dominant_orientations_.push_back (avg_dominant_centroid);
+      dominant_normals_.emplace_back (avg_normal[0], avg_normal[1], avg_normal[2]);
+      centroids_dominant_orientations_.emplace_back (avg_centroid[0], avg_centroid[1], avg_centroid[2]);
     }
 
     //compute modified VFH for all dominant clusters and add them to the list!
     output.points.resize (dominant_normals_.size ());
-    output.width = static_cast<uint32_t> (dominant_normals_.size ());
+    output.width = static_cast<std::uint32_t> (dominant_normals_.size ());
 
-    for (size_t i = 0; i < dominant_normals_.size (); ++i)
+    for (std::size_t i = 0; i < dominant_normals_.size (); ++i)
     {
       //configure VFH computation for CVFH
       vfh.setNormalToUse (dominant_normals_[i]);

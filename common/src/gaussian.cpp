@@ -50,10 +50,10 @@ pcl::GaussianKernel::compute (float sigma,
   const int hw = kernel_width / 2;
   float sigma_sqr = 1.0f / (2.0f * sigma * sigma);
   for (int i = -hw, j = 0, k = kernel_width - 1; i < 0 ; i++, j++, k--)
-    kernel[k] = kernel[j] = expf (-static_cast<float>(i) * static_cast<float>(i) * sigma_sqr);
+    kernel[k] = kernel[j] = std::exp (-static_cast<float>(i) * static_cast<float>(i) * sigma_sqr);
   kernel[hw] = 1;
   unsigned g_width = kernel_width;
-  for (unsigned i = 0; fabs (kernel[i]/max_gauss) < factor; i++, g_width-= 2) ;
+  for (unsigned i = 0; std::fabs (kernel[i]/max_gauss) < factor; i++, g_width-= 2) ;
   if (g_width == kernel_width)
   { 
     PCL_THROW_EXCEPTION (pcl::KernelWidthTooSmallException,
@@ -83,13 +83,13 @@ pcl::GaussianKernel::compute (float sigma,
   kernel.resize (kernel_width);
   derivative.resize (kernel_width);
   const float factor = 0.01f;
-  float max_gauss = 1.0f, max_deriv = float (sigma * exp (-0.5));
+  float max_gauss = 1.0f, max_deriv = float (sigma * std::exp (-0.5));
   int hw = kernel_width / 2;
 
   float sigma_sqr = 1.0f / (2.0f * sigma * sigma);
   for (int i = -hw, j = 0, k = kernel_width - 1; i < 0 ; i++, j++, k--)
   {
-    kernel[k] = kernel[j] = expf (-static_cast<float>(i) * static_cast<float>(i) * sigma_sqr);
+    kernel[k] = kernel[j] = std::exp (-static_cast<float>(i) * static_cast<float>(i) * sigma_sqr);
     derivative[j] = -static_cast<float>(i) * kernel[j];
     derivative[k] = -derivative[j];
   }
@@ -98,8 +98,8 @@ pcl::GaussianKernel::compute (float sigma,
   // Compute kernel and derivative true width
   unsigned g_width = kernel_width;
   unsigned d_width = kernel_width;
-  for (unsigned i = 0; fabs (derivative[i]/max_deriv) < factor; i++, d_width-= 2) ;
-  for (unsigned i = 0; fabs (kernel[i]/max_gauss) < factor; i++, g_width-= 2) ;
+  for (unsigned i = 0; std::fabs (derivative[i]/max_deriv) < factor; i++, d_width-= 2) ;
+  for (unsigned i = 0; std::fabs (kernel[i]/max_gauss) < factor; i++, g_width-= 2) ;
   if (g_width == kernel_width || d_width == kernel_width)
   { 
     PCL_THROW_EXCEPTION (KernelWidthTooSmallException,
@@ -136,8 +136,8 @@ pcl::GaussianKernel::convolveRows (const pcl::PointCloud<float>& input,
                                    pcl::PointCloud<float>& output) const
 {
   assert (kernel.size () % 2 == 1);
-  size_t kernel_width = kernel.size () -1;
-  size_t radius = kernel.size () / 2;
+  std::size_t kernel_width = kernel.size () -1;
+  std::size_t radius = kernel.size () / 2;
   const pcl::PointCloud<float>* input_;
   if (&input != &output)
   {
@@ -152,8 +152,8 @@ pcl::GaussianKernel::convolveRows (const pcl::PointCloud<float>& input,
   else
     input_ = new pcl::PointCloud<float>(input);
   
-  size_t i;
-  for (size_t j = 0; j < input_->height; j++)
+  std::size_t i;
+  for (std::size_t j = 0; j < input_->height; j++)
   {
     for (i = 0 ; i < radius ; i++)
       output (i,j) = 0;
@@ -181,8 +181,8 @@ pcl::GaussianKernel::convolveCols (const pcl::PointCloud<float>& input,
                                    pcl::PointCloud<float>& output) const
 {
   assert (kernel.size () % 2 == 1);
-  size_t kernel_width = kernel.size () -1;
-  size_t radius = kernel.size () / 2;
+  std::size_t kernel_width = kernel.size () -1;
+  std::size_t radius = kernel.size () / 2;
   const pcl::PointCloud<float>* input_;
   if (&input != &output)
   {
@@ -197,8 +197,8 @@ pcl::GaussianKernel::convolveCols (const pcl::PointCloud<float>& input,
   else
     input_ = new pcl::PointCloud<float> (input);
 
-  size_t j;
-  for (size_t i = 0; i < input_->width; i++)
+  std::size_t j;
+  for (std::size_t i = 0; i < input_->width; i++)
   {
     for (j = 0 ; j < radius ; j++)
       output (i,j) = 0;

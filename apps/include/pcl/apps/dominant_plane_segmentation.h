@@ -33,8 +33,7 @@
  *
  */
 
-#ifndef DOMINANT_PLANE_SEGMENTATION_H_
-#define DOMINANT_PLANE_SEGMENTATION_H_
+#pragma once
 
 #include <pcl/common/common.h>
 #include <pcl/point_cloud.h>
@@ -66,10 +65,10 @@ namespace pcl
       class PCL_EXPORTS DominantPlaneSegmentation
       {
       public:
-        typedef pcl::PointCloud<PointType> Cloud;
-        typedef typename Cloud::Ptr CloudPtr;
-        typedef typename Cloud::ConstPtr CloudConstPtr;
-        typedef typename pcl::search::KdTree<PointType>::Ptr KdTreePtr;
+        using Cloud = pcl::PointCloud<PointType>;
+        using CloudPtr = typename Cloud::Ptr;
+        using CloudConstPtr = typename Cloud::ConstPtr;
+        using KdTreePtr = typename pcl::search::KdTree<PointType>::Ptr;
 
         DominantPlaneSegmentation ()
         {
@@ -228,17 +227,14 @@ namespace pcl
         {
           if (p1.intensity == 0) //new label
             return 1;
-          else
+          //compute distance and check against max_dist
+          if ((p1.getVector3fMap () - p2.getVector3fMap ()).norm () <= max_dist)
           {
-            //compute distance and check against max_dist
-            if ((p1.getVector3fMap () - p2.getVector3fMap ()).norm () <= max_dist)
-            {
-              p2.intensity = p1.intensity;
-              return 0;
-            }
-            else //new label
-              return 1;
+            p2.intensity = p1.intensity;
+            return 0;
           }
+          //new label
+          return 1;
         }
 
         //components needed for cluster segmentation and plane extraction
@@ -286,5 +282,3 @@ namespace pcl
 #ifdef PCL_NO_PRECOMPILE
 #include <pcl/apps/impl/dominant_plane_segmentation.hpp>
 #endif
-
-#endif /* DOMINANT_PLANE_SEGMENTATION_H_ */

@@ -34,14 +34,11 @@
  *
  */
 
-#ifndef PCL_MODELER_MAIN_WINDOW_H_
-#define PCL_MODELER_MAIN_WINDOW_H_
-
-#include <pcl/apps/modeler/qt.h>
-#include <boost/shared_ptr.hpp>
+#pragma once
 
 #include <ui_main_window.h>
 
+#include <memory>
 
 namespace pcl
 {
@@ -104,7 +101,7 @@ namespace pcl
         bool 
         openProjectImpl(const QString& filename);
         static void 
-        updateRecentActions(std::vector<boost::shared_ptr<QAction> >& recent_actions, QStringList& recent_items);
+        updateRecentActions(std::vector<std::shared_ptr<QAction>>& recent_actions, QStringList& recent_items);
 
         // methods for view menu
         void 
@@ -130,8 +127,8 @@ namespace pcl
         friend class AbstractItem;
 
         MainWindow();
-        MainWindow(const MainWindow &) : QMainWindow () {}            // copy ctor hidden
-        MainWindow& operator=(const MainWindow &) { return (*this); } // assign op. hidden
+        MainWindow(const MainWindow &) = delete;
+        MainWindow& operator=(const MainWindow &) = delete;
         ~MainWindow();
 
         Ui::MainWindow                    *ui_; // Designer form
@@ -139,11 +136,9 @@ namespace pcl
         // shortcuts for recent point clouds/projects
         QStringList                       recent_files_;
         QStringList                       recent_projects_;
-        static const size_t               MAX_RECENT_NUMBER = 8;
-        std::vector<boost::shared_ptr<QAction> >  recent_pointcloud_actions_;
-        std::vector<boost::shared_ptr<QAction> >  recent_project_actions_;
+        static const std::size_t               MAX_RECENT_NUMBER = 8;
+        std::vector<std::shared_ptr<QAction>>  recent_pointcloud_actions_;
+        std::vector<std::shared_ptr<QAction>>  recent_project_actions_;
     };
   }
 }
-
-#endif // PCL_MODELER_MAIN_WINDOW_H_

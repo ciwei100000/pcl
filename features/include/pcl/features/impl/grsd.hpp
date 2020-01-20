@@ -50,14 +50,13 @@ pcl::GRSDEstimation<PointInT, PointNT, PointOutT>::getSimpleType (float min_radi
 {
   if (min_radius > min_radius_plane)
     return (1); // plane
-  else if (max_radius > min_radius_cylinder)
+  if (max_radius > min_radius_cylinder)
     return (2); // cylinder (rim)
-  else if (min_radius < max_radius_noise)
+  if (min_radius < max_radius_noise)
     return (0); // noise/corner
-  else if (max_radius - min_radius < max_min_radius_diff)
+  if (max_radius - min_radius < max_min_radius_diff)
     return (3); // sphere/corner
-  else
-    return (4); // edge
+  return (4);   // edge
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -89,26 +88,26 @@ pcl::GRSDEstimation<PointInT, PointNT, PointOutT>::computeFeature (PointCloudOut
   rsd.setInputNormals (normals_);
   rsd.setRadiusSearch (std::max (search_radius_, std::sqrt (3.0) * width_ / 2));
   rsd.compute (*radii);
-  
+
   // Save the type of each point
   int NR_CLASS = 5; // TODO make this nicer
   std::vector<int> types (radii->points.size ());
-  for (size_t idx = 0; idx < radii->points.size (); ++idx)
+  for (std::size_t idx = 0; idx < radii->points.size (); ++idx)
     types[idx] = getSimpleType (radii->points[idx].r_min, radii->points[idx].r_max);
 
   // Get the transitions between surface types between neighbors of occupied cells
   Eigen::MatrixXi transition_matrix = Eigen::MatrixXi::Zero (NR_CLASS + 1, NR_CLASS + 1);
-  for (size_t idx = 0; idx < cloud_downsampled->points.size (); ++idx)
+  for (std::size_t idx = 0; idx < cloud_downsampled->points.size (); ++idx)
   {
     int source_type = types[idx];
     std::vector<int> neighbors = grid.getNeighborCentroidIndices (cloud_downsampled->points[idx], relative_coordinates_all_);
-    for (unsigned id_n = 0; id_n < neighbors.size (); id_n++)
+    for (const int &neighbor : neighbors)
     {
       int neighbor_type;
-      if (neighbors[id_n] == -1) // empty
+      if (neighbor == -1) // empty
         neighbor_type = NR_CLASS;
       else
-        neighbor_type = types[neighbors[id_n]];
+        neighbor_type = types[neighbor];
       transition_matrix (source_type, neighbor_type)++;
     }
   }

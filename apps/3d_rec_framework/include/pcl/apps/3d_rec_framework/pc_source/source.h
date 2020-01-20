@@ -5,8 +5,7 @@
  *      Author: aitor
  */
 
-#ifndef REC_FRAMEWORK_VIEWS_SOURCE_H_
-#define REC_FRAMEWORK_VIEWS_SOURCE_H_
+#pragma once
 
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
@@ -30,13 +29,13 @@ namespace pcl
     template<typename PointT>
       class Model
       {
-        typedef typename pcl::PointCloud<PointT>::Ptr PointTPtr;
-        typedef typename pcl::PointCloud<PointT>::ConstPtr PointTPtrConst;
+        using PointTPtr = typename pcl::PointCloud<PointT>::Ptr;
+        using PointTPtrConst = typename pcl::PointCloud<PointT>::ConstPtr;
 
       public:
-        boost::shared_ptr<std::vector<PointTPtr> > views_;
-        boost::shared_ptr<std::vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> > > poses_;
-        boost::shared_ptr<std::vector<float> > self_occlusions_;
+        std::shared_ptr<std::vector<PointTPtr>> views_;
+        std::shared_ptr<std::vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f>>> poses_;
+        std::shared_ptr<std::vector<float>> self_occlusions_;
         std::string id_;
         std::string class_;
         PointTPtr assembled_;
@@ -83,15 +82,15 @@ namespace pcl
     {
 
     protected:
-      typedef Model<PointInT> ModelT;
+      using ModelT = Model<PointInT>;
       std::string path_;
-      boost::shared_ptr<std::vector<ModelT> > models_;
+      std::shared_ptr<std::vector<ModelT>> models_;
       float model_scale_;
       bool filter_duplicate_views_;
       bool load_views_;
 
       void
-      getIdAndClassFromFilename (std::string & filename, std::string & id, std::string & classname)
+      getIdAndClassFromFilename (const std::string & filename, std::string & id, std::string & classname)
       {
 
         std::vector < std::string > strs;
@@ -126,9 +125,9 @@ namespace pcl
 
         std::stringstream ss;
         ss << training_dir << "/";
-        for (size_t i = 0; i < strs.size (); i++)
+        for (const auto &str : strs)
         {
-          ss << strs[i] << "/";
+          ss << str << "/";
           bf::path trained_dir = ss.str ();
           if (!bf::exists (trained_dir))
           bf::create_directory (trained_dir);
@@ -145,6 +144,9 @@ namespace pcl
       Source() {
         load_views_ = true;
       }
+
+      virtual
+      ~Source() = default;
 
       float
       getScale ()
@@ -166,41 +168,28 @@ namespace pcl
       void
       getModelsInDirectory (bf::path & dir, std::string & rel_path_so_far, std::vector<std::string> & relative_paths, std::string & ext)
       {
-        bf::directory_iterator end_itr;
-        for (bf::directory_iterator itr (dir); itr != end_itr; ++itr)
+        for (const auto& dir_entry : bf::directory_iterator(dir))
         {
           //check if its a directory, then get models in it
-          if (bf::is_directory (*itr))
+          if (bf::is_directory (dir_entry))
           {
-#if BOOST_FILESYSTEM_VERSION == 3
-            std::string so_far = rel_path_so_far + (itr->path ().filename ()).string() + "/";
-#else
-            std::string so_far = rel_path_so_far + (itr->path ()).filename () + "/";
-#endif
+            std::string so_far = rel_path_so_far + (dir_entry.path ().filename ()).string() + "/";
 
-            bf::path curr_path = itr->path ();
+            bf::path curr_path = dir_entry.path ();
             getModelsInDirectory (curr_path, so_far, relative_paths, ext);
           }
           else
           {
             //check that it is a ply file and then add, otherwise ignore..
             std::vector < std::string > strs;
-#if BOOST_FILESYSTEM_VERSION == 3
-            std::string file = (itr->path ().filename ()).string();
-#else
-            std::string file = (itr->path ()).filename ();
-#endif
+            std::string file = (dir_entry.path ().filename ()).string();
 
             boost::split (strs, file, boost::is_any_of ("."));
             std::string extension = strs[strs.size () - 1];
 
-            if (extension.compare (ext) == 0)
+            if (extension == ext)
             {
-#if BOOST_FILESYSTEM_VERSION == 3
-              std::string path = rel_path_so_far + (itr->path ().filename ()).string();
-#else
-              std::string path = rel_path_so_far + (itr->path ()).filename ();
-#endif
+              std::string path = rel_path_so_far + (dir_entry.path ().filename ()).string();
 
               relative_paths.push_back (path);
             }
@@ -211,7 +200,7 @@ namespace pcl
       void
       voxelizeAllModels (float resolution)
       {
-        for (size_t i = 0; i < models_->size (); i++)
+        for (std::size_t i = 0; i < models_->size (); i++)
         {
           models_->at (i).getAssembled (resolution);
         }
@@ -226,20 +215,20 @@ namespace pcl
       /**
        * \brief Get the generated model
        */
-      boost::shared_ptr<std::vector<ModelT> >
+      std::shared_ptr<std::vector<ModelT>>
       getModels ()
       {
         return models_;
       }
 
-      boost::shared_ptr<std::vector<ModelT> >
+      std::shared_ptr<std::vector<ModelT>>
       getModels (std::string & model_id)
       {
 
         typename std::vector<ModelT>::iterator it = models_->begin ();
         while (it != models_->end ())
         {
-          if (model_id.compare ((*it).id_) != 0)
+          if (model_id != (*it).id_)
           {
             it = models_->erase (it);
           }
@@ -259,12 +248,7 @@ namespace pcl
         dir << base_dir << "/" << m.class_ << "/" << m.id_ << "/" << descr_name;
         bf::path desc_dir = dir.str ();
         std::cout << dir.str () << std::endl;
-        if (bf::exists (desc_dir))
-        {
-          return true;
-        }
-
-        return false;
+        return bf::exists (desc_dir);
       }
 
       std::string
@@ -297,5 +281,3 @@ namespace pcl
     };
   }
 }
-
-#endif /* REC_FRAMEWORK_VIEWS_SOURCE_H_ */

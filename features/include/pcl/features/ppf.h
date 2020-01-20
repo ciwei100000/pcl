@@ -36,8 +36,7 @@
  *
  */
 
-#ifndef PCL_PPF_H_
-#define PCL_PPF_H_
+#pragma once
 
 #include <pcl/features/feature.h>
 #include <pcl/features/boost.h>
@@ -77,15 +76,15 @@ namespace pcl
   class PPFEstimation : public FeatureFromNormals<PointInT, PointNT, PointOutT>
   {
     public:
-      typedef boost::shared_ptr<PPFEstimation<PointInT, PointNT, PointOutT> > Ptr;
-      typedef boost::shared_ptr<const PPFEstimation<PointInT, PointNT, PointOutT> > ConstPtr;
+      using Ptr = shared_ptr<PPFEstimation<PointInT, PointNT, PointOutT> >;
+      using ConstPtr = shared_ptr<const PPFEstimation<PointInT, PointNT, PointOutT> >;
       using PCLBase<PointInT>::indices_;
       using Feature<PointInT, PointOutT>::input_;
       using Feature<PointInT, PointOutT>::feature_name_;
       using Feature<PointInT, PointOutT>::getClassName;
       using FeatureFromNormals<PointInT, PointNT, PointOutT>::normals_;
 
-      typedef pcl::PointCloud<PointOutT> PointCloudOut;
+      using PointCloudOut = pcl::PointCloud<PointOutT>;
 
       /** \brief Empty Constructor. */
       PPFEstimation ();
@@ -98,12 +97,10 @@ namespace pcl
         * the input cloud);
         */
       void
-      computeFeature (PointCloudOut &output);
+      computeFeature (PointCloudOut &output) override;
   };
 }
 
 #ifdef PCL_NO_PRECOMPILE
 #include <pcl/features/impl/ppf.hpp>
 #endif
-
-#endif // PCL_PPF_H_

@@ -36,8 +36,7 @@
  * $Id$
  */
 
-#ifndef PCL_OCTREE_SINGLE_POINT_H
-#define PCL_OCTREE_SINGLE_POINT_H
+#pragma once
 
 #include <pcl/octree/octree_pointcloud.h>
 
@@ -65,8 +64,8 @@ namespace pcl
 
       public:
         // public typedefs for single/double buffering
-        typedef OctreePointCloudSinglePoint<PointT, LeafContainerT, BranchContainerT,
-            OctreeBase<LeafContainerT, BranchContainerT> > SingleBuffer;
+        using SingleBuffer = OctreePointCloudSinglePoint<PointT, LeafContainerT, BranchContainerT,
+            OctreeBase<LeafContainerT, BranchContainerT> >;
   //      typedef OctreePointCloudSinglePoint<PointT, LeafContainerT, BranchContainerT,
    //         Octree2BufBase<int, LeafContainerT, BranchContainerT> > DoubleBuffer;
 
@@ -79,7 +78,7 @@ namespace pcl
         }
 
         /** \brief Empty class constructor. */
-        virtual ~OctreePointCloudSinglePoint ()
+        ~OctreePointCloudSinglePoint ()
         {
         }
 
@@ -89,5 +88,3 @@ namespace pcl
 }
 
 #define PCL_INSTANTIATE_OctreePointCloudSinglePoint(T) template class PCL_EXPORTS pcl::octree::OctreePointCloudSinglePoint<T>;
-
-#endif

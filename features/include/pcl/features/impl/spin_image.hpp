@@ -45,7 +45,6 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/exceptions.h>
-#include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/features/spin_image.h>
 #include <cmath>
 
@@ -117,7 +116,7 @@ pcl::SpinImageEstimation<PointInT, PointNT, PointOutT>::computeSiForPoint (int i
     if (support_angle_cos_ > 0.0 || is_angular_) // not bogus
     {
       cos_between_normals = origin_normal.dot (input_normals_->points[nn_indices[i_neigh]].getNormalVector3fMap ());
-      if (fabs (cos_between_normals) > (1.0 + 10*std::numeric_limits<float>::epsilon ())) // should be okay for numeric stability
+      if (std::abs (cos_between_normals) > (1.0 + 10*std::numeric_limits<float>::epsilon ())) // should be okay for numeric stability
       {      
         PCL_ERROR ("[pcl::%s::computeSiForPoint] Normal for the point %d and/or the point %d are not normalized, dot ptoduct is %f.\n", 
           getClassName ().c_str (), nn_indices[i_neigh], index, cos_between_normals);
@@ -126,7 +125,7 @@ pcl::SpinImageEstimation<PointInT, PointNT, PointOutT>::computeSiForPoint (int i
       }
       cos_between_normals = std::max (-1.0, std::min (1.0, cos_between_normals));
 
-      if (fabs (cos_between_normals) < support_angle_cos_ )    // allow counter-directed normals
+      if (std::abs (cos_between_normals) < support_angle_cos_ )    // allow counter-directed normals
       {
         continue;
       }
@@ -141,13 +140,13 @@ pcl::SpinImageEstimation<PointInT, PointNT, PointOutT>::computeSiForPoint (int i
     const Eigen::Vector3f direction (
       surface_->points[nn_indices[i_neigh]].getVector3fMap () - origin_point);
     const double direction_norm = direction.norm ();
-    if (fabs(direction_norm) < 10*std::numeric_limits<double>::epsilon ())  
+    if (std::abs(direction_norm) < 10*std::numeric_limits<double>::epsilon ())  
       continue;  // ignore the point itself; it does not contribute really
     assert (direction_norm > 0.0);
 
     // the angle between the normal vector and the direction to the point
     double cos_dir_axis = direction.dot(rotation_axis) / direction_norm;
-    if (fabs(cos_dir_axis) > (1.0 + 10*std::numeric_limits<float>::epsilon())) // should be okay for numeric stability
+    if (std::abs(cos_dir_axis) > (1.0 + 10*std::numeric_limits<float>::epsilon())) // should be okay for numeric stability
     {      
       PCL_ERROR ("[pcl::%s::computeSiForPoint] Rotation axis for the point %d are not normalized, dot ptoduct is %f.\n", 
         getClassName ().c_str (), index, cos_dir_axis);
@@ -169,7 +168,7 @@ pcl::SpinImageEstimation<PointInT, PointNT, PointOutT>::computeSiForPoint (int i
       beta = direction_norm * cos_dir_axis;
       alpha = direction_norm * sqrt (1.0 - cos_dir_axis*cos_dir_axis);
 
-      if (fabs (beta) >= bin_size * image_width_ || alpha >= bin_size * image_width_)
+      if (std::abs (beta) >= bin_size * image_width_ || alpha >= bin_size * image_width_)
       {
         continue;  // outside the cylinder
       }
@@ -212,10 +211,10 @@ pcl::SpinImageEstimation<PointInT, PointNT, PointOutT>::computeSiForPoint (int i
 
     if (is_angular_)
     {
-      m_averAngles (alpha_bin, beta_bin) += (1-a) * (1-b) * acos (cos_between_normals); 
-      m_averAngles (alpha_bin+1, beta_bin) += a * (1-b) * acos (cos_between_normals);
-      m_averAngles (alpha_bin, beta_bin+1) += (1-a) * b * acos (cos_between_normals);
-      m_averAngles (alpha_bin+1, beta_bin+1) += a * b * acos (cos_between_normals);
+      m_averAngles (alpha_bin, beta_bin) += (1-a) * (1-b) * std::acos (cos_between_normals); 
+      m_averAngles (alpha_bin+1, beta_bin) += a * (1-b) * std::acos (cos_between_normals);
+      m_averAngles (alpha_bin, beta_bin+1) += (1-a) * b * std::acos (cos_between_normals);
+      m_averAngles (alpha_bin+1, beta_bin+1) += a * b * std::acos (cos_between_normals);
     }
   }
 
@@ -323,14 +322,14 @@ pcl::SpinImageEstimation<PointInT, PointNT, PointOutT>::initCompute ()
 template <typename PointInT, typename PointNT, typename PointOutT> void 
 pcl::SpinImageEstimation<PointInT, PointNT, PointOutT>::computeFeature (PointCloudOut &output)
 { 
-  for (int i_input = 0; i_input < static_cast<int> (indices_->size ()); ++i_input)
+  for (std::size_t i_input = 0; i_input < indices_->size (); ++i_input)
   {
     Eigen::ArrayXXd res = computeSiForPoint (indices_->at (i_input));
 
     // Copy into the resultant cloud
-    for (int iRow = 0; iRow < res.rows () ; iRow++)
+    for (Eigen::Index iRow = 0; iRow < res.rows () ; iRow++)
     {
-      for (int iCol = 0; iCol < res.cols () ; iCol++)
+      for (Eigen::Index iCol = 0; iCol < res.cols () ; iCol++)
       {
         output.points[i_input].histogram[ iRow*res.cols () + iCol ] = static_cast<float> (res (iRow, iCol));
       }

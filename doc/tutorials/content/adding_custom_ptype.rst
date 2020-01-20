@@ -53,7 +53,7 @@ Therefore, a simpler `PointXYZ` structure without the last float could be used
 instead.
 
 Moreover, if your application requires a `PointXYZRGBNormal` which contains
-`XYZ` 3D data, `RGB` information (colors), and surface normals estimated at
+`XYZ` 3D data, `RGBA` information (colors), and surface normals estimated at
 each point, it is trivial to define a structure with all the above. Since all
 algorithms in PCL should be templated, there are no other changes required
 other than your structure definition.
@@ -125,49 +125,24 @@ addition, the type that you want, might already be defined for you.
     float data_c[4];
   };
 
-* `PointXYZRGBA` - Members: float x, y, z; uint32_t rgba;
+* `PointXYZRGBA` - Members: float x, y, z; std::uint32_t rgba;
 
   Similar to `PointXYZI`, except `rgba` contains the RGBA information packed
-  into a single integer.
-
-.. code-block:: cpp
-
-  union 
-  {
-    float data[4];
-    struct 
-    {
-      float x;
-      float y;
-      float z;
-    };
-  };
-  union
-  {
-    struct
-    {
-      uint32_t rgba;
-    };
-    float data_c[4];
-  };
-
-* `PointXYZRGB` - float x, y, z, rgb;
-
-  Similar to `PointXYZRGBA`, except `rgb` represents the RGBA information packed into a float.
+  into an unsigned 32-bit integer. Thanks to the `union` declaration, it is
+  also possible to access color channels individually by name.
 
 .. note::
 
-   The reason why `rgb` data is being packed as a float comes from the early
-   development of PCL as part of the ROS project, where RGB data is still being
-   sent by wire as float numbers. We expect this data type to be dropped as
-   soon as all legacy code has been rewritten (most likely in PCL 2.x).
+  The nested `union` declaration provides yet another way to look at the RGBA
+  data--as a single precision floating point number. This is present for
+  historical reasons and should not be used in new code.
 
 .. code-block:: cpp
 
-  union 
+  union
   {
     float data[4];
-    struct 
+    struct
     {
       float x;
       float y;
@@ -176,12 +151,23 @@ addition, the type that you want, might already be defined for you.
   };
   union
   {
-    struct
+    union
     {
+      struct
+      {
+        std::uint8_t b;
+        std::uint8_t g;
+        std::uint8_t r;
+        std::uint8_t a;
+      };
       float rgb;
     };
-    float data_c[4];
+    std::uint32_t rgba;
   };
+
+* `PointXYZRGB` - float x, y, z; std::uint32_t rgba;
+
+  Same as `PointXYZRGBA`.
 
 * `PointXY` - float x, y;
 
@@ -295,10 +281,14 @@ addition, the type that you want, might already be defined for you.
   };
 
 
-* `PointXYZRGBNormal` - float x, y, z, rgb, normal[3], curvature;
+* `PointXYZRGBNormal` - float x, y, z, normal[3], curvature; std::uint32_t rgba;
 
-  A point structure that holds XYZ data, and RGB colors, together with surface
+  A point structure that holds XYZ data, and RGBA colors, together with surface
   normals and curvatures.
+
+.. note::
+
+  Despite the name, this point type does contain the alpha color channel.
 
 .. code-block:: cpp
 
@@ -323,11 +313,25 @@ addition, the type that you want, might already be defined for you.
       float normal_z;
     };
   }
-  union 
+  union
   {
-    struct 
+    struct
     {
-      float rgb;
+      union
+      {
+        union
+        {
+          struct
+          {
+            std::uint8_t b;
+            std::uint8_t g;
+            std::uint8_t r;
+            std::uint8_t a;
+          };
+          float rgb;
+        };
+        std::uint32_t rgba;
+      };
       float curvature;
     };
     float data_c[4];
@@ -452,7 +456,7 @@ addition, the type that you want, might already be defined for you.
     float r_min, r_max;
   };
 
-* `Boundary` - uint8_t boundary_point;
+* `Boundary` - std::uint8_t boundary_point;
 
   Simple point type holding whether the point is lying on a surface boundary or
   not. See `BoundaryEstimation` for more information. 
@@ -461,7 +465,7 @@ addition, the type that you want, might already be defined for you.
 
   struct
   {
-    uint8_t boundary_point;
+    std::uint8_t boundary_point;
   };
 
 * `PrincipalCurvatures` - float principal_curvature[3], pc1, pc2;
@@ -637,7 +641,7 @@ addition, the type that you want, might already be defined for you.
   {
     struct
     {
-      uint32_t rgba;
+      std::uint32_t rgba;
       float radius;
       float confidence;
       float curvature;
@@ -820,6 +824,7 @@ data (SSE padded), together with a test float.
    :linenos:
 
    #define PCL_NO_PRECOMPILE
+   #include <pcl/pcl_macros.h>
    #include <pcl/point_types.h>
    #include <pcl/point_cloud.h>
    #include <pcl/io/pcd_io.h>
@@ -828,7 +833,7 @@ data (SSE padded), together with a test float.
    {
      PCL_ADD_POINT4D;                  // preferred way of adding a XYZ+padding
      float test;
-     EIGEN_MAKE_ALIGNED_OPERATOR_NEW   // make sure our new allocators are aligned
+     PCL_MAKE_ALIGNED_OPERATOR_NEW     // make sure our new allocators are aligned
    } EIGEN_ALIGN16;                    // enforce SSE padding for correct memory alignment
 
    POINT_CLOUD_REGISTER_POINT_STRUCT (MyPointType,           // here we assume a XYZ + "test" (as fields)

@@ -47,7 +47,7 @@
 template <typename PointSource, typename PointTarget, typename FeatureT> void 
 pcl::SampleConsensusInitialAlignment<PointSource, PointTarget, FeatureT>::setSourceFeatures (const FeatureCloudConstPtr &features)
 {
-  if (features == NULL || features->empty ())
+  if (features == nullptr || features->empty ())
   {
     PCL_ERROR ("[pcl::%s::setSourceFeatures] Invalid or empty point cloud dataset given!\n", getClassName ().c_str ());
     return;
@@ -59,7 +59,7 @@ pcl::SampleConsensusInitialAlignment<PointSource, PointTarget, FeatureT>::setSou
 template <typename PointSource, typename PointTarget, typename FeatureT> void 
 pcl::SampleConsensusInitialAlignment<PointSource, PointTarget, FeatureT>::setTargetFeatures (const FeatureCloudConstPtr &features)
 {
-  if (features == NULL || features->empty ())
+  if (features == nullptr || features->empty ())
   {
     PCL_ERROR ("[pcl::%s::setTargetFeatures] Invalid or empty point cloud dataset given!\n", getClassName ().c_str ());
     return;
@@ -93,11 +93,11 @@ pcl::SampleConsensusInitialAlignment<PointSource, PointTarget, FeatureT>::select
 
     // Check to see if the sample is 1) unique and 2) far away from the other samples
     bool valid_sample = true;
-    for (size_t i = 0; i < sample_indices.size (); ++i)
+    for (const int &sample_idx : sample_indices)
     {
-      float distance_between_samples = euclideanDistance (cloud.points[sample_index], cloud.points[sample_indices[i]]);
+      float distance_between_samples = euclideanDistance (cloud.points[sample_index], cloud.points[sample_idx]);
 
-      if (sample_index == sample_indices[i] || distance_between_samples < min_sample_distance)
+      if (sample_index == sample_idx || distance_between_samples < min_sample_distance)
       {
         valid_sample = false;
         break;
@@ -137,7 +137,7 @@ pcl::SampleConsensusInitialAlignment<PointSource, PointTarget, FeatureT>::findSi
   std::vector<float> nn_distances (k_correspondences_);
 
   corresponding_indices.resize (sample_indices.size ());
-  for (size_t i = 0; i < sample_indices.size (); ++i)
+  for (std::size_t i = 0; i < sample_indices.size (); ++i)
   {
     // Find the k features nearest to input_features.points[sample_indices[i]]
     feature_tree_->nearestKSearch (input_features, sample_indices[i], k_correspondences_, nn_indices, nn_distances);

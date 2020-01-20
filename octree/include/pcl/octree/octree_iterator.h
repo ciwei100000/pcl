@@ -37,8 +37,7 @@
  * $Id$
  */
 
-#ifndef PCL_OCTREE_ITERATOR_H
-#define PCL_OCTREE_ITERATOR_H
+#pragma once
 
 #include <cstddef>
 #include <vector>
@@ -78,11 +77,11 @@ namespace pcl
       {
       public:
 
-        typedef typename OctreeT::LeafNode LeafNode;
-        typedef typename OctreeT::BranchNode BranchNode;
+        using LeafNode = typename OctreeT::LeafNode;
+        using BranchNode = typename OctreeT::BranchNode;
 
-        typedef typename OctreeT::LeafContainer LeafContainer;
-        typedef typename OctreeT::BranchContainer BranchContainer;
+        using LeafContainer = typename OctreeT::LeafContainer;
+        using BranchContainer = typename OctreeT::BranchContainer;
 
         /** \brief Empty constructor.
          */
@@ -370,8 +369,8 @@ namespace pcl
 
       public:
 
-        typedef typename OctreeIteratorBase<OctreeT>::LeafNode LeafNode;
-        typedef typename OctreeIteratorBase<OctreeT>::BranchNode BranchNode;
+        using LeafNode = typename OctreeIteratorBase<OctreeT>::LeafNode;
+        using BranchNode = typename OctreeIteratorBase<OctreeT>::BranchNode;
 
         /** \brief Empty constructor.
          * \param[in] max_depth_arg Depth limitation during traversal
@@ -477,8 +476,8 @@ namespace pcl
       {
       public:
         // public typedefs
-        typedef typename OctreeIteratorBase<OctreeT>::BranchNode BranchNode;
-        typedef typename OctreeIteratorBase<OctreeT>::LeafNode LeafNode;
+        using BranchNode = typename OctreeIteratorBase<OctreeT>::BranchNode;
+        using LeafNode = typename OctreeIteratorBase<OctreeT>::LeafNode;
 
         /** \brief Empty constructor.
          * \param[in] max_depth_arg Depth limitation during traversal
@@ -664,8 +663,8 @@ namespace pcl
     template<typename OctreeT>
       class OctreeLeafNodeDepthFirstIterator : public OctreeDepthFirstIterator<OctreeT>
       {
-        typedef typename OctreeDepthFirstIterator<OctreeT>::BranchNode BranchNode;
-        typedef typename OctreeDepthFirstIterator<OctreeT>::LeafNode LeafNode;
+        using BranchNode = typename OctreeDepthFirstIterator<OctreeT>::BranchNode;
+        using LeafNode = typename OctreeDepthFirstIterator<OctreeT>::LeafNode;
 
       public:
         /** \brief Empty constructor.
@@ -767,8 +766,8 @@ namespace pcl
     template<typename OctreeT>
       class OctreeLeafNodeBreadthFirstIterator : public OctreeBreadthFirstIterator<OctreeT>
       {
-        typedef typename OctreeBreadthFirstIterator<OctreeT>::BranchNode BranchNode;
-        typedef typename OctreeBreadthFirstIterator<OctreeT>::LeafNode LeafNode;
+        using BranchNode = typename OctreeBreadthFirstIterator<OctreeT>::BranchNode;
+        using LeafNode = typename OctreeBreadthFirstIterator<OctreeT>::LeafNode;
 
       public:
         /** \brief Empty constructor.
@@ -824,6 +823,3 @@ namespace pcl
  * Note: Since octree iterators depend on octrees, don't precompile them.
  */
 #include <pcl/octree/impl/octree_iterator.hpp>
-
-#endif
-

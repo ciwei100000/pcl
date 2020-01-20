@@ -1,7 +1,7 @@
 #include "openni_capture.h"
 #include <pcl/io/pcd_io.h>
-#include <boost/thread/mutex.hpp>
 #include <boost/make_shared.hpp>
+#include <mutex>
 
 OpenNICapture::OpenNICapture (const std::string& device_id)
   : grabber_ (device_id)
@@ -11,7 +11,7 @@ OpenNICapture::OpenNICapture (const std::string& device_id)
   , trigger_ (false)
 {
   // Register a callback function to our OpenNI grabber...
-  boost::function<void (const PointCloudConstPtr&)> frame_cb = boost::bind (&OpenNICapture::onNewFrame, this, _1);
+  std::function<void (const PointCloudConstPtr&)> frame_cb = [this] (const PointCloudConstPtr& cloud) { onNewFrame (cloud); };
   // ... and start grabbing frames
   grabber_.registerCallback (frame_cb);
   grabber_.start ();
@@ -37,10 +37,10 @@ OpenNICapture::snap ()
     if (!preview_)
     {
       // Initialize the visualizer ONLY if use_trigger is set to true
-      preview_ = boost::shared_ptr<pcl::visualization::PCLVisualizer> (new pcl::visualization::PCLVisualizer ());
+      preview_ = pcl::visualization::PCLVisualizer::Ptr (new pcl::visualization::PCLVisualizer ());
 
-      boost::function<void (const pcl::visualization::KeyboardEvent&)> keyboard_cb =
-        boost::bind (&OpenNICapture::onKeyboardEvent, this, _1);
+      std::function<void (const pcl::visualization::KeyboardEvent&)> keyboard_cb =
+        [this] (const pcl::visualization::KeyboardEvent& event) { onKeyboardEvent (event); };
 
       preview_->registerKeyboardCallback (keyboard_cb);
     }

@@ -60,15 +60,15 @@ pcl::IterativeClosestPoint<PointSource, PointTarget, Scalar>::transformCloud (
     Eigen::Vector3f nt, nt_t;
     Eigen::Matrix3f rot = tr.block<3, 3> (0, 0);
 
-    for (size_t i = 0; i < input.size (); ++i)
+    for (std::size_t i = 0; i < input.size (); ++i)
     {
-      const uint8_t* data_in = reinterpret_cast<const uint8_t*> (&input[i]);
-      uint8_t* data_out = reinterpret_cast<uint8_t*> (&output[i]);
+      const std::uint8_t* data_in = reinterpret_cast<const std::uint8_t*> (&input[i]);
+      std::uint8_t* data_out = reinterpret_cast<std::uint8_t*> (&output[i]);
       memcpy (&pt[0], data_in + x_idx_offset_, sizeof (float));
       memcpy (&pt[1], data_in + y_idx_offset_, sizeof (float));
       memcpy (&pt[2], data_in + z_idx_offset_, sizeof (float));
 
-      if (!pcl_isfinite (pt[0]) || !pcl_isfinite (pt[1]) || !pcl_isfinite (pt[2])) 
+      if (!std::isfinite (pt[0]) || !std::isfinite (pt[1]) || !std::isfinite (pt[2])) 
         continue;
 
       pt_t = tr * pt;
@@ -81,7 +81,7 @@ pcl::IterativeClosestPoint<PointSource, PointTarget, Scalar>::transformCloud (
       memcpy (&nt[1], data_in + ny_idx_offset_, sizeof (float));
       memcpy (&nt[2], data_in + nz_idx_offset_, sizeof (float));
 
-      if (!pcl_isfinite (nt[0]) || !pcl_isfinite (nt[1]) || !pcl_isfinite (nt[2])) 
+      if (!std::isfinite (nt[0]) || !std::isfinite (nt[1]) || !std::isfinite (nt[2])) 
         continue;
 
       nt_t = rot * nt;
@@ -93,15 +93,15 @@ pcl::IterativeClosestPoint<PointSource, PointTarget, Scalar>::transformCloud (
   }
   else
   {
-    for (size_t i = 0; i < input.size (); ++i)
+    for (std::size_t i = 0; i < input.size (); ++i)
     {
-      const uint8_t* data_in = reinterpret_cast<const uint8_t*> (&input[i]);
-      uint8_t* data_out = reinterpret_cast<uint8_t*> (&output[i]);
+      const std::uint8_t* data_in = reinterpret_cast<const std::uint8_t*> (&input[i]);
+      std::uint8_t* data_out = reinterpret_cast<std::uint8_t*> (&output[i]);
       memcpy (&pt[0], data_in + x_idx_offset_, sizeof (float));
       memcpy (&pt[1], data_in + y_idx_offset_, sizeof (float));
       memcpy (&pt[2], data_in + z_idx_offset_, sizeof (float));
 
-      if (!pcl_isfinite (pt[0]) || !pcl_isfinite (pt[1]) || !pcl_isfinite (pt[2])) 
+      if (!std::isfinite (pt[0]) || !std::isfinite (pt[1]) || !std::isfinite (pt[2])) 
         continue;
 
       pt_t = tr * pt;
@@ -151,7 +151,7 @@ pcl::IterativeClosestPoint<PointSource, PointTarget, Scalar>::computeTransformat
   if (correspondence_estimation_->requiresTargetNormals ())
     correspondence_estimation_->setTargetNormals (target_blob);
   // Correspondence Rejectors need a binary blob
-  for (size_t i = 0; i < correspondence_rejectors_.size (); ++i)
+  for (std::size_t i = 0; i < correspondence_rejectors_.size (); ++i)
   {
     registration::CorrespondenceRejector::Ptr& rej = correspondence_rejectors_[i];
     if (rej->requiresTargetPoints ())
@@ -193,7 +193,7 @@ pcl::IterativeClosestPoint<PointSource, PointTarget, Scalar>::computeTransformat
 
     //if (correspondence_rejectors_.empty ())
     CorrespondencesPtr temp_correspondences (new Correspondences (*correspondences_));
-    for (size_t i = 0; i < correspondence_rejectors_.size (); ++i)
+    for (std::size_t i = 0; i < correspondence_rejectors_.size (); ++i)
     {
       registration::CorrespondenceRejector::Ptr& rej = correspondence_rejectors_[i];
       PCL_DEBUG ("Applying a correspondence rejector method: %s.\n", rej->getClassName ().c_str ());
@@ -208,7 +208,7 @@ pcl::IterativeClosestPoint<PointSource, PointTarget, Scalar>::computeTransformat
         *temp_correspondences = *correspondences_;
     }
 
-    size_t cnt = correspondences_->size ();
+    std::size_t cnt = correspondences_->size ();
     // Check whether we have enough correspondences
     if (static_cast<int> (cnt) < min_number_correspondences_)
     {
@@ -235,7 +235,7 @@ pcl::IterativeClosestPoint<PointSource, PointTarget, Scalar>::computeTransformat
 
     converged_ = static_cast<bool> ((*convergence_criteria_));
   }
-  while (!converged_);
+  while (convergence_criteria_->getConvergenceState() == pcl::registration::DefaultConvergenceCriteria<Scalar>::CONVERGENCE_CRITERIA_NOT_CONVERGED);
 
   // Transform the input cloud using the final transformation
   PCL_DEBUG ("Transformation is:\n\t%5f\t%5f\t%5f\t%5f\n\t%5f\t%5f\t%5f\t%5f\n\t%5f\t%5f\t%5f\t%5f\n\t%5f\t%5f\t%5f\t%5f\n", 
@@ -268,7 +268,7 @@ pcl::IterativeClosestPoint<PointSource, PointTarget, Scalar>::determineRequiredB
       PCL_WARN("[pcl::%s::determineRequiredBlobData] Estimator expects target normals, but we can't provide them.\n", getClassName ().c_str ());
   }
   // Check rejectors
-  for (size_t i = 0; i < correspondence_rejectors_.size (); i++)
+  for (std::size_t i = 0; i < correspondence_rejectors_.size (); i++)
   {
     registration::CorrespondenceRejector::Ptr& rej = correspondence_rejectors_[i];
     need_source_blob_ |= rej->requiresSourcePoints ();
@@ -295,6 +295,6 @@ pcl::IterativeClosestPointWithNormals<PointSource, PointTarget, Scalar>::transfo
 {
   pcl::transformPointCloudWithNormals (input, output, transform);
 }
-      
+
 
 #endif /* PCL_REGISTRATION_IMPL_ICP_HPP_ */

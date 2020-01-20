@@ -36,6 +36,7 @@
  *
  */
 #include <pcl/pcl_config.h>
+#include <pcl/make_shared.h>
 #ifdef HAVE_OPENNI
 
 #ifdef __GNUC__
@@ -97,7 +98,7 @@ openni_wrapper::DeviceONI::DeviceONI (
 
   player_.SetRepeat (repeat);
   if (streaming_)
-    player_thread_ = boost::thread (&DeviceONI::PlayerThreadFunction, this);
+    player_thread_ = std::thread (&DeviceONI::PlayerThreadFunction, this);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -246,10 +247,10 @@ openni_wrapper::DeviceONI::NewONIIRDataAvailable (xn::ProductionNode&, void* coo
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-boost::shared_ptr<openni_wrapper::Image> 
-openni_wrapper::DeviceONI::getCurrentImage(boost::shared_ptr<xn::ImageMetaData> image_meta_data) const throw ()
+openni_wrapper::Image::Ptr 
+openni_wrapper::DeviceONI::getCurrentImage(pcl::shared_ptr<xn::ImageMetaData> image_meta_data) const throw ()
 {
-  return (boost::shared_ptr<openni_wrapper::Image> (new openni_wrapper::ImageRGB24 (image_meta_data)));
+  return (openni_wrapper::Image::Ptr (new openni_wrapper::ImageRGB24 (image_meta_data)));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

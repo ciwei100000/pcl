@@ -61,9 +61,11 @@
 #include <vtkMatrix4x4.h>
 #include <algorithm>
 #include <cstdio>
+#include <thread>
 #include <vector>
 
 using namespace std;
+using namespace std::chrono_literals;
 using namespace pcl;
 using namespace io;
 using namespace console;
@@ -71,7 +73,7 @@ using namespace recognition;
 using namespace visualization;
 
 bool
-vtk_to_pointcloud (const char* file_name, PointCloud<PointXYZ>& pcl_points, PointCloud<Normal>& pcl_normals, vtkPolyData* vtk_dst = NULL);
+vtk_to_pointcloud (const char* file_name, PointCloud<PointXYZ>& pcl_points, PointCloud<Normal>& pcl_normals, vtkPolyData* vtk_dst = nullptr);
 
 //#define _SHOW_SCENE_POINTS_
 #define _SHOW_OCTREE_POINTS_
@@ -104,7 +106,7 @@ class CallbackParameters
 bool
 vtk_to_pointcloud (const char* file_name, PointCloud<PointXYZ>& pcl_points, PointCloud<Normal>& pcl_normals, vtkPolyData* vtk_dst)
 {
-  size_t len = strlen (file_name);
+  std::size_t len = strlen (file_name);
   if ( file_name[len-3] != 'v' || file_name[len-2] != 't' || file_name[len-1] != 'k' )
   {
     fprintf (stderr, "ERROR: we need a .vtk object!\n");
@@ -158,7 +160,7 @@ vtk_to_pointcloud (const char* file_name, PointCloud<PointXYZ>& pcl_points, Poin
 //===============================================================================================================================
 
 void
-showHypothesisAsCoordinateFrame (Hypothesis& hypo, CallbackParameters* parameters, string frame_name)
+showHypothesisAsCoordinateFrame (Hypothesis& hypo, CallbackParameters* parameters, const string &frame_name)
 {
   float rot_col[3], x_dir[3], y_dir[3], z_dir[3], origin[3], scale = 2.0f*parameters->objrec_.getPairWidth ();
   pcl::ModelCoefficients coeffs; coeffs.values.resize (6);
@@ -209,7 +211,7 @@ showHypothesisAsCoordinateFrame (Hypothesis& hypo, CallbackParameters* parameter
 bool
 compareHypotheses (const Hypothesis& a, const Hypothesis& b)
 {
-  return (static_cast<bool> (a.match_confidence_ > b.match_confidence_));
+  return a.match_confidence_ > b.match_confidence_;
 }
 
 //===============================================================================================================================
@@ -237,12 +239,12 @@ update (CallbackParameters* params)
 
   // Clear the visualizer
   vtkRenderer *renderer = params->viz_.getRenderWindow ()->GetRenderers ()->GetFirstRenderer ();
-  for ( list<vtkActor*>::iterator it = params->actors_.begin () ; it != params->actors_.end () ; ++it )
-    renderer->RemoveActor (*it);
+  for (const auto &actor : params->actors_)
+    renderer->RemoveActor (actor);
   params->actors_.clear ();
 
-  for ( list<vtkActor*>::iterator it = params->model_actors_.begin () ; it != params->model_actors_.end () ; ++it )
-    renderer->RemoveActor (*it);
+  for (const auto &model_actor : params->model_actors_)
+    renderer->RemoveActor (model_actor);
   params->model_actors_.clear ();
 
   params->viz_.removeAllShapes ();
@@ -295,7 +297,7 @@ update (CallbackParameters* params)
 #endif
 
   // Now show some of the accepted hypotheses
-  vector<Hypothesis> accepted_hypotheses;
+  std::vector<Hypothesis> accepted_hypotheses;
   params->objrec_.getAcceptedHypotheses (accepted_hypotheses);
   int i = 0;
 
@@ -303,7 +305,7 @@ update (CallbackParameters* params)
   std::sort(accepted_hypotheses.begin (), accepted_hypotheses.end (), compareHypotheses);
 
   // Show the hypotheses
-  for ( vector<Hypothesis>::iterator acc_hypo = accepted_hypotheses.begin () ; i < params->num_hypotheses_to_show_ && acc_hypo != accepted_hypotheses.end () ; ++i, ++acc_hypo )
+  for ( std::vector<Hypothesis>::iterator acc_hypo = accepted_hypotheses.begin () ; i < params->num_hypotheses_to_show_ && acc_hypo != accepted_hypotheses.end () ; ++i, ++acc_hypo )
   {
     // Visualize the orientation as a tripod
     char frame_name[128];
@@ -324,21 +326,13 @@ update (CallbackParameters* params)
     // Setup the transformator
     vtkSmartPointer<vtkTransformPolyDataFilter> vtk_transformator = vtkSmartPointer<vtkTransformPolyDataFilter>::New ();
     vtk_transformator->SetTransform (vtk_transform);
-#if VTK_MAJOR_VERSION < 6
-    vtk_transformator->SetInput (vtk_model);
-#else
     vtk_transformator->SetInputData (vtk_model);
-#endif
     vtk_transformator->Update ();
 
     // Visualize
     vtkSmartPointer<vtkActor> vtk_actor = vtkSmartPointer<vtkActor>::New();
     vtkSmartPointer<vtkPolyDataMapper> vtk_mapper = vtkSmartPointer<vtkPolyDataMapper>::New ();
-#if VTK_MAJOR_VERSION < 6
-    vtk_mapper->SetInput(vtk_transformator->GetOutput ());
-#else
     vtk_mapper->SetInputData (vtk_transformator->GetOutput ());
-#endif
     vtk_actor->SetMapper(vtk_mapper);
     // Set the appearance & add to the renderer
     vtk_actor->GetProperty ()->SetColor (0.6, 0.7, 0.9);
@@ -346,7 +340,7 @@ update (CallbackParameters* params)
     params->model_actors_.push_back (vtk_actor);
 
     // Compose the model's id
-    cout << acc_hypo->obj_model_->getObjectName () << "_" << i+1 << " has a confidence value of " << acc_hypo->match_confidence_ << ";  ";
+    std::cout << acc_hypo->obj_model_->getObjectName () << "_" << i+1 << " has a confidence value of " << acc_hypo->match_confidence_ << ";  ";
   }
 
   // Show the bounds of the scene octree
@@ -365,12 +359,12 @@ update (CallbackParameters* params)
   axis(2,0) = static_cast<float> (aux::getRandomInteger (-100, 100));
   // Normalize the axis
   float len = std::sqrt (axis(0,0)*axis(0,0) + axis(1,0)*axis(1,0) + axis(2,0)*axis(2,0));
-  axis(0,0) = axis(0,0)/len;
-  axis(1,0) = axis(1,0)/len;
-  axis(2,0) = axis(2,0)/len;
+  axis(0,0) /=len;
+  axis(1,0) /=len;
+  axis(2,0) /=len;
 
-  cout << "Input angle = " << angle << endl;
-  cout << "Input axis = \n" << axis << endl;
+  std::cout << "Input angle = " << angle << std::endl;
+  std::cout << "Input axis = \n" << axis << std::endl;
 
   // The eigen axis-angle object
   Eigen::AngleAxis<float> angle_axis(angle, axis);
@@ -382,8 +376,8 @@ update (CallbackParameters* params)
   // Now compute back the angle and the axis based on eigen
   float comp_angle, comp_axis[3];
   aux::rotationMatrixToAxisAngle (m, comp_axis, comp_angle);
-  cout << "\nComputed angle = " << comp_angle << endl;
-  cout << "Computed axis = \n" << comp_axis[0] << "\n" << comp_axis[1] << "\n" << comp_axis[2] << endl;
+  std::cout << "\nComputed angle = " << comp_angle << std::endl;
+  std::cout << "Computed axis = \n" << comp_axis[0] << "\n" << comp_axis[1] << "\n" << comp_axis[2] << std::endl;
 #endif
 }
 
@@ -465,7 +459,7 @@ run (float pair_width, float voxel_size, float max_coplanarity_angle, int num_hy
   {
     //main loop of the visualizer
     viz.spinOnce (100);
-    boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+    std::this_thread::sleep_for(100ms);
   }
 
   vtk_model->Delete ();
@@ -488,8 +482,8 @@ main (int argc, char** argv)
 
   printf ("The following parameter values will be used:\n");
   for ( int i = 0 ; i < num_params ; ++i )
-    cout << "  " << parameter_names[i] << " = " << parameters[i] << endl;
-  cout << endl;
+    std::cout << "  " << parameter_names[i] << " = " << parameters[i] << std::endl;
+  std::cout << std::endl;
 
   run (parameters[0], parameters[1], parameters[2], static_cast<int> (parameters[3] + 0.5f));
 

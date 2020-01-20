@@ -76,17 +76,17 @@ pcl::ShapeContext3DEstimation<PointInT, PointNT, PointOutT>::initCompute ()
 
   // Fills radii interval based on formula (1) in section 2.1 of Frome's paper
   radii_interval_.resize (radius_bins_ + 1);
-  for (size_t j = 0; j < radius_bins_ + 1; j++)
-    radii_interval_[j] = static_cast<float> (exp (log (min_radius_) + ((static_cast<float> (j) / static_cast<float> (radius_bins_)) * log (search_radius_ / min_radius_))));
+  for (std::size_t j = 0; j < radius_bins_ + 1; j++)
+    radii_interval_[j] = static_cast<float> (std::exp (std::log (min_radius_) + ((static_cast<float> (j) / static_cast<float> (radius_bins_)) * std::log (search_radius_ / min_radius_))));
 
   // Fill theta divisions of elevation
   theta_divisions_.resize (elevation_bins_ + 1);
-  for (size_t k = 0; k < elevation_bins_ + 1; k++)
+  for (std::size_t k = 0; k < elevation_bins_ + 1; k++)
     theta_divisions_[k] = static_cast<float> (k) * elevation_interval;
 
   // Fill phi didvisions of elevation
   phi_divisions_.resize (azimuth_bins_ + 1);
-  for (size_t l = 0; l < azimuth_bins_ + 1; l++)
+  for (std::size_t l = 0; l < azimuth_bins_ + 1; l++)
     phi_divisions_[l] = static_cast<float> (l) * azimuth_interval;
 
   // LookUp Table that contains the volume of all the bins
@@ -98,15 +98,15 @@ pcl::ShapeContext3DEstimation<PointInT, PointNT, PointOutT>::initCompute ()
   // Resize volume look up table
   volume_lut_.resize (radius_bins_ * elevation_bins_ * azimuth_bins_);
   // Fill volumes look up table
-  for (size_t j = 0; j < radius_bins_; j++)
+  for (std::size_t j = 0; j < radius_bins_; j++)
   {
     // "r" term of the volume integral
     float integr_r = (radii_interval_[j+1] * radii_interval_[j+1] * radii_interval_[j+1] / 3.0f) - (radii_interval_[j] * radii_interval_[j] * radii_interval_[j] / 3.0f);
 
-    for (size_t k = 0; k < elevation_bins_; k++)
+    for (std::size_t k = 0; k < elevation_bins_; k++)
     {
       // "theta" term of the volume integral
-      float integr_theta = cosf (pcl::deg2rad (theta_divisions_[k])) - cosf (pcl::deg2rad (theta_divisions_[k+1]));
+      float integr_theta = std::cos (pcl::deg2rad (theta_divisions_[k])) - std::cos (pcl::deg2rad (theta_divisions_[k+1]));
       // Volume
       float V = integr_phi * integr_theta * integr_r;
       // Compute cube root of the computed volume commented for performance but left
@@ -114,7 +114,7 @@ pcl::ShapeContext3DEstimation<PointInT, PointNT, PointOutT>::initCompute ()
       // float cbrt = pow(V, e);
       // cbrt = 1 / cbrt;
 
-      for (size_t l = 0; l < azimuth_bins_; l++)
+      for (std::size_t l = 0; l < azimuth_bins_; l++)
       {
         // Store in lut 1/cbrt
         //volume_lut_[ (l*elevation_bins_*radius_bins_) + k*radius_bins_ + j ] = cbrt;
@@ -128,7 +128,7 @@ pcl::ShapeContext3DEstimation<PointInT, PointNT, PointOutT>::initCompute ()
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointInT, typename PointNT, typename PointOutT> bool
 pcl::ShapeContext3DEstimation<PointInT, PointNT, PointOutT>::computePoint (
-    size_t index, const pcl::PointCloud<PointNT> &normals, float rf[9], std::vector<float> &desc)
+    std::size_t index, const pcl::PointCloud<PointNT> &normals, float rf[9], std::vector<float> &desc)
 {
   // The RF is formed as this x_axis | y_axis | normal
   Eigen::Map<Eigen::Vector3f> x_axis (rf);
@@ -138,11 +138,11 @@ pcl::ShapeContext3DEstimation<PointInT, PointNT, PointOutT>::computePoint (
   // Find every point within specified search_radius_
   std::vector<int> nn_indices;
   std::vector<float> nn_dists;
-  const size_t neighb_cnt = searchForNeighbors ((*indices_)[index], search_radius_, nn_indices, nn_dists);
+  const std::size_t neighb_cnt = searchForNeighbors ((*indices_)[index], search_radius_, nn_indices, nn_dists);
   if (neighb_cnt == 0)
   {
-    for (size_t i = 0; i < desc.size (); ++i)
-      desc[i] = std::numeric_limits<float>::quiet_NaN ();
+    for (float &descriptor : desc)
+      descriptor = std::numeric_limits<float>::quiet_NaN ();
 
     memset (rf, 0, sizeof (rf[0]) * 9);
     return (false);
@@ -150,7 +150,7 @@ pcl::ShapeContext3DEstimation<PointInT, PointNT, PointOutT>::computePoint (
 
   float minDist = std::numeric_limits<float>::max ();
   int minIndex = -1;
-  for (size_t i = 0; i < nn_indices.size (); i++)
+  for (std::size_t i = 0; i < nn_indices.size (); i++)
   {
 	  if (nn_dists[i] < minDist)
 	  {
@@ -166,9 +166,9 @@ pcl::ShapeContext3DEstimation<PointInT, PointNT, PointOutT>::computePoint (
   normal = normals[minIndex].getNormalVector3fMap ();
 
   // Compute and store the RF direction
-  x_axis[0] = static_cast<float> (rnd ());
-  x_axis[1] = static_cast<float> (rnd ());
-  x_axis[2] = static_cast<float> (rnd ());
+  x_axis[0] = rnd ();
+  x_axis[1] = rnd ();
+  x_axis[2] = rnd ();
   if (!pcl::utils::equal (normal[2], 0.0f))
     x_axis[2] = - (normal[0]*x_axis[0] + normal[1]*x_axis[1]) / normal[2];
   else if (!pcl::utils::equal (normal[1], 0.0f))
@@ -185,7 +185,7 @@ pcl::ShapeContext3DEstimation<PointInT, PointNT, PointOutT>::computePoint (
   y_axis.matrix () = normal.cross (x_axis);
 
   // For each point within radius
-  for (size_t ne = 0; ne < neighb_cnt; ne++)
+  for (std::size_t ne = 0; ne < neighb_cnt; ne++)
   {
     if (pcl::utils::equal (nn_dists[ne], 0.0f))
 		  continue;
@@ -212,15 +212,15 @@ pcl::ShapeContext3DEstimation<PointInT, PointNT, PointOutT>::computePoint (
     Eigen::Vector3f no = neighbour - origin;
     no.normalize ();
     float theta = normal.dot (no);
-    theta = pcl::rad2deg (acosf (std::min (1.0f, std::max (-1.0f, theta))));
+    theta = pcl::rad2deg (std::acos (std::min (1.0f, std::max (-1.0f, theta))));
 
     // Bin (j, k, l)
-    size_t j = 0;
-    size_t k = 0;
-    size_t l = 0;
+    std::size_t j = 0;
+    std::size_t k = 0;
+    std::size_t l = 0;
 
     // Compute the Bin(j, k, l) coordinates of current neighbour
-    for (size_t rad = 1; rad < radius_bins_+1; rad++)
+    for (std::size_t rad = 1; rad < radius_bins_+1; rad++)
     {
       if (r <= radii_interval_[rad])
       {
@@ -229,7 +229,7 @@ pcl::ShapeContext3DEstimation<PointInT, PointNT, PointOutT>::computePoint (
       }
     }
 
-    for (size_t ang = 1; ang < elevation_bins_+1; ang++)
+    for (std::size_t ang = 1; ang < elevation_bins_+1; ang++)
     {
       if (theta <= theta_divisions_[ang])
       {
@@ -238,7 +238,7 @@ pcl::ShapeContext3DEstimation<PointInT, PointNT, PointOutT>::computePoint (
       }
     }
 
-    for (size_t ang = 1; ang < azimuth_bins_+1; ang++)
+    for (std::size_t ang = 1; ang < azimuth_bins_+1; ang++)
     {
       if (phi <= phi_divisions_[ang])
       {
@@ -261,7 +261,7 @@ pcl::ShapeContext3DEstimation<PointInT, PointNT, PointOutT>::computePoint (
     assert (w >= 0.0);
     if (w == std::numeric_limits<float>::infinity ())
       PCL_ERROR ("Shape Context Error INF!\n");
-    if (w != w)
+    if (std::isnan(w))
       PCL_ERROR ("Shape Context Error IND!\n");
     /// Accumulate w into correspondent Bin(j,k,l)
     desc[(l*elevation_bins_*radius_bins_) + (k*radius_bins_) + j] += w;
@@ -282,14 +282,14 @@ pcl::ShapeContext3DEstimation<PointInT, PointNT, PointOutT>::computeFeature (Poi
 
   output.is_dense = true;
   // Iterate over all points and compute the descriptors
-	for (size_t point_index = 0; point_index < indices_->size (); point_index++)
+	for (std::size_t point_index = 0; point_index < indices_->size (); point_index++)
   {
     //output[point_index].descriptor.resize (descriptor_length_);
 
     // If the point is not finite, set the descriptor to NaN and continue
     if (!isFinite ((*input_)[(*indices_)[point_index]]))
     {
-      for (size_t i = 0; i < descriptor_length_; ++i)
+      for (std::size_t i = 0; i < descriptor_length_; ++i)
         output[point_index].descriptor[i] = std::numeric_limits<float>::quiet_NaN ();
 
       memset (output[point_index].rf, 0, sizeof (output[point_index].rf[0]) * 9);
@@ -300,7 +300,7 @@ pcl::ShapeContext3DEstimation<PointInT, PointNT, PointOutT>::computeFeature (Poi
     std::vector<float> descriptor (descriptor_length_);
     if (!computePoint (point_index, *normals_, output[point_index].rf, descriptor))
       output.is_dense = false;
-    for (size_t j = 0; j < descriptor_length_; ++j)
+    for (std::size_t j = 0; j < descriptor_length_; ++j)
       output[point_index].descriptor[j] = descriptor[j];
   }
 }

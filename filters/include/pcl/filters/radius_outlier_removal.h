@@ -37,8 +37,7 @@
  *
  */
 
-#ifndef PCL_FILTERS_RADIUS_OUTLIER_REMOVAL_H_
-#define PCL_FILTERS_RADIUS_OUTLIER_REMOVAL_H_
+#pragma once
 
 #include <pcl/filters/filter_indices.h>
 #include <pcl/search/pcl_search.h>
@@ -72,16 +71,16 @@ namespace pcl
   class RadiusOutlierRemoval : public FilterIndices<PointT>
   {
     protected:
-      typedef typename FilterIndices<PointT>::PointCloud PointCloud;
-      typedef typename PointCloud::Ptr PointCloudPtr;
-      typedef typename PointCloud::ConstPtr PointCloudConstPtr;
-      typedef typename pcl::search::Search<PointT>::Ptr SearcherPtr;
+      using PointCloud = typename FilterIndices<PointT>::PointCloud;
+      using PointCloudPtr = typename PointCloud::Ptr;
+      using PointCloudConstPtr = typename PointCloud::ConstPtr;
+      using SearcherPtr = typename pcl::search::Search<PointT>::Ptr;
 
     public:
 
-      typedef boost::shared_ptr< RadiusOutlierRemoval<PointT> > Ptr;
-      typedef boost::shared_ptr< const RadiusOutlierRemoval<PointT> > ConstPtr;
-  
+      using Ptr = shared_ptr<RadiusOutlierRemoval<PointT> >;
+      using ConstPtr = shared_ptr<const RadiusOutlierRemoval<PointT> >;
+
 
       /** \brief Constructor.
         * \param[in] extract_removed_indices Set to true if you want to be able to extract the indices of points being removed (default = false).
@@ -154,13 +153,13 @@ namespace pcl
         * \param[out] output The resultant point cloud.
         */
       void
-      applyFilter (PointCloud &output);
+      applyFilter (PointCloud &output) override;
 
       /** \brief Filtered results are indexed by an indices array.
         * \param[out] indices The resultant indices.
         */
       void
-      applyFilter (std::vector<int> &indices)
+      applyFilter (std::vector<int> &indices) override
       {
         applyFilterIndices (indices);
       }
@@ -190,7 +189,7 @@ namespace pcl
     * \ingroup filters
     */
   template<>
-  class PCL_EXPORTS RadiusOutlierRemoval<pcl::PCLPointCloud2> : public Filter<pcl::PCLPointCloud2>
+  class PCL_EXPORTS RadiusOutlierRemoval<pcl::PCLPointCloud2> : public FilterIndices<pcl::PCLPointCloud2>
   {
     using Filter<pcl::PCLPointCloud2>::filter_name_;
     using Filter<pcl::PCLPointCloud2>::getClassName;
@@ -198,18 +197,18 @@ namespace pcl
     using Filter<pcl::PCLPointCloud2>::removed_indices_;
     using Filter<pcl::PCLPointCloud2>::extract_removed_indices_;
 
-    typedef pcl::search::Search<pcl::PointXYZ> KdTree;
-    typedef pcl::search::Search<pcl::PointXYZ>::Ptr KdTreePtr;
+    using KdTree = pcl::search::Search<pcl::PointXYZ>;
+    using KdTreePtr = pcl::search::Search<pcl::PointXYZ>::Ptr;
 
-    typedef pcl::PCLPointCloud2 PCLPointCloud2;
-    typedef PCLPointCloud2::Ptr PCLPointCloud2Ptr;
-    typedef PCLPointCloud2::ConstPtr PCLPointCloud2ConstPtr;
+    using PCLPointCloud2 = pcl::PCLPointCloud2;
+    using PCLPointCloud2Ptr = PCLPointCloud2::Ptr;
+    using PCLPointCloud2ConstPtr = PCLPointCloud2::ConstPtr;
 
     public:
       /** \brief Empty constructor. */
       RadiusOutlierRemoval (bool extract_removed_indices = false) :
-        Filter<pcl::PCLPointCloud2>::Filter (extract_removed_indices),
-        search_radius_ (0.0), min_pts_radius_ (1), tree_ ()
+        FilterIndices<pcl::PCLPointCloud2>::FilterIndices (extract_removed_indices),
+        search_radius_ (0.0), min_pts_radius_ (1)
       {
         filter_name_ = "RadiusOutlierRemoval";
       }
@@ -241,7 +240,7 @@ namespace pcl
       }
 
       /** \brief Get the minimum number of neighbors that a point needs to have in the given search radius to be
-        * considered an inlier and avoid being filtered. 
+        * considered an inlier and avoid being filtered.
         */
       inline double
       getMinNeighborsInRadius ()
@@ -254,21 +253,21 @@ namespace pcl
       double search_radius_;
 
       /** \brief The minimum number of neighbors that a point needs to have in the given search radius to be considered
-        * an inlier. 
+        * an inlier.
         */
       int min_pts_radius_;
 
       /** \brief A pointer to the spatial search object. */
-      KdTreePtr tree_;
+      KdTreePtr searcher_;
 
       void
-      applyFilter (PCLPointCloud2 &output);
+      applyFilter (PCLPointCloud2 &output) override;
+
+      void
+      applyFilter (std::vector<int> &indices) override;
   };
 }
 
 #ifdef PCL_NO_PRECOMPILE
 #include <pcl/filters/impl/radius_outlier_removal.hpp>
 #endif
-
-#endif  // PCL_FILTERS_RADIUS_OUTLIER_REMOVAL_H_
-

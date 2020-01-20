@@ -38,8 +38,7 @@
  *
  */
 
-#ifndef PCL_REGISTRATION_SAMPLE_CONSENSUS_PREREJECTIVE_H_
-#define PCL_REGISTRATION_SAMPLE_CONSENSUS_PREREJECTIVE_H_
+#pragma once
 
 #include <pcl/registration/registration.h>
 #include <pcl/registration/transformation_estimation_svd.h>
@@ -77,7 +76,7 @@ namespace pcl
   class SampleConsensusPrerejective : public Registration<PointSource, PointTarget>
   {
     public:
-      typedef typename Registration<PointSource, PointTarget>::Matrix4 Matrix4;
+      using Matrix4 = typename Registration<PointSource, PointTarget>::Matrix4;
       
       using Registration<PointSource, PointTarget>::reg_name_;
       using Registration<PointSource, PointTarget>::getClassName;
@@ -92,27 +91,27 @@ namespace pcl
       using Registration<PointSource, PointTarget>::getFitnessScore;
       using Registration<PointSource, PointTarget>::converged_;
 
-      typedef typename Registration<PointSource, PointTarget>::PointCloudSource PointCloudSource;
-      typedef typename PointCloudSource::Ptr PointCloudSourcePtr;
-      typedef typename PointCloudSource::ConstPtr PointCloudSourceConstPtr;
+      using PointCloudSource = typename Registration<PointSource, PointTarget>::PointCloudSource;
+      using PointCloudSourcePtr = typename PointCloudSource::Ptr;
+      using PointCloudSourceConstPtr = typename PointCloudSource::ConstPtr;
 
-      typedef typename Registration<PointSource, PointTarget>::PointCloudTarget PointCloudTarget;
+      using PointCloudTarget = typename Registration<PointSource, PointTarget>::PointCloudTarget;
 
-      typedef PointIndices::Ptr PointIndicesPtr;
-      typedef PointIndices::ConstPtr PointIndicesConstPtr;
+      using PointIndicesPtr = PointIndices::Ptr;
+      using PointIndicesConstPtr = PointIndices::ConstPtr;
 
-      typedef pcl::PointCloud<FeatureT> FeatureCloud;
-      typedef typename FeatureCloud::Ptr FeatureCloudPtr;
-      typedef typename FeatureCloud::ConstPtr FeatureCloudConstPtr;
+      using FeatureCloud = pcl::PointCloud<FeatureT>;
+      using FeatureCloudPtr = typename FeatureCloud::Ptr;
+      using FeatureCloudConstPtr = typename FeatureCloud::ConstPtr;
 
-      typedef boost::shared_ptr<SampleConsensusPrerejective<PointSource, PointTarget, FeatureT> > Ptr;
-      typedef boost::shared_ptr<const SampleConsensusPrerejective<PointSource, PointTarget, FeatureT> > ConstPtr;
+      using Ptr = shared_ptr<SampleConsensusPrerejective<PointSource, PointTarget, FeatureT> >;
+      using ConstPtr = shared_ptr<const SampleConsensusPrerejective<PointSource, PointTarget, FeatureT> >;
 
-      typedef typename KdTreeFLANN<FeatureT>::Ptr FeatureKdTreePtr;
+      using FeatureKdTreePtr = typename KdTreeFLANN<FeatureT>::Ptr;
       
-      typedef pcl::registration::CorrespondenceRejectorPoly<PointSource, PointTarget> CorrespondenceRejectorPoly;
-      typedef typename CorrespondenceRejectorPoly::Ptr CorrespondenceRejectorPolyPtr;
-      typedef typename CorrespondenceRejectorPoly::ConstPtr CorrespondenceRejectorPolyConstPtr;
+      using CorrespondenceRejectorPoly = pcl::registration::CorrespondenceRejectorPoly<PointSource, PointTarget>;
+      using CorrespondenceRejectorPolyPtr = typename CorrespondenceRejectorPoly::Ptr;
+      using CorrespondenceRejectorPolyConstPtr = typename CorrespondenceRejectorPoly::ConstPtr;
       
       /** \brief Constructor */
       SampleConsensusPrerejective ()
@@ -131,7 +130,7 @@ namespace pcl
       };
       
       /** \brief Destructor */
-      virtual ~SampleConsensusPrerejective ()
+      ~SampleConsensusPrerejective ()
       {
       }
 
@@ -276,7 +275,7 @@ namespace pcl
         * \param guess The computed transformation
         */
       void 
-      computeTransformation (PointCloudSource &output, const Eigen::Matrix4f& guess);
+      computeTransformation (PointCloudSource &output, const Eigen::Matrix4f& guess) override;
 
       /** \brief Obtain the fitness of a transformation
         * The following metrics are calculated, based on
@@ -316,5 +315,3 @@ namespace pcl
 }
 
 #include <pcl/registration/impl/sample_consensus_prerejective.hpp>
-
-#endif

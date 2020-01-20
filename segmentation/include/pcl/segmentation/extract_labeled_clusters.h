@@ -33,8 +33,7 @@
  *
  */
 
-#ifndef PCL_EXTRACT_LABELED_CLUSTERS_H_
-#define PCL_EXTRACT_LABELED_CLUSTERS_H_
+#pragma once
 
 #include <pcl/pcl_base.h>
 #include <pcl/search/pcl_search.h>
@@ -55,9 +54,9 @@ namespace pcl
     */
   template <typename PointT> void 
   extractLabeledEuclideanClusters (
-      const PointCloud<PointT> &cloud, const boost::shared_ptr<search::Search<PointT> > &tree, 
-      float tolerance, std::vector<std::vector<PointIndices> > &labeled_clusters, 
-      unsigned int min_pts_per_cluster = 1, unsigned int max_pts_per_cluster = std::numeric_limits<unsigned int>::max (), 
+      const PointCloud<PointT> &cloud, const typename search::Search<PointT>::Ptr &tree,
+      float tolerance, std::vector<std::vector<PointIndices> > &labeled_clusters,
+      unsigned int min_pts_per_cluster = 1, unsigned int max_pts_per_cluster = std::numeric_limits<unsigned int>::max (),
       unsigned int max_label = std::numeric_limits<unsigned int>::max ());
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,18 +69,18 @@ namespace pcl
   template <typename PointT>
   class LabeledEuclideanClusterExtraction: public PCLBase<PointT>
   {
-    typedef PCLBase<PointT> BasePCLBase;
+    using BasePCLBase = PCLBase<PointT>;
 
     public:
-      typedef pcl::PointCloud<PointT> PointCloud;
-      typedef typename PointCloud::Ptr PointCloudPtr;
-      typedef typename PointCloud::ConstPtr PointCloudConstPtr;
+      using PointCloud = pcl::PointCloud<PointT>;
+      using PointCloudPtr = typename PointCloud::Ptr;
+      using PointCloudConstPtr = typename PointCloud::ConstPtr;
 
-      typedef typename pcl::search::Search<PointT> KdTree;
-      typedef typename pcl::search::Search<PointT>::Ptr KdTreePtr;
+      using KdTree = pcl::search::Search<PointT>;
+      using KdTreePtr = typename KdTree::Ptr;
 
-      typedef PointIndices::Ptr PointIndicesPtr;
-      typedef PointIndices::ConstPtr PointIndicesConstPtr;
+      using PointIndicesPtr = PointIndices::Ptr;
+      using PointIndicesConstPtr = PointIndices::ConstPtr;
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       /** \brief Empty constructor. */
@@ -189,5 +188,3 @@ namespace pcl
 #ifdef PCL_NO_PRECOMPILE
 #include <pcl/segmentation/impl/extract_labeled_clusters.hpp>
 #endif
-
-#endif  //#ifndef PCL_EXTRACT_LABELED_CLUSTERS_H_

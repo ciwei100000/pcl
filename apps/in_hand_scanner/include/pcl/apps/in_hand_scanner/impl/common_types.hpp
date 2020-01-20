@@ -43,6 +43,8 @@
 
 #include <limits>
 
+#include <pcl/pcl_macros.h>
+
 namespace pcl
 {
   namespace ihs
@@ -52,11 +54,11 @@ namespace pcl
       PCL_ADD_POINT4D
       PCL_ADD_NORMAL4D
       PCL_ADD_RGB
-      float        weight;
+      float weight;
       unsigned int age;
-      uint32_t     directions;
+      std::uint32_t directions;
 
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      PCL_MAKE_ALIGNED_OPERATOR_NEW
     };
 
     struct PointIHS : public pcl::ihs::_PointIHS

@@ -38,13 +38,13 @@
  *
  */
 
-
-#ifndef PCL_PPF_REGISTRATION_H_
-#define PCL_PPF_REGISTRATION_H_
+#pragma once
 
 #include <pcl/registration/boost.h>
 #include <pcl/registration/registration.h>
 #include <pcl/features/ppf.h>
+
+#include <unordered_map>
 
 namespace pcl
 {
@@ -58,6 +58,8 @@ namespace pcl
         */
       struct HashKeyStruct : public std::pair <int, std::pair <int, std::pair <int, int> > >
       {
+        HashKeyStruct () = default;
+
         HashKeyStruct(int a, int b, int c, int d)
         {
           this->first = a;
@@ -65,10 +67,20 @@ namespace pcl
           this->second.second.first = c;
           this->second.second.second = d;
         }
+
+        std::size_t operator()(const HashKeyStruct& s) const noexcept
+        {
+            const std::size_t h1 = std::hash<int>{} (s.first);
+            const std::size_t h2 = std::hash<int>{} (s.second.first);
+            const std::size_t h3 = std::hash<int>{} (s.second.second.first);
+            const std::size_t h4 = std::hash<int>{} (s.second.second.second);
+            return h1 ^ (h2 << 1) ^ (h3 << 2) ^ (h4 << 3);
+        }
       };
-      typedef boost::unordered_multimap<HashKeyStruct, std::pair<size_t, size_t> > FeatureHashMapType;
-      typedef boost::shared_ptr<FeatureHashMapType> FeatureHashMapTypePtr;
-      typedef boost::shared_ptr<PPFHashMapSearch> Ptr;
+      using FeatureHashMapType = std::unordered_multimap<HashKeyStruct, std::pair<std::size_t, std::size_t>, HashKeyStruct>;
+      using FeatureHashMapTypePtr = shared_ptr<FeatureHashMapType>;
+      using Ptr = shared_ptr<PPFHashMapSearch>;
+      using ConstPtr = shared_ptr<const PPFHashMapSearch>;
 
 
       /** \brief Constructor for the PPFHashMapSearch class which sets the two step parameters for the enclosed data structure
@@ -77,8 +89,7 @@ namespace pcl
        */
       PPFHashMapSearch (float angle_discretization_step = 12.0f / 180.0f * static_cast<float> (M_PI),
                         float distance_discretization_step = 0.01f)
-        : alpha_m_ ()
-        , feature_hash_map_ (new FeatureHashMapType)
+        : feature_hash_map_ (new FeatureHashMapType)
         , internals_initialized_ (false)
         , angle_discretization_step_ (angle_discretization_step)
         , distance_discretization_step_ (distance_discretization_step)
@@ -102,9 +113,9 @@ namespace pcl
        */
       void
       nearestNeighborSearch (float &f1, float &f2, float &f3, float &f4,
-                             std::vector<std::pair<size_t, size_t> > &indices);
+                             std::vector<std::pair<std::size_t, std::size_t> > &indices);
 
-      /** \brief Convenience method for returning a copy of the class instance as a boost::shared_ptr */
+      /** \brief Convenience method for returning a copy of the class instance as a shared_ptr */
       Ptr
       makeShared() { return Ptr (new PPFHashMapSearch (*this)); }
 
@@ -158,7 +169,7 @@ namespace pcl
         Eigen::Affine3f pose;
         unsigned int votes;
       };
-      typedef std::vector<PoseWithVotes, Eigen::aligned_allocator<PoseWithVotes> > PoseWithVotesList;
+      using PoseWithVotesList = std::vector<PoseWithVotes, Eigen::aligned_allocator<PoseWithVotes> >;
 
       /// input_ is the model cloud
       using Registration<PointSource, PointTarget>::input_;
@@ -168,19 +179,18 @@ namespace pcl
       using Registration<PointSource, PointTarget>::final_transformation_;
       using Registration<PointSource, PointTarget>::transformation_;
 
-      typedef pcl::PointCloud<PointSource> PointCloudSource;
-      typedef typename PointCloudSource::Ptr PointCloudSourcePtr;
-      typedef typename PointCloudSource::ConstPtr PointCloudSourceConstPtr;
+      using PointCloudSource = pcl::PointCloud<PointSource>;
+      using PointCloudSourcePtr = typename PointCloudSource::Ptr;
+      using PointCloudSourceConstPtr = typename PointCloudSource::ConstPtr;
 
-      typedef pcl::PointCloud<PointTarget> PointCloudTarget;
-      typedef typename PointCloudTarget::Ptr PointCloudTargetPtr;
-      typedef typename PointCloudTarget::ConstPtr PointCloudTargetConstPtr;
+      using PointCloudTarget = pcl::PointCloud<PointTarget>;
+      using PointCloudTargetPtr = typename PointCloudTarget::Ptr;
+      using PointCloudTargetConstPtr = typename PointCloudTarget::ConstPtr;
 
 
       /** \brief Empty constructor that initializes all the parameters of the algorithm with default values */
       PPFRegistration ()
       :  Registration<PointSource, PointTarget> (),
-         search_method_ (),
          scene_reference_point_sampling_rate_ (5),
          clustering_position_diff_threshold_ (0.01f),
          clustering_rotation_diff_threshold_ (20.0f / 180.0f * static_cast<float> (M_PI))
@@ -238,13 +248,13 @@ namespace pcl
        * \param cloud the input point cloud target
        */
       void
-      setInputTarget (const PointCloudTargetConstPtr &cloud);
+      setInputTarget (const PointCloudTargetConstPtr &cloud) override;
 
 
     private:
       /** \brief Method that calculates the transformation between the input_ and target_ point clouds, based on the PPF features */
       void
-      computeTransformation (PointCloudSource &output, const Eigen::Matrix4f& guess);
+      computeTransformation (PointCloudSource &output, const Eigen::Matrix4f& guess) override;
 
 
       /** \brief the search method that is going to be used to find matching feature pairs */
@@ -269,8 +279,8 @@ namespace pcl
       /** \brief static method used for the std::sort function to order two pairs <index, votes>
        * by the number of votes (unsigned integer value) */
       static bool
-      clusterVotesCompareFunction (const std::pair<size_t, unsigned int> &a,
-                                   const std::pair<size_t, unsigned int> &b);
+      clusterVotesCompareFunction (const std::pair<std::size_t, unsigned int> &a,
+                                   const std::pair<std::size_t, unsigned int> &b);
 
       /** \brief Method that clusters a set of given poses by using the clustering thresholds
        * and their corresponding number of votes (see publication for more details) */
@@ -287,5 +297,3 @@ namespace pcl
 }
 
 #include <pcl/registration/impl/ppf_registration.hpp>
-
-#endif // PCL_PPF_REGISTRATION_H_

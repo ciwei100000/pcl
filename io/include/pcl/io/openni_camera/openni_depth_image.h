@@ -35,11 +35,12 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#include <pcl/pcl_config.h>
-#ifdef HAVE_OPENNI
 
-#ifndef __OPENNI_DEPTH_IMAGE__
-#define __OPENNI_DEPTH_IMAGE__
+#pragma once
+ 
+#include <pcl/pcl_config.h>
+#include <pcl/make_shared.h>
+#ifdef HAVE_OPENNI
 
 #include "openni.h"
 
@@ -56,8 +57,8 @@ namespace openni_wrapper
   class PCL_EXPORTS DepthImage
   {
     public:
-      typedef boost::shared_ptr<DepthImage> Ptr;
-      typedef boost::shared_ptr<const DepthImage> ConstPtr;
+      using Ptr = pcl::shared_ptr<DepthImage>;
+      using ConstPtr = pcl::shared_ptr<const DepthImage>;
 
       /** \brief Constructor
         * \param[in] depth_meta_data the actual data from the OpenNI library
@@ -68,7 +69,7 @@ namespace openni_wrapper
         * \param[in] no_sample_value defines which values in the depth data are indicating that no depth (disparity) could be determined .
         * \attention The focal length may change, depending whether the depth stream is registered/mapped to the RGB stream or not.
         */
-      inline DepthImage (boost::shared_ptr<xn::DepthMetaData> depth_meta_data, float baseline, float focal_length, XnUInt64 shadow_value, XnUInt64 no_sample_value) throw ();
+      inline DepthImage (pcl::shared_ptr<xn::DepthMetaData> depth_meta_data, float baseline, float focal_length, XnUInt64 shadow_value, XnUInt64 no_sample_value) throw ();
 
       /** \brief Destructor. Never throws an exception. */
       inline virtual ~DepthImage () throw ();
@@ -155,15 +156,15 @@ namespace openni_wrapper
       getTimeStamp () const throw ();
 
     protected:
-      boost::shared_ptr<xn::DepthMetaData> depth_md_;
+      pcl::shared_ptr<xn::DepthMetaData> depth_md_;
       float baseline_;
       float focal_length_;
       XnUInt64 shadow_value_;
       XnUInt64 no_sample_value_;
   } ;
 
-  DepthImage::DepthImage (boost::shared_ptr<xn::DepthMetaData> depth_meta_data, float baseline, float focal_length, XnUInt64 shadow_value, XnUInt64 no_sample_value) throw ()
-  : depth_md_ (depth_meta_data)
+  DepthImage::DepthImage (pcl::shared_ptr<xn::DepthMetaData> depth_meta_data, float baseline, float focal_length, XnUInt64 shadow_value, XnUInt64 no_sample_value) throw ()
+  : depth_md_ (std::move(depth_meta_data))
   , baseline_ (baseline)
   , focal_length_ (focal_length)
   , shadow_value_ (shadow_value)
@@ -226,4 +227,3 @@ namespace openni_wrapper
   }
 } // namespace
 #endif
-#endif //__OPENNI_DEPTH_IMAGE

@@ -41,7 +41,8 @@
 #include <pcl/console/parse.h>
 #include <pcl/common/time.h>
 #include <pcl/surface/mls.h>
-#include <pcl/kdtree/kdtree_flann.h>
+
+#include <mutex>
 
 #define FPS_CALC(_WHAT_) \
 do \
@@ -71,7 +72,7 @@ class OpenNISmoothing;
 void keyboardEventOccurred (const pcl::visualization::KeyboardEvent &event,
                             void *stop_void)
 {
-  boost::shared_ptr<bool> stop = *static_cast<boost::shared_ptr<bool>*> (stop_void);
+  std::shared_ptr<bool> stop = *static_cast<std::shared_ptr<bool>*> (stop_void);
   if (event.getKeySym () == "s" && event.keyDown ())
   {
     *stop = ! *stop;
@@ -84,9 +85,9 @@ template <typename PointType>
 class OpenNISmoothing
 {
   public:
-    typedef pcl::PointCloud<PointType> Cloud;
-    typedef typename Cloud::Ptr CloudPtr;
-    typedef typename Cloud::ConstPtr CloudConstPtr;
+    using Cloud = pcl::PointCloud<PointType>;
+    using CloudPtr = typename Cloud::Ptr;
+    using CloudConstPtr = typename Cloud::ConstPtr;
 
     OpenNISmoothing (double search_radius, bool sqr_gauss_param_set, double sqr_gauss_param,
                      int polynomial_order, const std::string& device_id = "")
@@ -131,15 +132,15 @@ class OpenNISmoothing
     void
     run ()
     {
-      pcl::Grabber* interface = new pcl::OpenNIGrabber (device_id_);
+      pcl::OpenNIGrabber interface {device_id_};
 
-      boost::function<void (const CloudConstPtr&)> f = boost::bind (&OpenNISmoothing::cloud_cb_, this, _1);
-      boost::signals2::connection c = interface->registerCallback (f);
+      std::function<void (const CloudConstPtr&)> f = [this] (const CloudConstPtr& cloud) { cloud_cb_ (cloud); };
+      boost::signals2::connection c = interface.registerCallback (f);
 
       viewer.registerKeyboardCallback (keyboardEventOccurred, reinterpret_cast<void*> (&stop_computing_));
 
 
-      interface->start ();
+      interface.start ();
 
       while (!viewer.wasStopped ())
       {
@@ -156,17 +157,17 @@ class OpenNISmoothing
         }
       }
 
-      interface->stop ();
+      interface.stop ();
     }
 
     pcl::MovingLeastSquares<PointType, PointType> smoother_;
     pcl::visualization::PCLVisualizer viewer;
     std::string device_id_;
-    boost::mutex mtx_;
+    std::mutex mtx_;
     CloudConstPtr cloud_;
     CloudPtr cloud_smoothed_;
     int viewport_input_, viewport_smoothed_;
-    boost::shared_ptr<bool> stop_computing_;
+    std::shared_ptr<bool> stop_computing_;
 };
 
 void
@@ -183,15 +184,15 @@ usage (char ** argv)
   {
     for (unsigned deviceIdx = 0; deviceIdx < driver.getNumberDevices (); ++deviceIdx)
     {
-      cout << "Device: " << deviceIdx + 1 << ", vendor: " << driver.getVendorName (deviceIdx) << ", product: " << driver.getProductName (deviceIdx)
-              << ", connected: " << driver.getBus (deviceIdx) << " @ " << driver.getAddress (deviceIdx) << ", serial number: \'" << driver.getSerialNumber (deviceIdx) << "\'" << endl;
-      cout << "device_id may be #1, #2, ... for the first second etc device in the list or" << endl
-           << "                 bus@address for the device connected to a specific usb-bus / address combination (works only in Linux) or" << endl
-           << "                 <serial-number> (only in Linux and for devices which provide serial numbers)"  << endl;
+      std::cout << "Device: " << deviceIdx + 1 << ", vendor: " << driver.getVendorName (deviceIdx) << ", product: " << driver.getProductName (deviceIdx)
+              << ", connected: " << driver.getBus (deviceIdx) << " @ " << driver.getAddress (deviceIdx) << ", serial number: \'" << driver.getSerialNumber (deviceIdx) << "\'" << std::endl;
+      std::cout << "device_id may be #1, #2, ... for the first second etc device in the list or" << std::endl
+           << "                 bus@address for the device connected to a specific usb-bus / address combination (works only in Linux) or" << std::endl
+           << "                 <serial-number> (only in Linux and for devices which provide serial numbers)"  << std::endl;
     }
   }
   else
-    cout << "No devices connected." << endl;
+    std::cout << "No devices connected." << std::endl;
 }
 
 int

@@ -87,7 +87,7 @@ randPSurface (vtkPolyData * polydata, std::vector<double> * cumulativeAreas, dou
 
   double A[3], B[3], C[3];
   vtkIdType npts = 0;
-  vtkIdType *ptIds = NULL;
+  vtkIdType *ptIds = nullptr;
   polydata->GetCellPoints (el, npts, ptIds);
   polydata->GetPoint (ptIds[0], A);
   polydata->GetPoint (ptIds[1], B);
@@ -131,33 +131,33 @@ randPSurface (vtkPolyData * polydata, std::vector<double> * cumulativeAreas, dou
 }
 
 void
-uniform_sampling (vtkSmartPointer<vtkPolyData> polydata, size_t n_samples, bool calc_normal, bool calc_color, pcl::PointCloud<pcl::PointXYZRGBNormal> & cloud_out)
+uniform_sampling (vtkSmartPointer<vtkPolyData> polydata, std::size_t n_samples, bool calc_normal, bool calc_color, pcl::PointCloud<pcl::PointXYZRGBNormal> & cloud_out)
 {
   polydata->BuildCells ();
   vtkSmartPointer<vtkCellArray> cells = polydata->GetPolys ();
 
   double p1[3], p2[3], p3[3], totalArea = 0;
   std::vector<double> cumulativeAreas (cells->GetNumberOfCells (), 0);
-  size_t i = 0;
-  vtkIdType npts = 0, *ptIds = NULL;
-  for (cells->InitTraversal (); cells->GetNextCell (npts, ptIds); i++)
+  vtkIdType npts = 0, *ptIds = nullptr;
+  std::size_t cellId = 0;
+  for (cells->InitTraversal (); cells->GetNextCell (npts, ptIds); cellId++)
   {
     polydata->GetPoint (ptIds[0], p1);
     polydata->GetPoint (ptIds[1], p2);
     polydata->GetPoint (ptIds[2], p3);
     totalArea += vtkTriangle::TriangleArea (p1, p2, p3);
-    cumulativeAreas[i] = totalArea;
+    cumulativeAreas[cellId] = totalArea;
   }
 
   cloud_out.points.resize (n_samples);
-  cloud_out.width = static_cast<pcl::uint32_t> (n_samples);
+  cloud_out.width = static_cast<std::uint32_t> (n_samples);
   cloud_out.height = 1;
 
-  for (i = 0; i < n_samples; i++)
+  for (std::size_t i = 0; i < n_samples; i++)
   {
     Eigen::Vector3f p;
-    Eigen::Vector3f n;
-    Eigen::Vector3f c;
+    Eigen::Vector3f n (0, 0, 0);
+    Eigen::Vector3f c (0, 0, 0);
     randPSurface (polydata, &cumulativeAreas, totalArea, p, calc_normal, n, calc_color, c);
     cloud_out.points[i].x = p[0];
     cloud_out.points[i].y = p[1];
@@ -170,9 +170,9 @@ uniform_sampling (vtkSmartPointer<vtkPolyData> polydata, size_t n_samples, bool 
     }
     if (calc_color)
     {
-      cloud_out.points[i].r = static_cast<uint8_t>(c[0]);
-      cloud_out.points[i].g = static_cast<uint8_t>(c[1]);
-      cloud_out.points[i].b = static_cast<uint8_t>(c[2]);
+      cloud_out.points[i].r = static_cast<std::uint8_t>(c[0]);
+      cloud_out.points[i].g = static_cast<std::uint8_t>(c[1]);
+      cloud_out.points[i].b = static_cast<std::uint8_t>(c[2]);
     }
   }
 }
@@ -256,11 +256,7 @@ main (int argc, char **argv)
 
   //make sure that the polygons are triangles!
   vtkSmartPointer<vtkTriangleFilter> triangleFilter = vtkSmartPointer<vtkTriangleFilter>::New ();
-#if VTK_MAJOR_VERSION < 6
-  triangleFilter->SetInput (polydata1);
-#else
   triangleFilter->SetInputData (polydata1);
-#endif
   triangleFilter->Update ();
 
   vtkSmartPointer<vtkPolyDataMapper> triangleMapper = vtkSmartPointer<vtkPolyDataMapper>::New ();
@@ -268,27 +264,8 @@ main (int argc, char **argv)
   triangleMapper->Update ();
   polydata1 = triangleMapper->GetInput ();
 
-  bool INTER_VIS = false;
-
-  if (INTER_VIS)
-  {
-    visualization::PCLVisualizer vis;
-    vis.addModelFromPolyData (polydata1, "mesh1", 0);
-    vis.setRepresentationToSurfaceForAllActors ();
-    vis.spin ();
-  }
-
   pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloud_1 (new pcl::PointCloud<pcl::PointXYZRGBNormal>);
   uniform_sampling (polydata1, SAMPLE_POINTS_, write_normals, write_colors, *cloud_1);
-
-  if (INTER_VIS)
-  {
-    visualization::PCLVisualizer vis_sampled;
-    vis_sampled.addPointCloud<pcl::PointXYZRGBNormal> (cloud_1);
-    if (write_normals)
-      vis_sampled.addPointCloudNormals<pcl::PointXYZRGBNormal> (cloud_1, 1, 0.02f, "cloud_normals");
-    vis_sampled.spin ();
-  }
 
   // Voxelgrid
   VoxelGrid<PointXYZRGBNormal> grid_;

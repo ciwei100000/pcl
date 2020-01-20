@@ -38,8 +38,7 @@
  *
  */
 
-#ifndef PCL_PRINCIPAL_CURVATURES_H_
-#define PCL_PRINCIPAL_CURVATURES_H_
+#pragma once
 
 #include <pcl/features/eigen.h>
 #include <pcl/features/feature.h>
@@ -61,8 +60,8 @@ namespace pcl
   class PrincipalCurvaturesEstimation : public FeatureFromNormals<PointInT, PointNT, PointOutT>
   {
     public:
-      typedef boost::shared_ptr<PrincipalCurvaturesEstimation<PointInT, PointNT, PointOutT> > Ptr;
-      typedef boost::shared_ptr<const PrincipalCurvaturesEstimation<PointInT, PointNT, PointOutT> > ConstPtr;
+      using Ptr = shared_ptr<PrincipalCurvaturesEstimation<PointInT, PointNT, PointOutT> >;
+      using ConstPtr = shared_ptr<const PrincipalCurvaturesEstimation<PointInT, PointNT, PointOutT> >;
       using Feature<PointInT, PointOutT>::feature_name_;
       using Feature<PointInT, PointOutT>::getClassName;
       using Feature<PointInT, PointOutT>::indices_;
@@ -72,12 +71,11 @@ namespace pcl
       using Feature<PointInT, PointOutT>::input_;
       using FeatureFromNormals<PointInT, PointNT, PointOutT>::normals_;
 
-      typedef typename Feature<PointInT, PointOutT>::PointCloudOut PointCloudOut;
-      typedef pcl::PointCloud<PointInT> PointCloudIn;
+      using PointCloudOut = typename Feature<PointInT, PointOutT>::PointCloudOut;
+      using PointCloudIn = pcl::PointCloud<PointInT>;
 
       /** \brief Empty constructor. */
       PrincipalCurvaturesEstimation () : 
-        projected_normals_ (), 
         xyz_centroid_ (Eigen::Vector3f::Zero ()), 
         demean_ (Eigen::Vector3f::Zero ()),
         covariance_matrix_ (Eigen::Matrix3f::Zero ()),
@@ -112,7 +110,7 @@ namespace pcl
         * \param[out] output the resultant point cloud model dataset that contains the principal curvature estimates
         */
       void
-      computeFeature (PointCloudOut &output);
+      computeFeature (PointCloudOut &output) override;
 
     private:
       /** \brief A pointer to the input dataset that contains the point normals of the XYZ dataset. */
@@ -137,5 +135,3 @@ namespace pcl
 #ifdef PCL_NO_PRECOMPILE
 #include <pcl/features/impl/principal_curvatures.hpp>
 #endif
-
-#endif  //#ifndef PCL_PRINCIPAL_CURVATURES_H_

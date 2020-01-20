@@ -54,9 +54,9 @@ float default_leaf_size = 0.005f;
 double default_feature_threshold = 5.0;
 double default_normal_radius_search = 0.03;
 
-typedef PointXYZRGBA PointT;
-typedef PointCloud<PointT> CloudT;
-typedef PointCloud<PointXYZRGBL> CloudLT;
+using PointT = PointXYZRGBA;
+using CloudT = PointCloud<PointT>;
+using CloudLT = PointCloud<PointXYZRGBL>;
 
 void
 printHelp (int, char **argv)
@@ -113,7 +113,7 @@ compute (const CloudT::Ptr &cloud,
   cloud_normals->width = cloud->width;
   cloud_normals->height = cloud->height;
   cloud_normals->points.resize (cloud->points.size ());
-  for (size_t i = 0; i < cloud->points.size (); i++)
+  for (std::size_t i = 0; i < cloud->points.size (); i++)
   {
     cloud_normals->points[i].x = cloud->points[i].x;
     cloud_normals->points[i].y = cloud->points[i].y;

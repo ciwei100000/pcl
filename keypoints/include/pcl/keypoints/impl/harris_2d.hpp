@@ -237,13 +237,12 @@ pcl::HarrisKeypoint2D<PointInT, PointOutT, IntensityT>::detectKeypoints (PointCl
   if (!nonmax_)
   {
     output = *response_;
-    for (size_t i = 0; i < response_->size (); ++i)
+    for (std::size_t i = 0; i < response_->size (); ++i)
       keypoints_indices_->indices.push_back (i);
   }
   else
   {    
-    std::sort (indices_->begin (), indices_->end (), 
-               boost::bind (&HarrisKeypoint2D::greaterIntensityAtIndices, this, _1, _2));
+    std::sort (indices_->begin (), indices_->end (), [this] (int p1, int p2) { return greaterIntensityAtIndices (p1, p2); });
     float threshold = threshold_ * response_->points[indices_->front ()].intensity;
     output.clear ();
     output.reserve (response_->size());
@@ -281,7 +280,7 @@ pcl::HarrisKeypoint2D<PointInT, PointOutT, IntensityT>::detectKeypoints (PointCl
     //   refineCorners (output);
 
     output.height = 1;
-    output.width = static_cast<uint32_t> (output.size());
+    output.width = static_cast<std::uint32_t> (output.size());
   }
 
   // we don not change the denseness
@@ -457,7 +456,7 @@ pcl::HarrisKeypoint2D<PointInT, PointOutT, IntensityT>::responseTomasi (PointClo
 //       tree_->radiusSearch (corner, search_radius_, nn_indices, nn_dists);
 //       for (std::vector<int>::const_iterator iIt = nn_indices.begin(); iIt != nn_indices.end(); ++iIt)
 //       {
-//         if (!pcl_isfinite (normals_->points[*iIt].normal_x))
+//         if (!std::isfinite (normals_->points[*iIt].normal_x))
 //           continue;
 
 //         nnT = normals_->points[*iIt].getNormalVector3fMap () * normals_->points[*iIt].getNormalVector3fMap ().transpose();

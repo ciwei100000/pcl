@@ -41,7 +41,6 @@
 #include <pcl/2d/edge.h>
 #include <pcl/features/organized_edge_detection.h>
 #include <pcl/console/print.h>
-#include <pcl/console/time.h>
 
 /**
  *  Directions: 1 2 3
@@ -70,7 +69,7 @@ pcl::OrganizedEdgeBase<PointT, PointLT>::assignLabelIndices (pcl::PointCloud<Poi
 {
   const unsigned invalid_label = unsigned (0);
   label_indices.resize (num_of_edgetype_);
-  for (unsigned idx = 0; idx < input_->points.size (); idx++)
+  for (std::size_t idx = 0; idx < input_->points.size (); idx++)
   {
     if (labels[idx].label != invalid_label)
     {
@@ -105,10 +104,10 @@ pcl::OrganizedEdgeBase<PointT, PointLT>::extractEdges (pcl::PointCloud<PointLT>&
       for (int col = 1; col < int(input_->width) - 1; col++)
       {
         int curr_idx = row*int(input_->width) + col;
-        if (!pcl_isfinite (input_->points[curr_idx].z))
+        if (!std::isfinite (input_->points[curr_idx].z))
           continue;
 
-        float curr_depth = fabsf (input_->points[curr_idx].z);
+        float curr_depth = std::abs (input_->points[curr_idx].z);
 
         // Calculate depth distances between current point and neighboring points
         std::vector<float> nghr_dist;
@@ -118,12 +117,12 @@ pcl::OrganizedEdgeBase<PointT, PointLT>::extractEdges (pcl::PointCloud<PointLT>&
         {
           int nghr_idx = curr_idx + directions[d_idx].d_index;
           assert (nghr_idx >= 0 && nghr_idx < input_->points.size ());
-          if (!pcl_isfinite (input_->points[nghr_idx].z))
+          if (!std::isfinite (input_->points[nghr_idx].z))
           {
             found_invalid_neighbor = true;
             break;
           }
-          nghr_dist[d_idx] = curr_depth - fabsf (input_->points[nghr_idx].z);
+          nghr_dist[d_idx] = curr_depth - std::abs (input_->points[nghr_idx].z);
         }
 
         if (!found_invalid_neighbor)
@@ -133,8 +132,8 @@ pcl::OrganizedEdgeBase<PointT, PointLT>::extractEdges (pcl::PointCloud<PointLT>&
           std::vector<float>::iterator max_itr = std::max_element (nghr_dist.begin (), nghr_dist.end ());
           float nghr_dist_min = *min_itr;
           float nghr_dist_max = *max_itr;
-          float dist_dominant = fabsf (nghr_dist_min) > fabsf (nghr_dist_max) ? nghr_dist_min : nghr_dist_max;
-          if (fabsf (dist_dominant) > th_depth_discon_*fabsf (curr_depth))
+          float dist_dominant = std::abs (nghr_dist_min) > std::abs (nghr_dist_max) ? nghr_dist_min : nghr_dist_max;
+          if (std::abs (dist_dominant) > th_depth_discon_*std::abs (curr_depth))
           {
             // Found a depth discontinuity
             if (dist_dominant > 0.f)
@@ -157,14 +156,14 @@ pcl::OrganizedEdgeBase<PointT, PointLT>::extractEdges (pcl::PointCloud<PointLT>&
           int dx = 0;
           int dy = 0;
           int num_of_invalid_pt = 0;
-          for (int d_idx = 0; d_idx < num_of_ngbr; d_idx++)
+          for (const auto &direction : directions)
           {
-            int nghr_idx = curr_idx + directions[d_idx].d_index;
+            int nghr_idx = curr_idx + direction.d_index;
             assert (nghr_idx >= 0 && nghr_idx < input_->points.size ());
-            if (!pcl_isfinite (input_->points[nghr_idx].z))
+            if (!std::isfinite (input_->points[nghr_idx].z))
             {
-              dx += directions[d_idx].d_x;
-              dy += directions[d_idx].d_y;
+              dx += direction.d_x;
+              dy += direction.d_y;
               num_of_invalid_pt++;
             }
           }
@@ -184,18 +183,18 @@ pcl::OrganizedEdgeBase<PointT, PointLT>::extractEdges (pcl::PointCloud<PointLT>&
             if (s_row < 0 || s_row >= int(input_->height) || s_col < 0 || s_col >= int(input_->width))
               break;
 
-            if (pcl_isfinite (input_->points[s_row*int(input_->width)+s_col].z))
+            if (std::isfinite (input_->points[s_row*int(input_->width)+s_col].z))
             {
-              corr_depth = fabsf (input_->points[s_row*int(input_->width)+s_col].z);
+              corr_depth = std::abs (input_->points[s_row*int(input_->width)+s_col].z);
               break;
             }
           }
 
-          if (!pcl_isnan (corr_depth))
+          if (!std::isnan (corr_depth))
           {
             // Found a corresponding point
             float dist = curr_depth - corr_depth;
-            if (fabsf (dist) > th_depth_discon_*fabsf (curr_depth))
+            if (std::abs (dist) > th_depth_discon_*std::abs (curr_depth))
             {
               // Found a depth discontinuity
               if (dist > 0.f)
@@ -250,7 +249,7 @@ pcl::OrganizedEdgeFromRGB<PointT, PointLT>::extractEdges (pcl::PointCloud<PointL
     gray->height = input_->height;
     gray->resize (input_->height*input_->width);
 
-    for (size_t i = 0; i < input_->size (); ++i)
+    for (std::size_t i = 0; i < input_->size (); ++i)
       (*gray)[i].intensity = float (((*input_)[i].r + (*input_)[i].g + (*input_)[i].b) / 3);
 
     pcl::PointCloud<pcl::PointXYZIEdge> img_edge_rgb;
@@ -260,9 +259,9 @@ pcl::OrganizedEdgeFromRGB<PointT, PointLT>::extractEdges (pcl::PointCloud<PointL
     edge.setHysteresisThresholdHigh (th_rgb_canny_high_);
     edge.detectEdgeCanny (img_edge_rgb);
     
-    for (uint32_t row=0; row<labels.height; row++)
+    for (std::uint32_t row=0; row<labels.height; row++)
     {
-      for (uint32_t col=0; col<labels.width; col++)
+      for (std::uint32_t col=0; col<labels.width; col++)
       {
         if (img_edge_rgb (col, row).magnitude == 255.f)
           labels[row * labels.width + col].label |= EDGELABEL_RGB_CANNY;
@@ -303,9 +302,9 @@ pcl::OrganizedEdgeFromNormals<PointT, PointNT, PointLT>::extractEdges (pcl::Poin
     ny.height = normals_->height;
     ny.resize (normals_->height*normals_->width);
 
-    for (uint32_t row=0; row<normals_->height; row++)
+    for (std::uint32_t row=0; row<normals_->height; row++)
     {
-      for (uint32_t col=0; col<normals_->width; col++)
+      for (std::uint32_t col=0; col<normals_->width; col++)
       {
         nx (col, row).intensity = normals_->points[row*normals_->width + col].normal_x;
         ny (col, row).intensity = normals_->points[row*normals_->width + col].normal_y;
@@ -318,9 +317,9 @@ pcl::OrganizedEdgeFromNormals<PointT, PointNT, PointLT>::extractEdges (pcl::Poin
     edge.setHysteresisThresholdHigh (th_hc_canny_high_);
     edge.canny (nx, ny, img_edge);
 
-    for (uint32_t row=0; row<labels.height; row++)
+    for (std::uint32_t row=0; row<labels.height; row++)
     {
-      for (uint32_t col=0; col<labels.width; col++)
+      for (std::uint32_t col=0; col<labels.width; col++)
       {
         if (img_edge (col, row).magnitude == 255.f)
           labels[row * labels.width + col].label |= EDGELABEL_HIGH_CURVATURE;

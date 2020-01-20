@@ -35,8 +35,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef PCL_REGISTRATION_CORRESPONDENCE_REJECTION_POLY_H_
-#define PCL_REGISTRATION_CORRESPONDENCE_REJECTION_POLY_H_
+
+#pragma once
 
 #include <pcl/registration/correspondence_rejection.h>
 #include <pcl/point_cloud.h>
@@ -68,16 +68,16 @@ namespace pcl
       using CorrespondenceRejector::getClassName;
 
       public:
-        typedef boost::shared_ptr<CorrespondenceRejectorPoly> Ptr;
-        typedef boost::shared_ptr<const CorrespondenceRejectorPoly> ConstPtr;
+        using Ptr = shared_ptr<CorrespondenceRejectorPoly<SourceT, TargetT> >;
+        using ConstPtr = shared_ptr<const CorrespondenceRejectorPoly<SourceT, TargetT> >;
         
-        typedef pcl::PointCloud<SourceT> PointCloudSource;
-        typedef typename PointCloudSource::Ptr PointCloudSourcePtr;
-        typedef typename PointCloudSource::ConstPtr PointCloudSourceConstPtr;
+        using PointCloudSource = pcl::PointCloud<SourceT>;
+        using PointCloudSourcePtr = typename PointCloudSource::Ptr;
+        using PointCloudSourceConstPtr = typename PointCloudSource::ConstPtr;
         
-        typedef pcl::PointCloud<TargetT> PointCloudTarget;
-        typedef typename PointCloudTarget::Ptr PointCloudTargetPtr;
-        typedef typename PointCloudTarget::ConstPtr PointCloudTargetConstPtr;
+        using PointCloudTarget = pcl::PointCloud<TargetT>;
+        using PointCloudTargetPtr = typename PointCloudTarget::Ptr;
+        using PointCloudTargetConstPtr = typename PointCloudTarget::ConstPtr;
 
         /** \brief Empty constructor */
         CorrespondenceRejectorPoly ()
@@ -95,7 +95,7 @@ namespace pcl
           */
         void 
         getRemainingCorrespondences (const pcl::Correspondences& original_correspondences, 
-                                     pcl::Correspondences& remaining_correspondences);
+                                     pcl::Correspondences& remaining_correspondences) override;
 
         /** \brief Provide a source point cloud dataset (must contain XYZ data!), used to compute the correspondence distance.
           * \param[in] cloud a cloud containing XYZ data
@@ -128,12 +128,12 @@ namespace pcl
         
         /** \brief See if this rejector requires source points */
         bool
-        requiresSourcePoints () const
+        requiresSourcePoints () const override
         { return (true); }
 
         /** \brief Blob method for setting the source cloud */
         void
-        setSourcePoints (pcl::PCLPointCloud2::ConstPtr cloud2)
+        setSourcePoints (pcl::PCLPointCloud2::ConstPtr cloud2) override
         { 
           PointCloudSourcePtr cloud (new PointCloudSource);
           fromPCLPointCloud2 (*cloud2, *cloud);
@@ -142,12 +142,12 @@ namespace pcl
         
         /** \brief See if this rejector requires a target cloud */
         bool
-        requiresTargetPoints () const
+        requiresTargetPoints () const override
         { return (true); }
 
         /** \brief Method for setting the target cloud */
         void
-        setTargetPoints (pcl::PCLPointCloud2::ConstPtr cloud2)
+        setTargetPoints (pcl::PCLPointCloud2::ConstPtr cloud2) override
         { 
           PointCloudTargetPtr cloud (new PointCloudTarget);
           fromPCLPointCloud2 (*cloud2, *cloud);
@@ -224,16 +224,17 @@ namespace pcl
                                          corr[ idx[0] ].index_match, corr[ idx[1] ].index_match,
                                          cardinality_));
           }
-          else
-          { // Otherwise check all edges
-            for (int i = 0; i < cardinality_; ++i)
-              if (!thresholdEdgeLength (corr[ idx[i] ].index_query, corr[ idx[(i+1)%cardinality_] ].index_query,
-                                        corr[ idx[i] ].index_match, corr[ idx[(i+1)%cardinality_] ].index_match,
-                                        similarity_threshold_squared_))
-                return (false);
-            
-            return (true);
+          // Otherwise check all edges
+          for (int i = 0; i < cardinality_; ++i)
+          {
+            if (!thresholdEdgeLength (corr[ idx[i] ].index_query, corr[ idx[(i+1)%cardinality_] ].index_query,
+                                      corr[ idx[i] ].index_match, corr[ idx[(i+1)%cardinality_] ].index_match,
+                                      similarity_threshold_squared_))
+            {
+              return (false);
+            }
           }
+          return (true);
         }
         
         /** \brief Polygonal rejection of a single polygon, indexed by two point index vectors
@@ -262,7 +263,7 @@ namespace pcl
           * \param[out] correspondences the set of resultant correspondences.
           */
         inline void 
-        applyRejection (pcl::Correspondences &correspondences)
+        applyRejection (pcl::Correspondences &correspondences) override
         {
           getRemainingCorrespondences (*input_correspondences_, correspondences);
         }
@@ -381,5 +382,3 @@ namespace pcl
 }
 
 #include <pcl/registration/impl/correspondence_rejection_poly.hpp>
-
-#endif    // PCL_REGISTRATION_CORRESPONDENCE_REJECTION_POLY_H_

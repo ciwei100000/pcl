@@ -38,7 +38,6 @@
  */
 
 #include <gtest/gtest.h>
-#include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/io/pcd_io.h>
@@ -202,7 +201,6 @@ TEST (RegionGrowingTest, SegmentFromPoint)
   EXPECT_NE (0, cluster.indices.size());
 }
 
-#if (BOOST_VERSION >= 104400)
 ////////////////////////////////////////////////////////////////////////////////////////////////
 TEST (MinCutSegmentationTest, Segment)
 {
@@ -335,7 +333,6 @@ TEST (MinCutSegmentationTest, SegmentWithWrongParameters)
   int num_of_segments = static_cast<int> (clusters.size ());
   EXPECT_EQ (2, num_of_segments);
 }
-#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 TEST (SegmentDifferences, Segmentation)
@@ -372,7 +369,7 @@ TEST (ExtractPolygonalPrism, Segmentation)
   PointCloud<PointXYZ>::Ptr hull (new PointCloud<PointXYZ>);
   hull->points.resize (5);
 
-  for (size_t i = 0; i < hull->points.size (); ++i)
+  for (std::size_t i = 0; i < hull->points.size (); ++i)
   {
     hull->points[i].x = hull->points[i].y = static_cast<float> (i);
     hull->points[i].z = 0.0f;
@@ -423,7 +420,7 @@ main (int argc, char** argv)
 
   // Tranpose the cloud
   cloud_t = cloud;
-  for (size_t i = 0; i < cloud.points.size (); ++i)
+  for (std::size_t i = 0; i < cloud.points.size (); ++i)
     cloud_t.points[i].x += 0.01f;
 
   cloud_   = cloud.makeShared ();

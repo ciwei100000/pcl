@@ -36,8 +36,8 @@
  *
  */
 
-#include <ctype.h>
-#include <stdio.h>
+#include <cctype>
+#include <cstdio>
 #include <pcl/console/parse.h>
 #include <pcl/console/print.h>
 #include <boost/algorithm/string.hpp>
@@ -156,10 +156,8 @@ pcl::console::parse_file_extension_argument (int argc, const char * const * argv
   for (int i = 1; i < argc; ++i)
   {
     std::string fname = std::string (argv[i]);
-    for (size_t j = 0; j < extension.size (); ++j)
+    for (auto ext : extension)
     {
-      std::string ext = extension[j];
-
       // Needs to be at least 4: .ext
       if (fname.size () <= 4)
         continue;
@@ -361,7 +359,7 @@ pcl::console::parse_x_arguments (int argc, const char * const * argv, const char
       boost::split (values, argv[i], boost::is_any_of (","), boost::token_compress_on);
 
       v.resize (values.size ());
-      for (size_t j = 0; j < v.size (); ++j)
+      for (std::size_t j = 0; j < v.size (); ++j)
         v[j] = atof (values.at (j).c_str ());
 
       return (i - 1);
@@ -384,7 +382,7 @@ pcl::console::parse_x_arguments (int argc, const char * const * argv, const char
       boost::split (values, argv[i], boost::is_any_of (","), boost::token_compress_on);
 
       v.resize (values.size ());
-      for (size_t j = 0; j < v.size (); ++j)
+      for (std::size_t j = 0; j < v.size (); ++j)
         v[j] = static_cast<float> (atof (values.at (j).c_str ()));
 
       return (i - 1);
@@ -407,7 +405,7 @@ pcl::console::parse_x_arguments (int argc, const char * const * argv, const char
       boost::split (values, argv[i], boost::is_any_of (","), boost::token_compress_on);
 
       v.resize (values.size ());
-      for (size_t j = 0; j < v.size (); ++j)
+      for (std::size_t j = 0; j < v.size (); ++j)
         v[j] = atoi (values.at (j).c_str ());
 
       return (i - 1);
@@ -429,10 +427,7 @@ pcl::console::parse_multiple_arguments (int argc, const char * const * argv, con
       values.push_back (val);
     }
   }
-  if (values.size () == 0)
-    return (false);
-  else
-    return (true);
+  return (!values.empty ());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -448,10 +443,7 @@ pcl::console::parse_multiple_arguments (int argc, const char * const * argv, con
       values.push_back (val);
     }
   }
-  if (values.size () == 0)
-    return (false);
-  else
-    return (true);
+  return (!values.empty ());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -467,10 +459,7 @@ pcl::console::parse_multiple_arguments (int argc, const char * const * argv, con
       values.push_back (val);
     }
   }
-  if (values.size () == 0)
-    return (false);
-  else
-    return (true);
+  return (!values.empty ());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -482,13 +471,10 @@ pcl::console::parse_multiple_arguments (int argc, const char * const * argv, con
     // Search for the string
     if ((strcmp (argv[i], str) == 0) && (++i < argc))
     {
-      values.push_back (std::string (argv[i]));
+      values.emplace_back(argv[i]);
     }
   }
-  if (values.size () == 0)
-    return (false);
-  else
-    return (true);
+  return (!values.empty ());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -515,10 +501,7 @@ pcl::console::parse_multiple_2x_arguments (int argc, const char * const * argv, 
       values_s.push_back (s);
     }
   }
-  if (values_f.size () == 0)
-    return (false);
-  else
-    return (true);
+  return (!values_f.empty ());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -550,9 +533,6 @@ pcl::console::parse_multiple_3x_arguments (int argc, const char * const * argv, 
       values_t.push_back (t);
     }
   }
-  if (values_f.size () == 0)
-    return (false);
-  else
-    return (true);
+  return (!values_f.empty ());
 }
 

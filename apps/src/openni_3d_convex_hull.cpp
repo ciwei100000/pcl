@@ -44,9 +44,13 @@
 #include <pcl/common/time.h>
 #include <pcl/visualization/cloud_viewer.h>
 
+#include <mutex>
+#include <thread>
+
+using namespace std;
+using namespace std::chrono_literals;
 using namespace pcl;
 using namespace pcl::visualization;
-using namespace std;
 
 #define FPS_CALC(_WHAT_) \
 do \
@@ -66,9 +70,9 @@ template <typename PointType>
 class OpenNI3DConvexHull
 {
   public:
-    typedef pcl::PointCloud<PointType> Cloud;
-    typedef typename Cloud::Ptr CloudPtr;
-    typedef typename Cloud::ConstPtr CloudConstPtr;
+    using Cloud = pcl::PointCloud<PointType>;
+    using CloudPtr = typename Cloud::Ptr;
+    using CloudConstPtr = typename Cloud::ConstPtr;
 
     OpenNI3DConvexHull (const std::string& device_id = "")
       : viewer ("PCL OpenNI 3D Convex Hull Viewer") 
@@ -81,7 +85,7 @@ class OpenNI3DConvexHull
     void 
     cloud_cb (const CloudConstPtr& cloud)
     {
-      boost::mutex::scoped_lock lock (mtx_);
+      std::lock_guard<std::mutex> lock (mtx_);
       FPS_CALC ("computation");
 
       cloud_pass_.reset (new Cloud);
@@ -104,12 +108,12 @@ class OpenNI3DConvexHull
     {
       if (!cloud_ || !new_cloud_)
       {
-        boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+        std::this_thread::sleep_for(1ms);
         return;
       }
 
       {
-        boost::mutex::scoped_lock lock (mtx_);
+        std::lock_guard<std::mutex> lock (mtx_);
         FPS_CALC ("visualization");
         CloudPtr temp_cloud;
         temp_cloud.swap (cloud_pass_);
@@ -132,28 +136,28 @@ class OpenNI3DConvexHull
     void
     run ()
     {
-      pcl::Grabber* interface = new pcl::OpenNIGrabber (device_id_);
+      pcl::OpenNIGrabber interface {device_id_};
 
-      boost::function<void (const CloudConstPtr&)> f = boost::bind (&OpenNI3DConvexHull::cloud_cb, this, _1);
-      boost::signals2::connection c = interface->registerCallback (f);
-     
-      viewer.runOnVisualizationThread (boost::bind(&OpenNI3DConvexHull::viz_cb, this, _1), "viz_cb");
+      std::function<void (const CloudConstPtr&)> f = [this] (const CloudConstPtr& cloud) { cloud_cb (cloud); };
+      boost::signals2::connection c = interface.registerCallback (f);
 
-      interface->start ();
+      viewer.runOnVisualizationThread ([this] (pcl::visualization::PCLVisualizer& viz) { viz_cb (viz); }, "viz_cb");
+
+      interface.start ();
       
       while (!viewer.wasStopped ())
       {
-        boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+        std::this_thread::sleep_for(1ms);
       }
 
-      interface->stop ();
+      interface.stop ();
     }
 
     pcl::PassThrough<PointType> pass;
     pcl::visualization::CloudViewer viewer;
 
     std::string device_id_;
-    boost::mutex mtx_;
+    std::mutex mtx_;
     // Data
     CloudConstPtr cloud_;
     CloudPtr cloud_pass_, cloud_hull_;
@@ -171,15 +175,15 @@ usage (char ** argv)
   {
     for (unsigned deviceIdx = 0; deviceIdx < driver.getNumberDevices (); ++deviceIdx)
     {
-      cout << "Device: " << deviceIdx + 1 << ", vendor: " << driver.getVendorName (deviceIdx) << ", product: " << driver.getProductName (deviceIdx)
-              << ", connected: " << driver.getBus (deviceIdx) << " @ " << driver.getAddress (deviceIdx) << ", serial number: \'" << driver.getSerialNumber (deviceIdx) << "\'" << endl;
-      cout << "device_id may be #1, #2, ... for the first second etc device in the list or" << endl
-           << "                 bus@address for the device connected to a specific usb-bus / address combination (works only in Linux) or" << endl
-           << "                 <serial-number> (only in Linux and for devices which provide serial numbers)"  << endl;
+      std::cout << "Device: " << deviceIdx + 1 << ", vendor: " << driver.getVendorName (deviceIdx) << ", product: " << driver.getProductName (deviceIdx)
+              << ", connected: " << driver.getBus (deviceIdx) << " @ " << driver.getAddress (deviceIdx) << ", serial number: \'" << driver.getSerialNumber (deviceIdx) << "\'" << std::endl;
+      std::cout << "device_id may be #1, #2, ... for the first second etc device in the list or" << std::endl
+           << "                 bus@address for the device connected to a specific usb-bus / address combination (works only in Linux) or" << std::endl
+           << "                 <serial-number> (only in Linux and for devices which provide serial numbers)"  << std::endl;
     }
   }
   else
-    cout << "No devices connected." << endl;
+    std::cout << "No devices connected." << std::endl;
 }
 
 int

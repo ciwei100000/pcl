@@ -35,8 +35,7 @@
   *
   */
 
-#ifndef PCL_FILTERS_CROP_HULL_H_
-#define PCL_FILTERS_CROP_HULL_H_
+#pragma once
 
 #include <pcl/point_types.h>
 #include <pcl/Vertices.h>
@@ -56,18 +55,17 @@ namespace pcl
     using Filter<PointT>::indices_;
     using Filter<PointT>::input_;
     
-    typedef typename Filter<PointT>::PointCloud PointCloud;
-    typedef typename PointCloud::Ptr PointCloudPtr;
-    typedef typename PointCloud::ConstPtr PointCloudConstPtr;
+    using PointCloud = typename Filter<PointT>::PointCloud;
+    using PointCloudPtr = typename PointCloud::Ptr;
+    using PointCloudConstPtr = typename PointCloud::ConstPtr;
 
     public:
 
-      typedef boost::shared_ptr< CropHull<PointT> > Ptr;
-      typedef boost::shared_ptr< const CropHull<PointT> > ConstPtr;
+      using Ptr = shared_ptr<CropHull<PointT> >;
+      using ConstPtr = shared_ptr<const CropHull<PointT> >;
 
       /** \brief Empty Constructor. */
       CropHull () :
-        hull_polygons_(),
         hull_cloud_(),
         dim_(3),
         crop_outside_(true)
@@ -136,13 +134,13 @@ namespace pcl
         * \param[out] output The set of points that passed the filter
         */
       void
-      applyFilter (PointCloud &output);
+      applyFilter (PointCloud &output) override;
 
       /** \brief Filter the input points using the 2D or 3D polygon hull.
         * \param[out] indices the indices of the set of points that passed the filter.
         */
       void        
-      applyFilter (std::vector<int> &indices);
+      applyFilter (std::vector<int> &indices) override;
 
     private:  
       /** \brief Return the size of the hull point cloud in line with coordinate axes.
@@ -239,5 +237,3 @@ namespace pcl
 #ifdef PCL_NO_PRECOMPILE
 #include <pcl/filters/impl/crop_hull.hpp>
 #endif
-
-#endif // ifndef PCL_FILTERS_CROP_HULL_H_

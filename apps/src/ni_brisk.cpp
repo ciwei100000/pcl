@@ -38,6 +38,7 @@
  */
 
 #define SHOW_FPS 1
+
 #include <pcl/apps/timer.h>
 #include <pcl/common/common.h>
 #include <pcl/common/angles.h>
@@ -51,19 +52,23 @@
 #include <pcl/console/print.h>
 #include <pcl/console/parse.h>
 
+#include <mutex>
+#include <thread>
+
 using namespace pcl;
 using namespace std;
+using namespace std::chrono_literals;
 
-typedef PointXYZRGBA PointT;
-typedef PointWithScale KeyPointT;
+using PointT = PointXYZRGBA;
+using KeyPointT = PointWithScale;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class BRISKDemo
 {
   public:
-    typedef PointCloud<PointT> Cloud;
-    typedef Cloud::Ptr CloudPtr;
-    typedef Cloud::ConstPtr CloudConstPtr;
+    using Cloud = PointCloud<PointT>;
+    using CloudPtr = Cloud::Ptr;
+    using CloudConstPtr = Cloud::ConstPtr;
 
     BRISKDemo (Grabber& grabber)
       : cloud_viewer_ ("BRISK 2D Keypoints -- PointCloud")
@@ -77,7 +82,7 @@ class BRISKDemo
     cloud_callback (const CloudConstPtr& cloud)
     {
       FPS_CALC ("cloud callback");
-      boost::mutex::scoped_lock lock (cloud_mutex_);
+      std::lock_guard<std::mutex> lock (cloud_mutex_);
       cloud_ = cloud;
 
       // Compute BRISK keypoints 
@@ -94,7 +99,7 @@ class BRISKDemo
     void
     init ()
     {
-      boost::function<void (const CloudConstPtr&) > cloud_cb = boost::bind (&BRISKDemo::cloud_callback, this, _1);
+      std::function<void (const CloudConstPtr&) > cloud_cb = [this] (const CloudConstPtr& cloud) { cloud_callback (cloud); };
       cloud_connection = grabber_.registerCallback (cloud_cb);
     }
 
@@ -179,8 +184,8 @@ class BRISKDemo
       keypoints3d.height = keypoints->height;
       keypoints3d.is_dense = true;
 
-      size_t j = 0;
-      for (size_t i = 0; i < keypoints->size (); ++i)
+      std::size_t j = 0;
+      for (std::size_t i = 0; i < keypoints->size (); ++i)
       {
         PointT pt = bilinearInterpolation (cloud, keypoints->points[i].x, keypoints->points[i].y);
 
@@ -230,7 +235,7 @@ class BRISKDemo
           {
             cloud_viewer_.setPosition (0, 0);
             cloud_viewer_.setSize (cloud->width, cloud->height);
-            cloud_init = !cloud_init;
+            cloud_init = true;
           }
 
           if (!cloud_viewer_.updatePointCloud (cloud, "OpenNICloud"))
@@ -243,13 +248,13 @@ class BRISKDemo
           {
             image_viewer_.setPosition (cloud->width, 0);
             image_viewer_.setSize (cloud->width, cloud->height);
-            image_init = !image_init;
+            image_init = true;
           }
 
           image_viewer_.showRGBImage<PointT> (cloud);
 
           image_viewer_.removeLayer (getStrBool (keypts));
-          for (size_t i = 0; i < keypoints->size (); ++i)
+          for (std::size_t i = 0; i < keypoints->size (); ++i)
           {
             int u = int (keypoints->points[i].x);
             int v = int (keypoints->points[i].y);
@@ -268,7 +273,7 @@ class BRISKDemo
 
         cloud_viewer_.spinOnce ();
         image_viewer_.spinOnce ();
-        boost::this_thread::sleep (boost::posix_time::microseconds (100));
+        std::this_thread::sleep_for(100us);
       }
 
       grabber_.stop ();
@@ -278,7 +283,7 @@ class BRISKDemo
     
     visualization::PCLVisualizer cloud_viewer_;
     Grabber& grabber_;
-    boost::mutex cloud_mutex_;
+    std::mutex cloud_mutex_;
     CloudConstPtr cloud_;
     
     visualization::ImageViewer image_viewer_;

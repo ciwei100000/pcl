@@ -50,7 +50,6 @@ pcl::features::ISMVoteList<PointT>::ISMVoteList () :
   tree_is_valid_ (false),
   votes_origins_ (new pcl::PointCloud<PointT> ()),
   votes_class_ (0),
-  tree_ (),
   k_ind_ (0),
   k_sqr_dist_ (0)
 {
@@ -89,13 +88,13 @@ pcl::features::ISMVoteList<PointT>::getColoredCloud (typename pcl::PointCloud<Po
   colored_cloud->height = 0;
   colored_cloud->width = 1;
 
-  if (cloud != 0)
+  if (cloud != nullptr)
   {
-    colored_cloud->height += static_cast<uint32_t> (cloud->points.size ());
+    colored_cloud->height += static_cast<std::uint32_t> (cloud->points.size ());
     point.r = 255;
     point.g = 255;
     point.b = 255;
-    for (size_t i_point = 0; i_point < cloud->points.size (); i_point++)
+    for (std::size_t i_point = 0; i_point < cloud->points.size (); i_point++)
     {
       point.x = cloud->points[i_point].x;
       point.y = cloud->points[i_point].y;
@@ -107,14 +106,14 @@ pcl::features::ISMVoteList<PointT>::getColoredCloud (typename pcl::PointCloud<Po
   point.r = 0;
   point.g = 0;
   point.b = 255;
-  for (size_t i_vote = 0; i_vote < votes_->points.size (); i_vote++)
+  for (const auto &i_vote : votes_->points)
   {
-    point.x = votes_->points[i_vote].x;
-    point.y = votes_->points[i_vote].y;
-    point.z = votes_->points[i_vote].z;
+    point.x = i_vote.x;
+    point.y = i_vote.y;
+    point.z = i_vote.z;
     colored_cloud->points.push_back (point);
   }
-  colored_cloud->height += static_cast<uint32_t> (votes_->points.size ());
+  colored_cloud->height += static_cast<std::uint32_t> (votes_->points.size ());
 
   return (colored_cloud);
 }
@@ -129,10 +128,10 @@ pcl::features::ISMVoteList<PointT>::findStrongestPeaks (
 {
   validateTree ();
 
-  const size_t n_vote_classes = votes_class_.size ();
+  const std::size_t n_vote_classes = votes_class_.size ();
   if (n_vote_classes == 0)
     return;
-  for (size_t i = 0; i < n_vote_classes ; i++)
+  for (std::size_t i = 0; i < n_vote_classes ; i++)
     assert ( votes_class_[i] == in_class_id );
 
   // heuristic: start from NUM_INIT_PTS different locations selected uniformly
@@ -227,8 +226,8 @@ pcl::features::ISMVoteList<PointT>::validateTree ()
 {
   if (!tree_is_valid_)
   {
-    if (tree_ == 0)
-      tree_ = boost::shared_ptr<pcl::KdTreeFLANN<pcl::InterestPoint> > (new pcl::KdTreeFLANN<pcl::InterestPoint> ());
+    if (tree_ == nullptr)
+      tree_.reset (new pcl::KdTreeFLANN<pcl::InterestPoint>);
     tree_->setInputCloud (votes_);
     k_ind_.resize ( votes_->points.size (), -1 );
     k_sqr_dist_.resize ( votes_->points.size (), 0.0f );
@@ -249,11 +248,11 @@ pcl::features::ISMVoteList<PointT>::shiftMean (const Eigen::Vector3f& snap_pt, c
   pt.x = snap_pt[0];
   pt.y = snap_pt[1];
   pt.z = snap_pt[2];
-  size_t n_pts = tree_->radiusSearch (pt, 3*in_sigma_dist, k_ind_, k_sqr_dist_);
+  std::size_t n_pts = tree_->radiusSearch (pt, 3*in_sigma_dist, k_ind_, k_sqr_dist_);
 
-  for (size_t j = 0; j < n_pts; j++)
+  for (std::size_t j = 0; j < n_pts; j++)
   {
-    double kernel = votes_->points[k_ind_[j]].strength * exp (-k_sqr_dist_[j] / (in_sigma_dist * in_sigma_dist));
+    double kernel = votes_->points[k_ind_[j]].strength * std::exp (-k_sqr_dist_[j] / (in_sigma_dist * in_sigma_dist));
     Eigen::Vector3f vote_vec (votes_->points[k_ind_[j]].x, votes_->points[k_ind_[j]].y, votes_->points[k_ind_[j]].z);
     wgh_sum += vote_vec * static_cast<float> (kernel);
     denom += kernel;
@@ -270,7 +269,7 @@ pcl::features::ISMVoteList<PointT>::getDensityAtPoint (
 {
   validateTree ();
 
-  const size_t n_vote_classes = votes_class_.size ();
+  const std::size_t n_vote_classes = votes_class_.size ();
   if (n_vote_classes == 0)
     return (0.0);
 
@@ -280,10 +279,10 @@ pcl::features::ISMVoteList<PointT>::getDensityAtPoint (
   pt.x = point.x;
   pt.y = point.y;
   pt.z = point.z;
-  size_t num_of_pts = tree_->radiusSearch (pt, 3 * sigma_dist, k_ind_, k_sqr_dist_);
+  std::size_t num_of_pts = tree_->radiusSearch (pt, 3 * sigma_dist, k_ind_, k_sqr_dist_);
 
-  for (size_t j = 0; j < num_of_pts; j++)
-    sum_vote += votes_->points[k_ind_[j]].strength * exp (-k_sqr_dist_[j] / (sigma_dist * sigma_dist));
+  for (std::size_t j = 0; j < num_of_pts; j++)
+    sum_vote += votes_->points[k_ind_[j]].strength * std::exp (-k_sqr_dist_[j] / (sigma_dist * sigma_dist));
 
   return (sum_vote);
 }
@@ -301,8 +300,6 @@ pcl::features::ISMModel::ISMModel () :
   learned_weights_ (0),
   classes_ (0),
   sigmas_ (0),
-  directions_to_center_ (),
-  clusters_centers_ (),
   clusters_ (0),
   number_of_classes_ (0),
   number_of_visual_words_ (0),
@@ -404,8 +401,8 @@ pcl::features::ISMModel::saveModelToFile (std::string& file_name)
   for (unsigned int i_cluster = 0; i_cluster < number_of_clusters_; i_cluster++)
   {
     output_file << static_cast<unsigned int> (clusters_[i_cluster].size ()) << " ";
-    for (unsigned int i_visual_word = 0; i_visual_word < static_cast<unsigned int> (clusters_[i_cluster].size ()); i_visual_word++)
-      output_file << clusters_[i_cluster][i_visual_word] << " ";
+    for (const unsigned int &visual_word : clusters_[i_cluster])
+      output_file << visual_word << " ";
   }
 
   output_file.close ();
@@ -427,7 +424,7 @@ pcl::features::ISMModel::loadModelFromfile (std::string& file_name)
   char line[256];
 
   input_file.getline (line, 256, ' ');
-  number_of_classes_ = static_cast<unsigned int> (strtol (line, 0, 10));
+  number_of_classes_ = static_cast<unsigned int> (strtol (line, nullptr, 10));
   input_file.getline (line, 256, ' '); number_of_visual_words_ = atoi (line);
   input_file.getline (line, 256, ' '); number_of_clusters_ = atoi (line);
   input_file.getline (line, 256, ' '); descriptors_dimension_ = atoi (line);
@@ -636,7 +633,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::setSamplin
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-template <int FeatureSize, typename PointT, typename NormalT> boost::shared_ptr<pcl::Feature<PointT, pcl::Histogram<FeatureSize> > >
+template <int FeatureSize, typename PointT, typename NormalT> typename pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::FeaturePtr
 pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::getFeatureEstimator ()
 {
   return (feature_estimator_);
@@ -644,8 +641,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::getFeature
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <int FeatureSize, typename PointT, typename NormalT> void
-pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::setFeatureEstimator (
-  boost::shared_ptr<pcl::Feature<PointT, pcl::Histogram<FeatureSize> > > feature)
+pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::setFeatureEstimator (FeaturePtr feature)
 {
   feature_estimator_ = feature;
 }
@@ -701,7 +697,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::trainISM (
 {
   bool success = true;
 
-  if (trained_model == 0)
+  if (trained_model == nullptr)
     return (false);
   trained_model->reset ();
 
@@ -718,7 +714,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::trainISM (
 
   std::vector<unsigned int> vec;
   trained_model->clusters_.resize (number_of_clusters_, vec);
-  for (size_t i_label = 0; i_label < locations.size (); i_label++)
+  for (std::size_t i_label = 0; i_label < locations.size (); i_label++)
     trained_model->clusters_[labels (i_label)].push_back (i_label);
 
   calculateSigmas (trained_model->sigmas_);
@@ -738,7 +734,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::trainISM (
 
   trained_model->directions_to_center_.resize (locations.size (), 3);
   trained_model->classes_.resize (locations.size ());
-  for (size_t i_dir = 0; i_dir < locations.size (); i_dir++)
+  for (std::size_t i_dir = 0; i_dir < locations.size (); i_dir++)
   {
     trained_model->directions_to_center_(i_dir, 0) = locations[i_dir].dir_to_center_.x;
     trained_model->directions_to_center_(i_dir, 1) = locations[i_dir].dir_to_center_.y;
@@ -750,22 +746,22 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::trainISM (
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-template <int FeatureSize, typename PointT, typename NormalT> boost::shared_ptr<pcl::features::ISMVoteList<PointT> >
+template <int FeatureSize, typename PointT, typename NormalT> typename pcl::features::ISMVoteList<PointT>::Ptr
 pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::findObjects (
   ISMModelPtr model,
   typename pcl::PointCloud<PointT>::Ptr in_cloud,
   typename pcl::PointCloud<Normal>::Ptr in_normals,
   int in_class_of_interest)
 {
-  boost::shared_ptr<pcl::features::ISMVoteList<PointT> > out_votes (new pcl::features::ISMVoteList<PointT> ());
+  typename pcl::features::ISMVoteList<PointT>::Ptr out_votes (new pcl::features::ISMVoteList<PointT> ());
 
-  if (in_cloud->points.size () == 0)
+  if (in_cloud->points.empty ())
     return (out_votes);
 
   typename pcl::PointCloud<PointT>::Ptr sampled_point_cloud (new pcl::PointCloud<PointT> ());
   typename pcl::PointCloud<NormalT>::Ptr sampled_normal_cloud (new pcl::PointCloud<NormalT> ());
   simplifyCloud (in_cloud, in_normals, sampled_point_cloud, sampled_normal_cloud);
-  if (sampled_point_cloud->points.size () == 0)
+  if (sampled_point_cloud->points.empty ())
     return (out_votes);
 
   typename pcl::PointCloud<pcl::Histogram<FeatureSize> >::Ptr feature_cloud (new pcl::PointCloud<pcl::Histogram<FeatureSize> > ());
@@ -804,7 +800,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::findObject
     min_dist_inds[i_point] = min_dist_idx;
   }//next keypoint
 
-  for (size_t i_point = 0; i_point < n_key_points; i_point++)
+  for (std::size_t i_point = 0; i_point < n_key_points; i_point++)
   {
     int min_dist_idx = min_dist_inds[i_point];
     if (min_dist_idx == -1)
@@ -855,16 +851,15 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::extractDes
 
   int n_key_points = 0;
 
-  if (training_clouds_.size () == 0 || training_classes_.size () == 0 || feature_estimator_ == 0)
+  if (training_clouds_.empty () || training_classes_.empty () || feature_estimator_ == nullptr)
     return (false);
 
-  for (size_t i_cloud = 0; i_cloud < training_clouds_.size (); i_cloud++)
+  for (std::size_t i_cloud = 0; i_cloud < training_clouds_.size (); i_cloud++)
   {
     //compute the center of the training object
     Eigen::Vector3f models_center (0.0f, 0.0f, 0.0f);
-    const size_t num_of_points =  training_clouds_[i_cloud]->points.size ();
-    typename pcl::PointCloud<PointT>::iterator point_j;
-    for (point_j = training_clouds_[i_cloud]->begin (); point_j != training_clouds_[i_cloud]->end (); point_j++)
+    const std::size_t num_of_points =  training_clouds_[i_cloud]->points.size ();
+    for (auto point_j = training_clouds_[i_cloud]->begin (); point_j != training_clouds_[i_cloud]->end (); point_j++)
       models_center += point_j->getVector3fMap ();
     models_center /= static_cast<float> (num_of_points);
 
@@ -872,7 +867,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::extractDes
     typename pcl::PointCloud<PointT>::Ptr sampled_point_cloud (new pcl::PointCloud<PointT> ());
     typename pcl::PointCloud<NormalT>::Ptr sampled_normal_cloud (new pcl::PointCloud<NormalT> ());
     simplifyCloud (training_clouds_[i_cloud], training_normals_[i_cloud], sampled_point_cloud, sampled_normal_cloud);
-    if (sampled_point_cloud->points.size () == 0)
+    if (sampled_point_cloud->points.empty ())
       continue;
 
     shiftCloud (training_clouds_[i_cloud], models_center);
@@ -884,8 +879,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::extractDes
     estimateFeatures (sampled_point_cloud, sampled_normal_cloud, feature_cloud);
 
     int point_index = 0;
-    typename pcl::PointCloud<PointT>::iterator point_i;
-    for (point_i = sampled_point_cloud->points.begin (); point_i != sampled_point_cloud->points.end (); point_i++, point_index++)
+    for (auto point_i = sampled_point_cloud->points.cbegin (); point_i != sampled_point_cloud->points.cend (); point_i++, point_index++)
     {
       float descriptor_sum = Eigen::VectorXf::Map (feature_cloud->points[point_index].histogram, FeatureSize).sum ();
       if (descriptor_sum < std::numeric_limits<float>::epsilon ())
@@ -893,7 +887,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::extractDes
 
       histograms.insert ( histograms.end (), feature_cloud->begin () + point_index, feature_cloud->begin () + point_index + 1 );
 
-      int dist = static_cast<int> (std::distance (sampled_point_cloud->points.begin (), point_i));
+      int dist = static_cast<int> (std::distance (sampled_point_cloud->points.cbegin (), point_i));
       Eigen::Matrix3f new_basis = alignYCoordWithNormal (sampled_normal_cloud->points[dist]);
       Eigen::Vector3f zero;
       zero (0) = 0.0;
@@ -920,7 +914,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::clusterDes
 {
   Eigen::MatrixXf points_to_cluster (histograms.size (), FeatureSize);
 
-  for (unsigned int i_feature = 0; i_feature < histograms.size (); i_feature++)
+  for (std::size_t i_feature = 0; i_feature < histograms.size (); i_feature++)
     for (int i_dim = 0; i_dim < FeatureSize; i_dim++)
       points_to_cluster (i_feature, i_dim) = histograms[i_feature].histogram[i_dim];
 
@@ -941,10 +935,10 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::clusterDes
 template <int FeatureSize, typename PointT, typename NormalT> void
 pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::calculateSigmas (std::vector<float>& sigmas)
 {
-  if (training_sigmas_.size () != 0)
+  if (!training_sigmas_.empty ())
   {
     sigmas.resize (training_sigmas_.size (), 0.0f);
-    for (unsigned int i_sigma = 0; i_sigma < training_sigmas_.size (); i_sigma++)
+    for (std::size_t i_sigma = 0; i_sigma < training_sigmas_.size (); i_sigma++)
       sigmas[i_sigma] = training_sigmas_[i_sigma];
     return;
   }
@@ -1026,7 +1020,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::calculateW
   n_vot_2.resize (number_of_clusters_, vect);
   n_vot.resize (number_of_clusters_, 0);
   n_ftr.resize (number_of_classes, 0);
-  for (size_t i_location = 0; i_location < locations.size (); i_location++)
+  for (std::size_t i_location = 0; i_location < locations.size (); i_location++)
   {
     int i_class = training_classes_[locations[i_location].model_num_];
     int i_cluster = labels (i_location);
@@ -1079,10 +1073,10 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::calculateW
         Eigen::Vector3f predicted_center = locations[j_index].point_.getVector3fMap () + direction_2;
         float residual = (predicted_center - actual_center).norm ();
         float value = -residual * residual / square_sigma_dist;
-        gauss_dists.push_back (static_cast<float> (exp (value)));
+        gauss_dists.push_back (static_cast<float> (std::exp (value)));
       }//next word
       //find median gaussian weighted distance
-      size_t mid_elem = (gauss_dists.size () - 1) / 2;
+      std::size_t mid_elem = (gauss_dists.size () - 1) / 2;
       std::nth_element (gauss_dists.begin (), gauss_dists.begin () + mid_elem, gauss_dists.end ());
       learned_weights[i_index] = *(gauss_dists.begin () + mid_elem);
     }//next word
@@ -1138,13 +1132,13 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::simplifyCl
   //extract indices of points from source cloud which are closest to grid points
   const float max_value = std::numeric_limits<float>::max ();
 
-  const size_t num_source_points = in_point_cloud->points.size ();
-  const size_t num_sample_points = temp_cloud.points.size ();
+  const std::size_t num_source_points = in_point_cloud->points.size ();
+  const std::size_t num_sample_points = temp_cloud.points.size ();
 
   std::vector<float> dist_to_grid_center (num_sample_points, max_value);
   std::vector<int> sampling_indices (num_sample_points, -1);
 
-  for (size_t i_point = 0; i_point < num_source_points; i_point++)
+  for (std::size_t i_point = 0; i_point < num_source_points; i_point++)
   {
     int index = grid.getCentroidIndex (in_point_cloud->points[i_point]);
     if (index == -1)
@@ -1167,7 +1161,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::simplifyCl
   pcl::ExtractIndices<NormalT> extract_normals;
 
   final_inliers_indices->indices.reserve (num_sample_points);
-  for (size_t i_point = 0; i_point < num_sample_points; i_point++)
+  for (std::size_t i_point = 0; i_point < num_sample_points; i_point++)
   {
     if (sampling_indices[i_point] != -1)
       final_inliers_indices->indices.push_back ( sampling_indices[i_point] );
@@ -1188,8 +1182,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::shiftCloud
   typename pcl::PointCloud<PointT>::Ptr in_cloud,
   Eigen::Vector3f shift_point)
 {
-  typename pcl::PointCloud<PointT>::iterator point_it;
-  for (point_it = in_cloud->points.begin (); point_it != in_cloud->points.end (); point_it++)
+  for (auto point_it = in_cloud->points.begin (); point_it != in_cloud->points.end (); point_it++)
   {
     point_it->x -= shift_point.x ();
     point_it->y -= shift_point.y ();
@@ -1242,7 +1235,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::estimateFe
   typename pcl::PointCloud<NormalT>::Ptr normal_cloud,
   typename pcl::PointCloud<pcl::Histogram<FeatureSize> >::Ptr feature_cloud)
 {
-  typename pcl::search::Search<PointT>::Ptr tree = boost::shared_ptr<pcl::search::Search<PointT> > (new pcl::search::KdTree<PointT>);
+  typename pcl::search::Search<PointT>::Ptr tree (new pcl::search::KdTree<PointT>);
 //  tree->setInputCloud (point_cloud);
 
   feature_estimator_->setInputCloud (sampled_point_cloud->makeShared ());
@@ -1272,11 +1265,11 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::computeKMe
   Eigen::MatrixXf& cluster_centers)
 {
   const int spp_trials = 3;
-  size_t number_of_points = points_to_cluster.rows () > 1 ? points_to_cluster.rows () : points_to_cluster.cols ();
+  std::size_t number_of_points = points_to_cluster.rows () > 1 ? points_to_cluster.rows () : points_to_cluster.cols ();
   int feature_dimension = points_to_cluster.rows () > 1 ? FeatureSize : 1;
 
   attempts = std::max (attempts, 1);
-  srand (static_cast<unsigned int> (time (0)));
+  srand (static_cast<unsigned int> (time (nullptr)));
 
   Eigen::MatrixXi labels (number_of_points, 1);
 
@@ -1315,7 +1308,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::computeKMe
   for (int i_dim = 0; i_dim < feature_dimension; i_dim++)
     box[i_dim] = Eigen::Vector2f (points_to_cluster (0, i_dim), points_to_cluster (0, i_dim));
 
-  for (unsigned int i_point = 0; i_point < number_of_points; i_point++)
+  for (std::size_t i_point = 0; i_point < number_of_points; i_point++)
     for (int i_dim = 0; i_dim < feature_dimension; i_dim++)
     {
       float v = points_to_cluster (i_point, i_dim);
@@ -1353,7 +1346,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::computeKMe
         centers.setZero ();
         for (int i_cluster = 0; i_cluster < number_of_clusters; i_cluster++)
           counters[i_cluster] = 0;
-        for (unsigned int i_point = 0; i_point < number_of_points; i_point++)
+        for (std::size_t i_point = 0; i_point < number_of_points; i_point++)
         {
           int i_label = labels (i_point, 0);
           for (int i_dim = 0; i_dim < feature_dimension; i_dim++)
@@ -1391,7 +1384,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::computeKMe
         }
       }
       compactness = 0.0f;
-      for (unsigned int i_point = 0; i_point < number_of_points; i_point++)
+      for (std::size_t i_point = 0; i_point < number_of_points; i_point++)
       {
         Eigen::VectorXf sample (feature_dimension);
         sample = points_to_cluster.row (i_point);
@@ -1434,7 +1427,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::generateCe
   int number_of_clusters,
   int trials)
 {
-  size_t dimension = data.cols ();
+  std::size_t dimension = data.cols ();
   unsigned int number_of_points = static_cast<unsigned int> (data.rows ());
   std::vector<int> centers_vec (number_of_clusters);
   int* centers = &centers_vec[0];
@@ -1498,7 +1491,7 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::generateCe
   }
 
   for (int i_cluster = 0; i_cluster < number_of_clusters; i_cluster++)
-    for (unsigned int i_dim = 0; i_dim < dimension; i_dim++)
+    for (std::size_t i_dim = 0; i_dim < dimension; i_dim++)
       out_centers (i_cluster, i_dim) = data (centers[i_cluster], i_dim);
 }
 
@@ -1507,10 +1500,10 @@ template <int FeatureSize, typename PointT, typename NormalT> void
 pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::generateRandomCenter (const std::vector<Eigen::Vector2f, Eigen::aligned_allocator<Eigen::Vector2f> >& boxes,
   Eigen::VectorXf& center)
 {
-  size_t dimension = boxes.size ();
+  std::size_t dimension = boxes.size ();
   float margin = 1.0f / static_cast<float> (dimension);
 
-  for (unsigned int i_dim = 0; i_dim < dimension; i_dim++)
+  for (std::size_t i_dim = 0; i_dim < dimension; i_dim++)
   {
     unsigned int random_integer = rand () - 1;
     float random_float = static_cast<float> (random_integer) / static_cast<float> (std::numeric_limits<unsigned int>::max ());
@@ -1522,9 +1515,9 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::generateRa
 template <int FeatureSize, typename PointT, typename NormalT> float
 pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::computeDistance (Eigen::VectorXf& vec_1, Eigen::VectorXf& vec_2)
 {
-  size_t dimension = vec_1.rows () > 1 ? vec_1.rows () : vec_1.cols ();
+  std::size_t dimension = vec_1.rows () > 1 ? vec_1.rows () : vec_1.cols ();
   float distance = 0.0f;
-  for(unsigned int i_dim = 0; i_dim < dimension; i_dim++)
+  for(std::size_t i_dim = 0; i_dim < dimension; i_dim++)
   {
     float diff = vec_1 (i_dim) - vec_2 (i_dim);
     distance += diff * diff;

@@ -9,13 +9,13 @@ if(PCL_SHARED_LIBS)
 #  set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_SHARED_LIBRARY_SUFFIX})
   if(WIN32)
     set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_IMPORT_LIBRARY_SUFFIX})
-  endif(WIN32)
-else(PCL_SHARED_LIBS)
+  endif()
+else()
   set(PCL_LIB_PREFIX ${CMAKE_STATIC_LIBRARY_PREFIX})
   set(PCL_LIB_SUFFIX ${CMAKE_STATIC_LIBRARY_SUFFIX})
   set(PCL_LIB_TYPE "STATIC")
   set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX})
-endif(PCL_SHARED_LIBS)
+endif()
 mark_as_advanced(PCL_SHARED_LIBS)
 
 # Build with dynamic linking for Boost (advanced users)
@@ -42,6 +42,14 @@ mark_as_advanced(PCL_NO_PRECOMPILE)
 option(PCL_ENABLE_SSE "Enable or Disable SSE optimizations." ON)
 mark_as_advanced(PCL_ENABLE_SSE)
 
+# Allow the user to enable compiler cache
+option(PCL_ENABLE_CCACHE "Enable using compiler cache for compilation" OFF)
+mark_as_advanced(PCL_ENABLE_CCACHE)
+
+# Treat compiler warnings as errors
+option(PCL_WARNINGS_ARE_ERRORS "Treat warnings as errors" OFF)
+mark_as_advanced(PCL_WARNINGS_ARE_ERRORS)
+
 # Display timing information for each compiler instance on screen
 option(CMAKE_TIMING_VERBOSE "Enable the display of timing information for each compiler instance." OFF)
 mark_as_advanced(CMAKE_TIMING_VERBOSE)
@@ -51,11 +59,7 @@ option(CMAKE_MSVC_CODE_LINK_OPTIMIZATION "Enable the /GL and /LTCG code and link
 mark_as_advanced(CMAKE_MSVC_CODE_LINK_OPTIMIZATION)
 
 # Project folders
-option(USE_PROJECT_FOLDERS "Use folders to organize PCL projects in an IDE." OFF)
-mark_as_advanced(USE_PROJECT_FOLDERS)
-if(USE_PROJECT_FOLDERS)
-  set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-endif(USE_PROJECT_FOLDERS)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 option(BUILD_tools "Useful PCL-based command line tools" ON)
 

@@ -38,8 +38,7 @@
  *
  */
 
-#ifndef PCL_SAMPLE_CONSENSUS_RRANSAC_H_
-#define PCL_SAMPLE_CONSENSUS_RRANSAC_H_
+#pragma once
 
 #include <pcl/sample_consensus/sac.h>
 #include <pcl/sample_consensus/sac_model.h>
@@ -56,11 +55,11 @@ namespace pcl
   template <typename PointT>
   class RandomizedRandomSampleConsensus : public SampleConsensus<PointT>
   {
-    typedef typename SampleConsensusModel<PointT>::Ptr SampleConsensusModelPtr;
+    using SampleConsensusModelPtr = typename SampleConsensusModel<PointT>::Ptr;
 
     public:
-      typedef boost::shared_ptr<RandomizedRandomSampleConsensus> Ptr;
-      typedef boost::shared_ptr<const RandomizedRandomSampleConsensus> ConstPtr;
+      using Ptr = shared_ptr<RandomizedRandomSampleConsensus<PointT> >;
+      using ConstPtr = shared_ptr<const RandomizedRandomSampleConsensus<PointT> >;
 
       using SampleConsensus<PointT>::max_iterations_;
       using SampleConsensus<PointT>::threshold_;
@@ -98,7 +97,7 @@ namespace pcl
         * \param[in] debug_verbosity_level enable/disable on-screen debug information and set the verbosity level
         */
       bool 
-      computeModel (int debug_verbosity_level = 0);
+      computeModel (int debug_verbosity_level = 0) override;
 
       /** \brief Set the percentage of points to pre-test.
         * \param[in] nr_pretest percentage of points to pre-test
@@ -108,7 +107,7 @@ namespace pcl
 
       /** \brief Get the percentage of points to pre-test. */
       inline double 
-      getFractionNrPretest () { return (fraction_nr_pretest_); }
+      getFractionNrPretest () const { return (fraction_nr_pretest_); }
 
     private:
       /** \brief Number of samples to randomly pre-test, in percents. */
@@ -119,6 +118,3 @@ namespace pcl
 #ifdef PCL_NO_PRECOMPILE
 #include <pcl/sample_consensus/impl/rransac.hpp>
 #endif
-
-#endif  //#ifndef PCL_SAMPLE_CONSENSUS_RRANSAC_H_
-

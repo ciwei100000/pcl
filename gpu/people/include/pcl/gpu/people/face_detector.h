@@ -34,8 +34,7 @@
  * @author: Koen Buys
  */
 
-#ifndef PCL_GPU_PEOPLE_FACE_DETECTOR_H_
-#define PCL_GPU_PEOPLE_FACE_DETECTOR_H_
+#pragma once
 
 #include <pcl/pcl_exports.h>
 #include <pcl/point_types.h>
@@ -58,10 +57,11 @@ namespace pcl
       class FaceDetector
       {
         public:
-          typedef boost::shared_ptr<FaceDetector> Ptr;
-          //typedef DeviceArray2D<unsigned char> Labels;
-          //typedef DeviceArray2D<unsigned short> Depth;
-          //typedef DeviceArray2D<pcl::RGB> Image;
+          using Ptr = shared_ptr<FaceDetector>;
+          using ConstPtr = shared_ptr<const FaceDetector>;
+          //using Labels = DeviceArray2D<unsigned char>;
+          //using Depth = DeviceArray2D<unsigned short>;
+          //using Image = DeviceArray2D<pcl::RGB>;
 
           /** \brief This is the constructor **/
           FaceDetector ( int cols, int rows);
@@ -197,6 +197,3 @@ namespace pcl
     }
   }
 }
-
-
-#endif /* PCL_GPU_PEOPLE_FACE_DETECTOR_H_ */

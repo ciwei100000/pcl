@@ -33,9 +33,9 @@
  *
  */
 
-#ifndef PCL_SURFACE_MARCHING_CUBES_H_
-#define PCL_SURFACE_MARCHING_CUBES_H_
+#pragma once
 
+#include <pcl/pcl_macros.h>
 #include <pcl/surface/boost.h>
 #include <pcl/surface/reconstruction.h>
 
@@ -363,16 +363,16 @@ namespace pcl
   class MarchingCubes : public SurfaceReconstruction<PointNT>
   {
     public:
-      typedef boost::shared_ptr<MarchingCubes<PointNT> > Ptr;
-      typedef boost::shared_ptr<const MarchingCubes<PointNT> > ConstPtr;
+      using Ptr = shared_ptr<MarchingCubes<PointNT> >;
+      using ConstPtr = shared_ptr<const MarchingCubes<PointNT> >;
 
       using SurfaceReconstruction<PointNT>::input_;
       using SurfaceReconstruction<PointNT>::tree_;
 
-      typedef typename pcl::PointCloud<PointNT>::Ptr PointCloudPtr;
+      using PointCloudPtr = typename pcl::PointCloud<PointNT>::Ptr;
 
-      typedef typename pcl::KdTree<PointNT> KdTree;
-      typedef typename pcl::KdTree<PointNT>::Ptr KdTreePtr;
+      using KdTree = pcl::KdTree<PointNT>;
+      using KdTreePtr = typename KdTree::Ptr;
 
       /** \brief Constructor. */
       MarchingCubes (const float percentage_extend_grid = 0.0f,
@@ -383,7 +383,7 @@ namespace pcl
       }
 
       /** \brief Destructor. */
-      virtual ~MarchingCubes ();
+      ~MarchingCubes ();
 
 
       /** \brief Method that sets the iso level of the surface to be extracted.
@@ -501,30 +501,27 @@ namespace pcl
                          Eigen::Vector3i &index3d);
 
       /** \brief Class get name method. */
-      std::string getClassName () const { return ("MarchingCubes"); }
+      std::string getClassName () const override { return ("MarchingCubes"); }
 
       /** \brief Extract the surface.
         * \param[out] output the resultant polygonal mesh
         */
-       virtual void
-       performReconstruction (pcl::PolygonMesh &output);
+       void
+       performReconstruction (pcl::PolygonMesh &output) override;
 
        /** \brief Extract the surface.
          * \param[out] points the points of the extracted mesh
          * \param[out] polygons the connectivity between the point of the extracted mesh.
          */
-       virtual void
+       void
        performReconstruction (pcl::PointCloud<PointNT> &points,
-                              std::vector<pcl::Vertices> &polygons);
+                              std::vector<pcl::Vertices> &polygons) override;
 
     public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      PCL_MAKE_ALIGNED_OPERATOR_NEW
   };
 }
 
 #ifdef PCL_NO_PRECOMPILE
 #include <pcl/surface/impl/marching_cubes.hpp>
 #endif
-
-#endif  // PCL_SURFACE_MARCHING_CUBES_H_
-

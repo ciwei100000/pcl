@@ -37,22 +37,20 @@
  *
  */
 
-#ifndef PCL_GPU_EXTRACT_LABELED_CLUSTERS_H_
-#define PCL_GPU_EXTRACT_LABELED_CLUSTERS_H_
+#pragma once
 
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/PointIndices.h>
 #include <pcl/pcl_macros.h>
 #include <pcl/gpu/octree/octree.hpp>
-#include <pcl/gpu/containers/impl/device_array.hpp>
 
 namespace pcl
 {
   namespace gpu
   {
     template <typename PointT> void
-    extractLabeledEuclideanClusters (const boost::shared_ptr<pcl::PointCloud<PointT> > &host_cloud_,
+    extractLabeledEuclideanClusters (const typename pcl::PointCloud<PointT>::Ptr &host_cloud_,
                                      const pcl::gpu::Octree::Ptr                 &tree,
                                      float                                       tolerance,
                                      std::vector<PointIndices>                   &clusters,
@@ -67,18 +65,18 @@ namespace pcl
     class EuclideanLabeledClusterExtraction
     {
       public:
-        typedef pcl::PointXYZ PointType;
-        typedef pcl::PointCloud<PointT> PointCloudHost;
-        typedef typename PointCloudHost::Ptr PointCloudHostPtr;
-        typedef typename PointCloudHost::ConstPtr PointCloudHostConstPtr;
+        using PointType = pcl::PointXYZ;
+        using PointCloudHost = pcl::PointCloud<PointT>;
+        using PointCloudHostPtr = typename PointCloudHost::Ptr;
+        using PointCloudHostConstPtr = typename PointCloudHost::ConstPtr;
 
-        typedef PointIndices::Ptr PointIndicesPtr;
-        typedef PointIndices::ConstPtr PointIndicesConstPtr;
+        using PointIndicesPtr = PointIndices::Ptr;
+        using PointIndicesConstPtr = PointIndices::ConstPtr;
 
-        typedef pcl::gpu::Octree GPUTree;
-        typedef pcl::gpu::Octree::Ptr GPUTreePtr;
+        using GPUTree = pcl::gpu::Octree;
+        using GPUTreePtr = pcl::gpu::Octree::Ptr;
 
-        typedef pcl::gpu::Octree::PointCloud CloudDevice;
+        using CloudDevice = pcl::gpu::Octree::PointCloud;
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /** \brief Empty constructor. */
@@ -160,5 +158,3 @@ namespace pcl
     }
   }
 }
-
-#endif //PCL_GPU_EXTRACT_LABELED_CLUSTERS_H_

@@ -59,7 +59,7 @@ pcl::SampleConsensusModelParallelPlane<PointT>::selectWithinDistance (
 }
 
 //////////////////////////////////////////////////////////////////////////
-template <typename PointT> int
+template <typename PointT> std::size_t
 pcl::SampleConsensusModelParallelPlane<PointT>::countWithinDistance (
       const Eigen::VectorXf &model_coefficients, const double threshold) const
 {
@@ -101,7 +101,7 @@ pcl::SampleConsensusModelParallelPlane<PointT>::isModelValid (const Eigen::Vecto
     coeff.normalize ();
 
     Eigen::Vector4f axis (axis_[0], axis_[1], axis_[2], 0);
-    if (fabs (axis.dot (coeff)) > sin_angle_)
+    if (std::abs (axis.dot (coeff)) > sin_angle_)
       return  (false);
   }
 
