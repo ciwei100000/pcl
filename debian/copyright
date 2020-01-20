@@ -3,7 +3,7 @@ Upstream-Name: PCL
 Upstream-Contact: http://pointclouds.org/contact.html
 Source: https://github.com/PointCloudLibrary/pcl
 Files-Excluded: cuda/common/include/pcl/cuda/cutil*.h
-                gpu/utils/include/pcl/gpu/utils/device/cutil_math.h
+Comment: Copyright 1993-2010 NVIDIA Corporation.  All rights reserved.
 
 Files: *
 Copyright: 2001, Addison-Wesley
