@@ -77,6 +77,8 @@ pcl::PCA<PointT>::initCompute ()
     eigenvalues_[i] = evd.eigenvalues () [2-i];
     eigenvectors_.col (i) = evd.eigenvectors ().col (2-i);
   }
+  // Enforce right hand rule 
+  eigenvectors_.col(2) = eigenvectors_.col(0).cross(eigenvectors_.col(1));
   // If not basis only then compute the coefficients
   if (!basis_only_)
     coefficients_ = eigenvectors_.transpose() * cloud_demean.topRows<3> ();
@@ -94,7 +96,7 @@ pcl::PCA<PointT>::update (const PointT& input_point, FLAG flag)
     PCL_THROW_EXCEPTION (InitFailedException, "[pcl::PCA::update] PCA initCompute failed");
 
   Eigen::Vector3f input (input_point.x, input_point.y, input_point.z);
-  const size_t n = eigenvectors_.cols ();// number of eigen vectors
+  const std::size_t n = eigenvectors_.cols ();// number of eigen vectors
   Eigen::VectorXf meanp = (float(n) * (mean_.head<3>() + input)) / float(n + 1);
   Eigen::VectorXf a = eigenvectors_.transpose() * (input - mean_.head<3>());
   Eigen::VectorXf y = (eigenvectors_ * a) + mean_.head<3>();
@@ -178,19 +180,19 @@ pcl::PCA<PointT>::project (const PointCloud& input, PointCloud& projection)
   if (input.is_dense)
   {
     projection.resize (input.size ());
-    for (size_t i = 0; i < input.size (); ++i)
+    for (std::size_t i = 0; i < input.size (); ++i)
       project (input[i], projection[i]);
   }
   else
   {
     PointT p;
-    for (size_t i = 0; i < input.size (); ++i)
+    for (const auto& pt: input)
     {
-      if (!pcl_isfinite (input[i].x) || 
-          !pcl_isfinite (input[i].y) ||
-          !pcl_isfinite (input[i].z))
+      if (!std::isfinite (pt.x) ||
+          !std::isfinite (pt.y) ||
+          !std::isfinite (pt.z))
         continue;
-      project (input[i], p);
+      project (pt, p);
       projection.push_back (p);
     }
   }
@@ -220,17 +222,17 @@ pcl::PCA<PointT>::reconstruct (const PointCloud& projection, PointCloud& input)
   if (input.is_dense)
   {
     input.resize (projection.size ());
-    for (size_t i = 0; i < projection.size (); ++i)
+    for (std::size_t i = 0; i < projection.size (); ++i)
       reconstruct (projection[i], input[i]);
   }
   else
   {
     PointT p;
-    for (size_t i = 0; i < input.size (); ++i)
+    for (std::size_t i = 0; i < input.size (); ++i)
     {
-      if (!pcl_isfinite (input[i].x) || 
-          !pcl_isfinite (input[i].y) ||
-          !pcl_isfinite (input[i].z))
+      if (!std::isfinite (input[i].x) || 
+          !std::isfinite (input[i].y) ||
+          !std::isfinite (input[i].z))
         continue;
       reconstruct (projection[i], p);
       input.push_back (p);

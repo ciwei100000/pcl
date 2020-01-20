@@ -34,6 +34,8 @@
  *  Author: Anatoly Baskeheev, Itseez Ltd, (myname.mysurname@mycompany.com)
  */
 
+#ifdef HAVE_OPENNI
+
 #include <pcl/io/openni_camera/openni.h>
 
 #include "openni_capture.h"
@@ -114,7 +116,7 @@ pcl::gpu::kinfuLS::CaptureOpenNI::open (int device)
   }
 
   xn::NodeInfoList devicesList;
-  rc = impl_->context.EnumerateProductionTrees ( XN_NODE_TYPE_DEVICE, NULL, devicesList, 0 );
+  rc = impl_->context.EnumerateProductionTrees ( XN_NODE_TYPE_DEVICE, nullptr, devicesList, nullptr );
   if (rc != XN_STATUS_OK)
   {
     sprintf (impl_->strError, "Init failed: %s\n", xnGetStatusString (rc));
@@ -136,8 +138,8 @@ pcl::gpu::kinfuLS::CaptureOpenNI::open (int device)
   XnLicense license;
   const char* vendor = "PrimeSense";
   const char* key = "0KOIk2JeIBYClPWVnMoRKn5cdY4=";
-  sprintf (license.strKey, key);
-  sprintf (license.strVendor, vendor);
+  strncpy (license.strKey, key, sizeof (license.strKey));
+  strncpy (license.strVendor, vendor, sizeof (license.strVendor));
 
   rc = impl_->context.AddLicense (license);
   if (rc != XN_STATUS_OK)
@@ -153,7 +155,7 @@ pcl::gpu::kinfuLS::CaptureOpenNI::open (int device)
     REPORT_ERROR (impl_->strError);
   }
   //rc = impl_->depth.SetIntProperty("HoleFilter", 1);
-  rc = impl_->depth.SetMapOutputMode (mode);
+  impl_->depth.SetMapOutputMode (mode);
   impl_->has_depth = true;
 
   rc = impl_->image.Create (impl_->context);
@@ -165,7 +167,7 @@ pcl::gpu::kinfuLS::CaptureOpenNI::open (int device)
   else
   {
     impl_->has_image = true;
-    rc = impl_->image.SetMapOutputMode (mode);
+    impl_->image.SetMapOutputMode (mode);
   }
 
   getParams ();
@@ -276,7 +278,7 @@ pcl::gpu::kinfuLS::CaptureOpenNI::grab (PtrStepSz<const unsigned short>& depth, 
   else
   {
     printf ("no image\n");
-    rgb24.data = 0;
+    rgb24.data = nullptr;
     rgb24.cols = rgb24.rows = rgb24.step = 0;
   }
 
@@ -374,3 +376,5 @@ pcl::gpu::kinfuLS::CaptureOpenNI::setRegistration (bool value)
   getParams ();
   return rc == XN_STATUS_OK;
 }
+
+#endif

@@ -47,10 +47,10 @@ using namespace pcl;
 using namespace pcl::io;
 using namespace std;
 
-typedef search::KdTree<PointXYZ>::Ptr KdTreePtr;
+using KdTreePtr = search::KdTree<PointXYZ>::Ptr;
 
 PointCloud<PointXYZ> cloud;
-vector<int> indices;
+std::vector<int> indices;
 KdTreePtr tree;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +67,7 @@ TEST (PCL, computePointNormal)
   c.push_back (p11); c.push_back (p21); c.push_back (p31);
 
   computePointNormal (cloud, plane_parameters, curvature);
-//  cerr << plane_parameters << "\n";
+//  std::cerr << plane_parameters << "\n";
   
   c.clear ();
   PointXYZ p12 (-439747.72f, -43597.250f, 0.0000000f),
@@ -77,7 +77,7 @@ TEST (PCL, computePointNormal)
   c.push_back (p12); c.push_back (p22); c.push_back (p32);
 
   computePointNormal (cloud, plane_parameters, curvature);
-//  cerr << plane_parameters << "\n";
+//  std::cerr << plane_parameters << "\n";
 
   c.clear ();
   PointXYZ p13 (567011.56f, -7741.8179f, 0.00000000f),
@@ -87,7 +87,7 @@ TEST (PCL, computePointNormal)
   c.push_back (p13); c.push_back (p23); c.push_back (p33);
 
   computePointNormal (cloud, plane_parameters, curvature);
-//  cerr << plane_parameters << "\n";
+//  std::cerr << plane_parameters << "\n";
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -100,18 +100,18 @@ TEST (PCL, NormalEstimation)
 
   // computePointNormal (indices, Vector)
   computePointNormal (cloud, indices, plane_parameters, curvature);
-  EXPECT_NEAR (fabs (plane_parameters[0]), 0.035592, 1e-4);
-  EXPECT_NEAR (fabs (plane_parameters[1]), 0.369596, 1e-4);
-  EXPECT_NEAR (fabs (plane_parameters[2]), 0.928511, 1e-4);
-  EXPECT_NEAR (fabs (plane_parameters[3]), 0.0622552, 1e-4);
+  EXPECT_NEAR (std::abs (plane_parameters[0]), 0.035592, 1e-4);
+  EXPECT_NEAR (std::abs (plane_parameters[1]), 0.369596, 1e-4);
+  EXPECT_NEAR (std::abs (plane_parameters[2]), 0.928511, 1e-4);
+  EXPECT_NEAR (std::abs (plane_parameters[3]), 0.0622552, 1e-4);
   EXPECT_NEAR (curvature, 0.0693136, 1e-4);
 
   float nx, ny, nz;
   // computePointNormal (indices)
   n.computePointNormal (cloud, indices, nx, ny, nz, curvature);
-  EXPECT_NEAR (fabs (nx), 0.035592, 1e-4);
-  EXPECT_NEAR (fabs (ny), 0.369596, 1e-4);
-  EXPECT_NEAR (fabs (nz), 0.928511, 1e-4);
+  EXPECT_NEAR (std::abs (nx), 0.035592, 1e-4);
+  EXPECT_NEAR (std::abs (ny), 0.369596, 1e-4);
+  EXPECT_NEAR (std::abs (nz), 0.928511, 1e-4);
   EXPECT_NEAR (curvature, 0.0693136, 1e-4);
 
   // computePointNormal (Vector)
@@ -142,7 +142,7 @@ TEST (PCL, NormalEstimation)
   PointCloud<PointXYZ>::Ptr cloudptr = cloud.makeShared ();
   n.setInputCloud (cloudptr);
   EXPECT_EQ (n.getInputCloud (), cloudptr);
-  boost::shared_ptr<vector<int> > indicesptr (new vector<int> (indices));
+  pcl::IndicesPtr indicesptr (new pcl::Indices (indices));
   n.setIndices (indicesptr);
   EXPECT_EQ (n.getIndices (), indicesptr);
   n.setSearchMethod (tree);
@@ -153,12 +153,12 @@ TEST (PCL, NormalEstimation)
   n.compute (*normals);
   EXPECT_EQ (normals->points.size (), indices.size ());
 
-  for (size_t i = 0; i < normals->points.size (); ++i)
+  for (const auto &point : normals->points)
   {
-    EXPECT_NEAR (normals->points[i].normal[0], -0.035592, 1e-4);
-    EXPECT_NEAR (normals->points[i].normal[1], -0.369596, 1e-4);
-    EXPECT_NEAR (normals->points[i].normal[2], -0.928511, 1e-4);
-    EXPECT_NEAR (normals->points[i].curvature, 0.0693136, 1e-4);
+    EXPECT_NEAR (point.normal[0], -0.035592, 1e-4);
+    EXPECT_NEAR (point.normal[1], -0.369596, 1e-4);
+    EXPECT_NEAR (point.normal[2], -0.928511, 1e-4);
+    EXPECT_NEAR (point.curvature, 0.0693136, 1e-4);
   }
 
   PointCloud<PointXYZ>::Ptr surfaceptr = cloudptr;
@@ -193,7 +193,7 @@ TEST (PCL, NormalEstimationOpenMP)
   PointCloud<PointXYZ>::Ptr cloudptr = cloud.makeShared ();
   n.setInputCloud (cloudptr);
   EXPECT_EQ (n.getInputCloud (), cloudptr);
-  boost::shared_ptr<vector<int> > indicesptr (new vector<int> (indices));
+  pcl::IndicesPtr indicesptr (new pcl::Indices (indices));
   n.setIndices (indicesptr);
   EXPECT_EQ (n.getIndices (), indicesptr);
   n.setSearchMethod (tree);
@@ -204,12 +204,12 @@ TEST (PCL, NormalEstimationOpenMP)
   n.compute (*normals);
   EXPECT_EQ (normals->points.size (), indices.size ());
 
-  for (size_t i = 0; i < normals->points.size (); ++i)
+  for (const auto &point : normals->points)
   {
-    EXPECT_NEAR (normals->points[i].normal[0], -0.035592, 1e-4);
-    EXPECT_NEAR (normals->points[i].normal[1], -0.369596, 1e-4);
-    EXPECT_NEAR (normals->points[i].normal[2], -0.928511, 1e-4);
-    EXPECT_NEAR (normals->points[i].curvature, 0.0693136, 1e-4);
+    EXPECT_NEAR (point.normal[0], -0.035592, 1e-4);
+    EXPECT_NEAR (point.normal[1], -0.369596, 1e-4);
+    EXPECT_NEAR (point.normal[2], -0.928511, 1e-4);
+    EXPECT_NEAR (point.curvature, 0.0693136, 1e-4);
   }
 }
 

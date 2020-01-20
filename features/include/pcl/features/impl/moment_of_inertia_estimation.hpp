@@ -56,14 +56,11 @@ pcl::MomentOfInertiaEstimation<PointT>::MomentOfInertiaEstimation () :
   major_value_ (0.0f),
   middle_value_ (0.0f),
   minor_value_ (0.0f),
-  moment_of_inertia_ (),
-  eccentricity_ (),
   aabb_min_point_ (),
   aabb_max_point_ (),
   obb_min_point_ (),
   obb_max_point_ (),
-  obb_position_ (0.0f, 0.0f, 0.0f),
-  obb_rotational_matrix_ ()
+  obb_position_ (0.0f, 0.0f, 0.0f)
 {
 }
 
@@ -144,7 +141,7 @@ pcl::MomentOfInertiaEstimation<PointT>::compute ()
 
   if (normalize_)
   {
-    if (indices_->size () > 0)
+    if (!indices_->empty ())
       point_mass_ = 1.0f / static_cast <float> (indices_->size () * indices_->size ());
     else
       point_mass_ = 1.0f;
@@ -468,8 +465,8 @@ pcl::MomentOfInertiaEstimation<PointT>::rotateVector (const Eigen::Vector3f& vec
   const float y = axis (1);
   const float z = axis (2);
   const float rad = M_PI / 180.0f;
-  const float cosine = cos (angle * rad);
-  const float sine = sin (angle * rad);
+  const float cosine = std::cos (angle * rad);
+  const float sine = std::sin (angle * rad);
   rotation_matrix << cosine + (1 - cosine) * x * x,      (1 - cosine) * x * y - sine * z,    (1 - cosine) * x * z + sine * y,
                      (1 - cosine) * y * x + sine * z,    cosine + (1 - cosine) * y * y,      (1 - cosine) * y * z - sine * x,
                      (1 - cosine) * z * x - sine * y,    (1 - cosine) * z * y + sine * x,    cosine + (1 - cosine) * z * z;
@@ -543,13 +540,13 @@ pcl::MomentOfInertiaEstimation<PointT>::computeEccentricity (const Eigen::Matrix
   float eccentricity = 0.0f;
 
   if (major >= middle && major >= minor && middle_value != 0.0f)
-    eccentricity = pow (1.0f - (minor_value * minor_value) / (middle_value * middle_value), 0.5f);
+    eccentricity = std::pow (1.0f - (minor_value * minor_value) / (middle_value * middle_value), 0.5f);
 
   if (middle >= major && middle >= minor && major_value != 0.0f)
-    eccentricity = pow (1.0f - (minor_value * minor_value) / (major_value * major_value), 0.5f);
+    eccentricity = std::pow (1.0f - (minor_value * minor_value) / (major_value * major_value), 0.5f);
 
   if (minor >= major && minor >= middle && major_value != 0.0f)
-    eccentricity = pow (1.0f - (middle_value * middle_value) / (major_value * major_value), 0.5f);
+    eccentricity = std::pow (1.0f - (middle_value * middle_value) / (major_value * major_value), 0.5f);
 
   return (eccentricity);
 }
@@ -607,7 +604,7 @@ pcl::MomentOfInertiaEstimation<PointT>::setIndices (const PointIndicesConstPtr& 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT> void
-pcl::MomentOfInertiaEstimation<PointT>::setIndices (size_t row_start, size_t col_start, size_t nb_rows, size_t nb_cols)
+pcl::MomentOfInertiaEstimation<PointT>::setIndices (std::size_t row_start, std::size_t col_start, std::size_t nb_rows, std::size_t nb_cols)
 {
   if ((nb_rows > input_->height) || (row_start > input_->height))
   {
@@ -621,14 +618,14 @@ pcl::MomentOfInertiaEstimation<PointT>::setIndices (size_t row_start, size_t col
     return;
   }
 
-  size_t row_end = row_start + nb_rows;
+  const std::size_t row_end = row_start + nb_rows;
   if (row_end > input_->height)
   {
     PCL_ERROR ("[PCLBase::setIndices] %d is out of rows range %d", row_end, input_->height);
     return;
   }
 
-  size_t col_end = col_start + nb_cols;
+  const std::size_t col_end = col_start + nb_cols;
   if (col_end > input_->width)
   {
     PCL_ERROR ("[PCLBase::setIndices] %d is out of columns range %d", col_end, input_->width);
@@ -637,8 +634,8 @@ pcl::MomentOfInertiaEstimation<PointT>::setIndices (size_t row_start, size_t col
 
   indices_.reset (new std::vector<int>);
   indices_->reserve (nb_cols * nb_rows);
-  for(size_t i = row_start; i < row_end; i++)
-    for(size_t j = col_start; j < col_end; j++)
+  for(std::size_t i = row_start; i < row_end; i++)
+    for(std::size_t j = col_start; j < col_end; j++)
       indices_->push_back (static_cast<int> ((i * input_->width) + j));
   fake_indices_ = false;
   use_indices_  = true;

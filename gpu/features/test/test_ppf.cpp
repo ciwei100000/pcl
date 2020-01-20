@@ -34,14 +34,6 @@
  *  Author: Anatoly Baskeheev, Itseez Ltd, (myname.mysurname@mycompany.com)
  */
 
-#if (defined(__GNUC__) && !defined(__CUDACC__) && (GTEST_GCC_VER_ >= 40000)) 
-    #define GTEST_USE_OWN_TR1_TUPLE 0
-#endif
-
-#if defined(_MSC_VER) && (_MSC_VER >= 1500)
-    #define GTEST_USE_OWN_TR1_TUPLE 0
-#endif
-
 #include "gtest/gtest.h"
 
 #include <pcl/point_types.h>
@@ -65,7 +57,7 @@ TEST(PCL_FeaturesGPU, ppf)
     source.generateIndices();
     source.estimateNormals();
                    
-    vector<PointXYZ> normals_for_gpu(source.normals->points.size());    
+    std::vector<PointXYZ> normals_for_gpu(source.normals->points.size());    
     std::transform(source.normals->points.begin(), source.normals->points.end(), normals_for_gpu.begin(), DataSource::Normal2PointXYZ());
     
     //uploading data to GPU
@@ -90,7 +82,7 @@ TEST(PCL_FeaturesGPU, ppf)
     pph_gpu.compute(ppf_features);
 
 
-    vector<PPFSignature> downloaded;
+    std::vector<PPFSignature> downloaded;
     ppf_features.download(downloaded);
 
     pcl::PPFEstimation<PointXYZ, Normal, PPFSignature> fe;
@@ -101,7 +93,7 @@ TEST(PCL_FeaturesGPU, ppf)
     PointCloud<PPFSignature> ppfs;
     fe.compute (ppfs);
 
-    for(size_t i = 0; i < downloaded.size(); ++i)
+    for(std::size_t i = 0; i < downloaded.size(); ++i)
     {
         PPFSignature& gpu = downloaded[i];
         PPFSignature& cpu = ppfs.points[i];        
@@ -124,7 +116,7 @@ TEST(PCL_FeaturesGPU, ppfrgb)
     source.generateIndices();
     source.estimateNormals();
                    
-    vector<PointXYZ> normals_for_gpu(source.normals->points.size());    
+    std::vector<PointXYZ> normals_for_gpu(source.normals->points.size());    
     std::transform(source.normals->points.begin(), source.normals->points.end(), normals_for_gpu.begin(), DataSource::Normal2PointXYZ());
     
     //uploading data to GPU
@@ -148,14 +140,14 @@ TEST(PCL_FeaturesGPU, ppfrgb)
     pph_gpu.setIndices(indices_gpu);
     pph_gpu.compute(ppf_features);
 
-    vector<PPFRGBSignature> downloaded;
+    std::vector<PPFRGBSignature> downloaded;
     ppf_features.download(downloaded);
 
     pcl::PPFRGBEstimation<PointXYZRGB, Normal, PPFRGBSignature> fe;
     
     PointCloud<PointXYZRGB>::Ptr cloud_XYZRGB(new PointCloud<PointXYZRGB>());
     cloud_XYZRGB->points.clear();
-    for(size_t i = 0; i < source.cloud->points.size(); ++i)               
+    for(std::size_t i = 0; i < source.cloud->points.size(); ++i)               
     {
         const PointXYZ& p = source.cloud->points[i];        
         int color = *(int*)&p.data[3];
@@ -178,7 +170,7 @@ TEST(PCL_FeaturesGPU, ppfrgb)
     PointCloud<PPFRGBSignature> ppfs;
     fe.compute (ppfs);
 
-    for(size_t i = 207025; i < downloaded.size(); ++i)
+    for(std::size_t i = 207025; i < downloaded.size(); ++i)
     {
         PPFRGBSignature& gpu = downloaded[i];
         PPFRGBSignature& cpu = ppfs.points[i];        
@@ -189,8 +181,8 @@ TEST(PCL_FeaturesGPU, ppfrgb)
         ASSERT_NEAR(gpu.f4, cpu.f4, 0.01f);
         ASSERT_NEAR(gpu.alpha_m, cpu.alpha_m, 0.01f); 
 
-        if (pcl_isnan(gpu.r_ratio) || pcl_isnan(gpu.g_ratio) || pcl_isnan(gpu.b_ratio) || 
-            pcl_isnan(cpu.r_ratio) || pcl_isnan(cpu.g_ratio) || pcl_isnan(cpu.b_ratio))
+        if (std::isnan(gpu.r_ratio) || std::isnan(gpu.g_ratio) || std::isnan(gpu.b_ratio) || 
+            std::isnan(cpu.r_ratio) || std::isnan(cpu.g_ratio) || std::isnan(cpu.b_ratio))
             continue;
         
         ASSERT_NEAR(gpu.r_ratio, cpu.r_ratio, 0.01f);
@@ -212,7 +204,7 @@ TEST(PCL_FeaturesGPU, ppfrgb_region)
 
     source.estimateNormals();
                    
-    vector<PointXYZ> normals_for_gpu(source.normals->points.size());    
+    std::vector<PointXYZ> normals_for_gpu(source.normals->points.size());    
     std::transform(source.normals->points.begin(), source.normals->points.end(), normals_for_gpu.begin(), DataSource::Normal2PointXYZ());
     
     //uploading data to GPU
@@ -238,14 +230,14 @@ TEST(PCL_FeaturesGPU, ppfrgb_region)
 
     pph_gpu.compute(ppf_features);
 
-    vector<PPFRGBSignature> downloaded;
+    std::vector<PPFRGBSignature> downloaded;
     ppf_features.download(downloaded);
 
     pcl::PPFRGBRegionEstimation<PointXYZRGB, Normal, PPFRGBSignature> fe;
     
     PointCloud<PointXYZRGB>::Ptr cloud_XYZRGB(new PointCloud<PointXYZRGB>());
     cloud_XYZRGB->points.clear();
-    for(size_t i = 0; i < source.cloud->points.size(); ++i)               
+    for(std::size_t i = 0; i < source.cloud->points.size(); ++i)               
     {
         const PointXYZ& p = source.cloud->points[i];        
         int color = *(int*)&p.data[3];
@@ -269,7 +261,7 @@ TEST(PCL_FeaturesGPU, ppfrgb_region)
     PointCloud<PPFRGBSignature> ppfs;
     fe.compute (ppfs);
 
-    for(size_t i = 0; i < downloaded.size(); ++i)
+    for(std::size_t i = 0; i < downloaded.size(); ++i)
     {
         PPFRGBSignature& gpu = downloaded[i];
         PPFRGBSignature& cpu = ppfs.points[i];        
@@ -280,8 +272,8 @@ TEST(PCL_FeaturesGPU, ppfrgb_region)
         ASSERT_NEAR(gpu.f4, cpu.f4, 0.01f);
         ASSERT_NEAR(gpu.alpha_m, cpu.alpha_m, 0.01f); 
 
-        if (pcl_isnan(gpu.r_ratio) || pcl_isnan(gpu.g_ratio) || pcl_isnan(gpu.b_ratio) || 
-            pcl_isnan(cpu.r_ratio) || pcl_isnan(cpu.g_ratio) || pcl_isnan(cpu.b_ratio))
+        if (std::isnan(gpu.r_ratio) || std::isnan(gpu.g_ratio) || std::isnan(gpu.b_ratio) || 
+            std::isnan(cpu.r_ratio) || std::isnan(cpu.g_ratio) || std::isnan(cpu.b_ratio))
             continue;
         
         ASSERT_NEAR(gpu.r_ratio, cpu.r_ratio, 0.01f);

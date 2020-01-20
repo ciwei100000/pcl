@@ -1,5 +1,4 @@
-#ifndef PCL_TRACKING_COHERENCE_H_
-#define PCL_TRACKING_COHERENCE_H_
+#pragma once
 
 #include <pcl/pcl_base.h>
 
@@ -17,12 +16,12 @@ namespace pcl
     class PointCoherence
     {
     public:
-      typedef boost::shared_ptr< PointCoherence<PointInT> > Ptr;
-      typedef boost::shared_ptr< const PointCoherence<PointInT> > ConstPtr;
+      using Ptr = shared_ptr<PointCoherence<PointInT> >;
+      using ConstPtr = shared_ptr<const PointCoherence<PointInT> >;
       
     public:
       /** \brief empty constructor */
-      PointCoherence () : coherence_name_ () {}
+      PointCoherence () {}
       
       /** \brief empty distructor */
       virtual ~PointCoherence () {}
@@ -60,16 +59,16 @@ namespace pcl
     class PointCloudCoherence
     {
     public:
-      typedef boost::shared_ptr< PointCloudCoherence<PointInT> > Ptr;
-      typedef boost::shared_ptr< const PointCloudCoherence<PointInT> > ConstPtr;
+      using Ptr = shared_ptr<PointCloudCoherence<PointInT> >;
+      using ConstPtr = shared_ptr<const PointCloudCoherence<PointInT> >;
 
-      typedef pcl::PointCloud<PointInT> PointCloudIn;
-      typedef typename PointCloudIn::Ptr PointCloudInPtr;
-      typedef typename PointCloudIn::ConstPtr PointCloudInConstPtr;
+      using PointCloudIn = pcl::PointCloud<PointInT>;
+      using PointCloudInPtr = typename PointCloudIn::Ptr;
+      using PointCloudInConstPtr = typename PointCloudIn::ConstPtr;
       
-      typedef typename PointCoherence<PointInT>::Ptr PointCoherencePtr;
+      using PointCoherencePtr = typename PointCoherence<PointInT>::Ptr;
       /** \brief Constructor. */
-      PointCloudCoherence () : coherence_name_ (), target_input_ (), point_coherences_ () {}
+      PointCloudCoherence () : target_input_ (), point_coherences_ () {}
 
       /** \brief Destructor. */
       virtual ~PointCloudCoherence () {}
@@ -129,8 +128,4 @@ namespace pcl
   }
 }
 
-
 #include <pcl/tracking/impl/coherence.hpp>
-
-
-#endif

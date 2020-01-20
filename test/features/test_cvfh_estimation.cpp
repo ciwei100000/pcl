@@ -48,11 +48,11 @@ using namespace pcl;
 using namespace pcl::io;
 using namespace std;
 
-typedef search::KdTree<PointXYZ>::Ptr KdTreePtr;
-typedef PointCloud<PointXYZ>::Ptr CloudPtr;
+using KdTreePtr = search::KdTree<PointXYZ>::Ptr;
+using CloudPtr = PointCloud<PointXYZ>::Ptr;
 
 PointCloud<PointXYZ> cloud;
-vector<int> indices;
+std::vector<int> indices;
 KdTreePtr tree;
 
 CloudPtr cloud_milk;
@@ -67,7 +67,7 @@ TEST (PCL, CVFHEstimation)
   PointCloud<Normal>::Ptr normals (new PointCloud<Normal> ());
   // set parameters
   n.setInputCloud (cloud.makeShared ());
-  boost::shared_ptr<vector<int> > indicesptr (new vector<int> (indices));
+  pcl::IndicesPtr indicesptr (new pcl::Indices (indices));
   n.setIndices (indicesptr);
   n.setSearchMethod (tree);
   n.setKSearch (10); // Use 10 nearest neighbors to estimate the normals
@@ -143,7 +143,7 @@ main (int argc, char** argv)
   }
 
   indices.resize (cloud.points.size ());
-  for (size_t i = 0; i < indices.size (); ++i)
+  for (std::size_t i = 0; i < indices.size (); ++i)
   {
     indices[i] = static_cast<int>(i);
   }

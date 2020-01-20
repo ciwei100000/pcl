@@ -47,8 +47,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 pcl::MeshSubdivisionVTK::MeshSubdivisionVTK ()
-  : pcl::MeshProcessing (),
-    filter_type_ (LINEAR)
+  : filter_type_ (LINEAR)
 {
 }
 
@@ -79,11 +78,7 @@ pcl::MeshSubdivisionVTK::performProcessing (pcl::PolygonMesh &output)
       break;
   }
 
-#if VTK_MAJOR_VERSION < 6
-  vtk_subdivision_filter->SetInput (vtk_polygons_);
-#else
   vtk_subdivision_filter->SetInputData (vtk_polygons_);
-#endif
   vtk_subdivision_filter->Update ();
 
   vtk_polygons_ = vtk_subdivision_filter->GetOutput ();

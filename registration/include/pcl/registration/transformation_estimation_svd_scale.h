@@ -37,8 +37,8 @@
  * $Id$
  *
  */
-#ifndef PCL_REGISTRATION_TRANSFORMATION_ESTIMATION_SVD_SCALE_H_
-#define PCL_REGISTRATION_TRANSFORMATION_ESTIMATION_SVD_SCALE_H_
+
+#pragma once
 
 #include <pcl/registration/transformation_estimation_svd.h>
 
@@ -58,10 +58,10 @@ namespace pcl
     class TransformationEstimationSVDScale : public TransformationEstimationSVD<PointSource, PointTarget, Scalar>
     {
       public:
-        typedef boost::shared_ptr<TransformationEstimationSVDScale<PointSource, PointTarget, Scalar> > Ptr;
-        typedef boost::shared_ptr<const TransformationEstimationSVDScale<PointSource, PointTarget, Scalar> > ConstPtr;
+        using Ptr = shared_ptr<TransformationEstimationSVDScale<PointSource, PointTarget, Scalar> >;
+        using ConstPtr = shared_ptr<const TransformationEstimationSVDScale<PointSource, PointTarget, Scalar> >;
 
-        typedef typename TransformationEstimationSVD<PointSource, PointTarget, Scalar>::Matrix4 Matrix4;
+        using Matrix4 = typename TransformationEstimationSVD<PointSource, PointTarget, Scalar>::Matrix4;
 
         /** \brief Inherits from TransformationEstimationSVD, but forces it to not use the Umeyama method */
         TransformationEstimationSVDScale ():
@@ -88,5 +88,3 @@ namespace pcl
 }
 
 #include <pcl/registration/impl/transformation_estimation_svd_scale.hpp>
-
-#endif /* PCL_REGISTRATION_TRANSFORMATION_ESTIMATION_SVD_SCALE_H_ */

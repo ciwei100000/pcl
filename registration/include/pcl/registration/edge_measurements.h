@@ -38,8 +38,9 @@
  *
  */
 
-#ifndef PCL_EDGE_MEASUREMENTS_H_
-#define PCL_EDGE_MEASUREMENTS_H_
+#pragma once
+
+#include <pcl/pcl_macros.h>
 
 namespace pcl
 {
@@ -62,12 +63,10 @@ namespace pcl
       VertexT v_start, v_end;
       Eigen::Matrix4f relative_transformation;
       InformationT information_matrix;
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      PCL_MAKE_ALIGNED_OPERATOR_NEW
 
       PoseMeasurement (const VertexT& v_s, const VertexT& v_e, const Eigen::Matrix4f& tr, const InformationT& mtx)
         : v_start (v_s), v_end (v_e), relative_transformation (tr), information_matrix (mtx) {}
     };
   }
 }
-
-#endif // PCL_EDGE_MEASUREMENTS_H_

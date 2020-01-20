@@ -37,16 +37,16 @@
  *
  */
 
-#ifndef PCL_REGION_GROWING_H_
-#define PCL_REGION_GROWING_H_
+#pragma once
 
 #include <pcl/pcl_base.h>
+#include <pcl/pcl_macros.h>
 #include <pcl/search/search.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <list>
-#include <math.h>
-#include <time.h>
+#include <cmath>
+#include <ctime>
 
 namespace pcl
 {
@@ -62,11 +62,11 @@ namespace pcl
   {
     public:
 
-      typedef pcl::search::Search <PointT> KdTree;
-      typedef typename KdTree::Ptr KdTreePtr;
-      typedef pcl::PointCloud <NormalT> Normal;
-      typedef typename Normal::Ptr NormalPtr;
-      typedef pcl::PointCloud <PointT> PointCloud;
+      using KdTree = pcl::search::Search<PointT>;
+      using KdTreePtr = typename KdTree::Ptr;
+      using Normal = pcl::PointCloud<NormalT>;
+      using NormalPtr = typename Normal::Ptr;
+      using PointCloud = pcl::PointCloud<PointT>;
 
       using PCLBase <PointT>::input_;
       using PCLBase <PointT>::indices_;
@@ -81,7 +81,7 @@ namespace pcl
       /** \brief This destructor destroys the cloud, normals and search method used for
         * finding KNN. In other words it frees memory.
         */
-      virtual
+      
       ~RegionGrowing ();
 
       /** \brief Get the minimum number of points that a cluster needs to contain in order to be considered valid. */
@@ -333,7 +333,7 @@ namespace pcl
       int number_of_segments_;
 
     public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      PCL_MAKE_ALIGNED_OPERATOR_NEW
   };
 
   /** \brief This function is used as a comparator for sorting. */
@@ -346,6 +346,4 @@ namespace pcl
 
 #ifdef PCL_NO_PRECOMPILE
 #include <pcl/segmentation/impl/region_growing.hpp>
-#endif
-
 #endif

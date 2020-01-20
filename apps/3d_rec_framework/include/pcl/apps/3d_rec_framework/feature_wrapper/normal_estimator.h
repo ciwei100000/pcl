@@ -5,8 +5,7 @@
  *      Author: aitor
  */
 
-#ifndef REC_FRAMEWORK_NORMAL_ESTIMATOR_H_
-#define REC_FRAMEWORK_NORMAL_ESTIMATOR_H_
+#pragma once
 
 #include <pcl/filters/radius_outlier_removal.h>
 #include <pcl/filters/voxel_grid.h>
@@ -22,12 +21,12 @@ namespace pcl
       class PreProcessorAndNormalEstimator
       {
 
-        typedef typename pcl::PointCloud<PointInT>::Ptr PointInTPtr;
+        using PointInTPtr = typename pcl::PointCloud<PointInT>::Ptr;
 
         float
         computeMeshResolution (PointInTPtr & input)
         {
-          typedef typename pcl::KdTree<PointInT>::Ptr KdTreeInPtr;
+          using KdTreeInPtr = typename pcl::KdTree<PointInT>::Ptr;
           KdTreeInPtr tree = boost::make_shared<pcl::KdTreeFLANN<PointInT> > (false);
           tree->setInputCloud (input);
 
@@ -38,12 +37,12 @@ namespace pcl
           float sum_distances = 0.0;
           std::vector<float> avg_distances (input->points.size ());
           // Iterate through the source data set
-          for (size_t i = 0; i < input->points.size (); ++i)
+          for (std::size_t i = 0; i < input->points.size (); ++i)
           {
             tree->nearestKSearch (input->points[i], 9, nn_indices, nn_distances);
 
             float avg_dist_neighbours = 0.0;
-            for (size_t j = 1; j < nn_indices.size (); j++)
+            for (std::size_t j = 1; j < nn_indices.size (); j++)
               avg_dist_neighbours += std::sqrt (nn_distances[j]);
 
             avg_dist_neighbours /= static_cast<float> (nn_indices.size ());
@@ -138,7 +137,7 @@ namespace pcl
             out = in;
           }
 
-          if (out->points.size () == 0)
+          if (out->points.empty ())
           {
             PCL_WARN("NORMAL estimator: Cloud has no points after voxel grid, won't be able to compute normals!\n");
             return;
@@ -168,7 +167,7 @@ namespace pcl
 
           }
 
-          if (out->points.size () == 0)
+          if (out->points.empty ())
           {
             PCL_WARN("NORMAL estimator: Cloud has no points after removing outliers...!\n");
             return;
@@ -184,8 +183,7 @@ namespace pcl
 
           if (out->isOrganized ())
           {
-            typedef typename pcl::IntegralImageNormalEstimation<PointInT, pcl::Normal> NormalEstimator_;
-            NormalEstimator_ n3d;
+            pcl::IntegralImageNormalEstimation<PointInT, pcl::Normal> n3d;
             n3d.setNormalEstimationMethod (n3d.COVARIANCE_MATRIX);
             //n3d.setNormalEstimationMethod (n3d.AVERAGE_3D_GRADIENT);
             n3d.setInputCloud (out);
@@ -205,9 +203,9 @@ namespace pcl
             {
               pcl::ScopeTime t ("check nans...");
               int j = 0;
-              for (size_t i = 0; i < out->points.size (); ++i)
+              for (std::size_t i = 0; i < out->points.size (); ++i)
               {
-                if (!pcl_isfinite (out->points[i].x) || !pcl_isfinite (out->points[i].y) || !pcl_isfinite (out->points[i].z))
+                if (!std::isfinite (out->points[i].x) || !std::isfinite (out->points[i].y) || !std::isfinite (out->points[i].z))
                   continue;
 
                 out->points[j] = out->points[i];
@@ -224,8 +222,7 @@ namespace pcl
               out->height = 1;
             }
 
-            typedef typename pcl::NormalEstimation<PointInT, pcl::Normal> NormalEstimator_;
-            NormalEstimator_ n3d;
+            pcl::NormalEstimation<PointInT, pcl::Normal> n3d;
             typename pcl::search::KdTree<PointInT>::Ptr normals_tree (new pcl::search::KdTree<PointInT>);
             normals_tree->setInputCloud (out);
             n3d.setRadiusSearch (radius);
@@ -242,10 +239,10 @@ namespace pcl
           {
             pcl::ScopeTime t ("check nans...");
             int j = 0;
-            for (size_t i = 0; i < normals->points.size (); ++i)
+            for (std::size_t i = 0; i < normals->points.size (); ++i)
             {
-              if (!pcl_isfinite (normals->points[i].normal_x) || !pcl_isfinite (normals->points[i].normal_y)
-                  || !pcl_isfinite (normals->points[i].normal_z))
+              if (!std::isfinite (normals->points[i].normal_x) || !std::isfinite (normals->points[i].normal_y)
+                  || !std::isfinite (normals->points[i].normal_z))
                 continue;
 
               normals->points[j] = normals->points[i];
@@ -266,10 +263,10 @@ namespace pcl
             //is is organized, we set the xyz points to NaN
             pcl::ScopeTime t ("check nans organized...");
             bool NaNs = false;
-            for (size_t i = 0; i < normals->points.size (); ++i)
+            for (std::size_t i = 0; i < normals->points.size (); ++i)
             {
-              if (pcl_isfinite (normals->points[i].normal_x) && pcl_isfinite (normals->points[i].normal_y)
-                  && pcl_isfinite (normals->points[i].normal_z))
+              if (std::isfinite (normals->points[i].normal_x) && std::isfinite (normals->points[i].normal_y)
+                  && std::isfinite (normals->points[i].normal_z))
                 continue;
 
               NaNs = true;
@@ -284,7 +281,7 @@ namespace pcl
             }
           }
 
-          /*for (size_t i = 0; i < out->points.size (); i++)
+          /*for (std::size_t i = 0; i < out->points.size (); i++)
           {
             int r, g, b;
             r = static_cast<int> (out->points[i].r);
@@ -296,5 +293,3 @@ namespace pcl
       };
   }
 }
-
-#endif /* REC_FRAMEWORK_NORMAL_ESTIMATOR_H_ */

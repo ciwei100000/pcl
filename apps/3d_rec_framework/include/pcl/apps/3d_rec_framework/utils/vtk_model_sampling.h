@@ -5,8 +5,7 @@
  *      Author: aitor
  */
 
-#ifndef REC_FRAMEWORK_UNIFORM_SAMPLING_H_
-#define REC_FRAMEWORK_UNIFORM_SAMPLING_H_
+#pragma once
 
 #include <vtkPolyData.h>
 #include <vtkTriangle.h>
@@ -63,10 +62,10 @@ namespace pcl
 
       double A[3], B[3], C[3];
       vtkIdType npts = 0;
-      vtkIdType *ptIds = NULL;
+      vtkIdType *ptIds = nullptr;
       polydata->GetCellPoints (el, npts, ptIds);
 
-      if (ptIds == NULL)
+      if (ptIds == nullptr)
         return;
 
       polydata->GetPoint (ptIds[0], A);
@@ -77,15 +76,15 @@ namespace pcl
 
     template<typename PointT>
       inline void
-      uniform_sampling (vtkSmartPointer<vtkPolyData> polydata, size_t n_samples, typename pcl::PointCloud<PointT> & cloud_out)
+      uniform_sampling (const vtkSmartPointer<vtkPolyData>& polydata, std::size_t n_samples, typename pcl::PointCloud<PointT> & cloud_out)
       {
         polydata->BuildCells ();
         vtkSmartPointer < vtkCellArray > cells = polydata->GetPolys ();
 
         double p1[3], p2[3], p3[3], totalArea = 0;
         std::vector<double> cumulativeAreas (cells->GetNumberOfCells (), 0);
-        size_t i = 0;
-        vtkIdType npts = 0, *ptIds = NULL;
+        std::size_t i = 0;
+        vtkIdType npts = 0, *ptIds = nullptr;
         for (cells->InitTraversal (); cells->GetNextCell (npts, ptIds); i++)
         {
           polydata->GetPoint (ptIds[0], p1);
@@ -111,7 +110,7 @@ namespace pcl
 
     template<typename PointT>
       inline void
-      uniform_sampling (std::string & file, size_t n_samples, typename pcl::PointCloud<PointT> & cloud_out, float scale = 1.f)
+      uniform_sampling (std::string & file, std::size_t n_samples, typename pcl::PointCloud<PointT> & cloud_out, float scale = 1.f)
       {
 
         vtkSmartPointer < vtkPLYReader > reader = vtkSmartPointer<vtkPLYReader>::New ();
@@ -143,7 +142,7 @@ namespace pcl
       }
 
     inline void
-    getVerticesAsPointCloud (vtkSmartPointer<vtkPolyData> polydata, pcl::PointCloud<pcl::PointXYZ> & cloud_out)
+    getVerticesAsPointCloud (const vtkSmartPointer<vtkPolyData>& polydata, pcl::PointCloud<pcl::PointXYZ> & cloud_out)
     {
       vtkPoints *points = polydata->GetPoints ();
       cloud_out.points.resize (points->GetNumberOfPoints ());
@@ -151,7 +150,7 @@ namespace pcl
       cloud_out.height = 1;
       cloud_out.is_dense = false;
 
-      for (int i = 0; i < points->GetNumberOfPoints (); i++)
+      for (vtkIdType i = 0; i < points->GetNumberOfPoints (); i++)
       {
         double p[3];
         points->GetPoint (i, p);
@@ -162,5 +161,3 @@ namespace pcl
     }
   }
 }
-
-#endif /* REC_FRAMEWORK_UNIFORM_SAMPLING_H_ */

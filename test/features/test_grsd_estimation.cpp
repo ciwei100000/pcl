@@ -42,9 +42,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/features/grsd.h>
 #include <pcl/features/normal_3d.h>
-#include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/io/pcd_io.h>
-
 
 using namespace pcl;
 using namespace pcl::io;
@@ -52,7 +50,7 @@ using namespace std;
 
 search::KdTree<PointXYZ>::Ptr tree (new search::KdTree<PointXYZ> ());
 PointCloud<PointXYZ>::Ptr cloud (new PointCloud<PointXYZ> ());
-vector<int> indices;
+std::vector<int> indices;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 TEST (PCL, GRSDEstimation)

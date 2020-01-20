@@ -70,7 +70,7 @@ using namespace Eigen;
 
 PCLPointCloud2::Ptr cloud_blob (new PCLPointCloud2);
 PointCloud<PointXYZ>::Ptr cloud (new PointCloud<PointXYZ>);
-vector<int> indices_;
+std::vector<int> indices_;
 
 PointCloud<PointXYZRGB>::Ptr cloud_organized (new PointCloud<PointXYZRGB>);
 
@@ -82,7 +82,7 @@ TEST (ExtractIndicesSelf, Filters)
 {
   // Test the PointCloud<PointT> method
   ExtractIndices<PointXYZ> ei;
-  boost::shared_ptr<vector<int> > indices (new vector<int> (2));
+  pcl::IndicesPtr indices (new pcl::Indices (2));
   (*indices)[0] = 0;
   (*indices)[1] = static_cast<int> (cloud->points.size ()) - 1;
 
@@ -109,7 +109,7 @@ TEST (ExtractIndices, Filters)
 {
   // Test the PointCloud<PointT> method
   ExtractIndices<PointXYZ> ei;
-  boost::shared_ptr<vector<int> > indices (new vector<int> (2));
+  pcl::IndicesPtr indices (new pcl::Indices (2));
   (*indices)[0] = 0;
   (*indices)[1] = static_cast<int> (cloud->points.size ()) - 1;
 
@@ -197,9 +197,9 @@ TEST (ExtractIndices, Filters)
   EXPECT_EQ (output.points[0].x, cloud->points[0].x);
   EXPECT_EQ (output.points[0].y, cloud->points[0].y);
   EXPECT_EQ (output.points[0].z, cloud->points[0].z);
-  EXPECT_TRUE (pcl_isnan(output.points[1].x));
-  EXPECT_TRUE (pcl_isnan(output.points[1].y));
-  EXPECT_TRUE (pcl_isnan(output.points[1].z));
+  EXPECT_TRUE (std::isnan(output.points[1].x));
+  EXPECT_TRUE (std::isnan(output.points[1].y));
+  EXPECT_TRUE (std::isnan(output.points[1].z));
 
   ei2.setNegative (true);
   ei2.setKeepOrganized (true);
@@ -211,9 +211,9 @@ TEST (ExtractIndices, Filters)
   EXPECT_EQ (output.width, cloud->width);
   EXPECT_EQ (output.height, cloud->height);
 
-  EXPECT_TRUE (pcl_isnan(output.points[0].x));
-  EXPECT_TRUE (pcl_isnan(output.points[0].y));
-  EXPECT_TRUE (pcl_isnan(output.points[0].z));
+  EXPECT_TRUE (std::isnan(output.points[0].x));
+  EXPECT_TRUE (std::isnan(output.points[0].y));
+  EXPECT_TRUE (std::isnan(output.points[0].z));
   EXPECT_EQ (output.points[1].x, cloud->points[1].x);
   EXPECT_EQ (output.points[1].y, cloud->points[1].y);
   EXPECT_EQ (output.points[1].z, cloud->points[1].z);
@@ -230,7 +230,7 @@ TEST (ExtractIndices, Filters)
   eie.filter (result);
   EXPECT_EQ (int (result.points.size ()), 0);
 
-  boost::shared_ptr<vector<int> > idx (new vector<int> (10));
+  pcl::IndicesPtr idx (new pcl::Indices (10));
   eie.setIndices (idx);
   eie.setNegative (false);
   eie.filter (result);
@@ -269,7 +269,7 @@ TEST (ExtractIndices, Filters)
     ps.setFilterLimitsNegative ((bool)i);
     ps.filter (scf);
     std::cerr << scf.points.size () << std::endl;
-    for (size_t j = 0; j < scf.points.size (); ++j)
+    for (std::size_t j = 0; j < scf.points.size (); ++j)
       std::cerr << scf.points[j] << std::endl;
   }
   */
@@ -389,12 +389,12 @@ TEST (PassThrough, Filters)
   EXPECT_EQ (output.height, cloud->height);
   EXPECT_EQ (bool (output.is_dense), false); // NaN was set as a user filter value
 
-  EXPECT_TRUE (pcl_isnan (output.points[0].x));
-  EXPECT_TRUE (pcl_isnan (output.points[0].y));
-  EXPECT_TRUE (pcl_isnan (output.points[0].z));
-  EXPECT_TRUE (pcl_isnan (output.points[41].x));
-  EXPECT_TRUE (pcl_isnan (output.points[41].y));
-  EXPECT_TRUE (pcl_isnan (output.points[41].z));
+  EXPECT_TRUE (std::isnan (output.points[0].x));
+  EXPECT_TRUE (std::isnan (output.points[0].y));
+  EXPECT_TRUE (std::isnan (output.points[0].z));
+  EXPECT_TRUE (std::isnan (output.points[41].x));
+  EXPECT_TRUE (std::isnan (output.points[41].y));
+  EXPECT_TRUE (std::isnan (output.points[41].z));
 
   pt.setFilterLimitsNegative (true);
   pt.filter (output);
@@ -444,7 +444,7 @@ TEST (PassThrough, Filters)
   EXPECT_NEAR (output.points[41].y, 0.039749, 1e-5);
   EXPECT_NEAR (output.points[41].z, 0.052133, 1e-5);
 
-  pt2.setFilterLimitsNegative (true);
+  pt2.setNegative (true);
   pt2.filter (output_blob);
 
   fromPCLPointCloud2 (output_blob, output);
@@ -493,7 +493,7 @@ TEST (PassThrough, Filters)
   EXPECT_NEAR (output.points[41].y, 0.039749, 1e-5);
   EXPECT_NEAR (output.points[41].z, 0.052133, 1e-5);
 
-  pt2_.setFilterLimitsNegative (true);
+  pt2_.setNegative (true);
   pt2_.filter (output_blob);
 
   fromPCLPointCloud2 (output_blob, output);
@@ -526,7 +526,7 @@ TEST (PassThrough, Filters)
   EXPECT_NEAR (output.points[output.points.size () - 1].x, cloud->points[cloud->points.size () - 1].x, 1e-5);
 
   pt2.setFilterFieldName ("z");
-  pt2.setFilterLimitsNegative (false);
+  pt2.setNegative (false);
   pt2.setKeepOrganized (true);
   pt2.filter (output_blob);
   fromPCLPointCloud2 (output_blob, output);
@@ -536,15 +536,15 @@ TEST (PassThrough, Filters)
   EXPECT_EQ (output.height, cloud->height);
   EXPECT_EQ (bool (output.is_dense), false); // NaN was set as a user filter value
 
-  EXPECT_TRUE (pcl_isnan (output.points[0].x));
-  EXPECT_TRUE (pcl_isnan (output.points[0].y));
-  EXPECT_TRUE (pcl_isnan (output.points[0].z));
+  EXPECT_TRUE (std::isnan (output.points[0].x));
+  EXPECT_TRUE (std::isnan (output.points[0].y));
+  EXPECT_TRUE (std::isnan (output.points[0].z));
 
-  EXPECT_TRUE (pcl_isnan (output.points[41].x));
-  EXPECT_TRUE (pcl_isnan (output.points[41].y));
-  EXPECT_TRUE (pcl_isnan (output.points[41].z));
+  EXPECT_TRUE (std::isnan (output.points[41].x));
+  EXPECT_TRUE (std::isnan (output.points[41].y));
+  EXPECT_TRUE (std::isnan (output.points[41].z));
 
-  pt2.setFilterLimitsNegative (true);
+  pt2.setNegative (true);
   pt2.filter (output_blob);
   fromPCLPointCloud2 (output_blob, output);
 
@@ -622,9 +622,9 @@ TEST (VoxelGrid, Filters)
   int centroidIdx = grid.getCentroidIndex (cloud->points[195]);
 
   // for arbitrary points, the centroid should be close
-  EXPECT_LE (fabs (output.points[centroidIdx].x - cloud->points[195].x), 0.02);
-  EXPECT_LE (fabs (output.points[centroidIdx].y - cloud->points[195].y), 0.02);
-  EXPECT_LE (fabs (output.points[centroidIdx].z - cloud->points[195].z), 0.02);
+  EXPECT_LE (std::abs (output.points[centroidIdx].x - cloud->points[195].x), 0.02);
+  EXPECT_LE (std::abs (output.points[centroidIdx].y - cloud->points[195].y), 0.02);
+  EXPECT_LE (std::abs (output.points[centroidIdx].z - cloud->points[195].z), 0.02);
 
   // if getNeighborCentroidIndices works then the other helper functions work as well
   EXPECT_EQ (grid.getNeighborCentroidIndices (output.points[0], Eigen::MatrixXi::Zero(3,1))[0], 0);
@@ -632,11 +632,11 @@ TEST (VoxelGrid, Filters)
 
   // neighboring centroid should be in the right position
   Eigen::MatrixXi directions = Eigen::Vector3i (0, 0, 1);
-  vector<int> neighbors = grid.getNeighborCentroidIndices (cloud->points[195], directions);
-  EXPECT_EQ (neighbors.size (), size_t (directions.cols ()));
+  std::vector<int> neighbors = grid.getNeighborCentroidIndices (cloud->points[195], directions);
+  EXPECT_EQ (neighbors.size (), std::size_t (directions.cols ()));
   EXPECT_NE (neighbors.at (0), -1);
-  EXPECT_LE (fabs (output.points[neighbors.at (0)].x - output.points[centroidIdx].x), 0.02);
-  EXPECT_LE (fabs (output.points[neighbors.at (0)].y - output.points[centroidIdx].y), 0.02);
+  EXPECT_LE (std::abs (output.points[neighbors.at (0)].x - output.points[centroidIdx].x), 0.02);
+  EXPECT_LE (std::abs (output.points[neighbors.at (0)].y - output.points[centroidIdx].y), 0.02);
   EXPECT_LE ( output.points[neighbors.at (0)].z - output.points[centroidIdx].z, 0.02 * 2);
 
   // Test the pcl::PCLPointCloud2 method
@@ -704,9 +704,9 @@ TEST (VoxelGrid, Filters)
   EXPECT_NE (centroidIdx2, -1);
 
   // for arbitrary points, the centroid should be close
-  EXPECT_LE (fabs (output.points[centroidIdx2].x - 0.048722), 0.02);
-  EXPECT_LE (fabs (output.points[centroidIdx2].y - 0.073760), 0.02);
-  EXPECT_LE (fabs (output.points[centroidIdx2].z - 0.017434), 0.02);
+  EXPECT_LE (std::abs (output.points[centroidIdx2].x - 0.048722), 0.02);
+  EXPECT_LE (std::abs (output.points[centroidIdx2].y - 0.073760), 0.02);
+  EXPECT_LE (std::abs (output.points[centroidIdx2].z - 0.017434), 0.02);
 
   // if getNeighborCentroidIndices works then the other helper functions work as well
   EXPECT_EQ (grid2.getNeighborCentroidIndices (output.points[0].x, output.points[0].y, output.points[0].z, Eigen::MatrixXi::Zero(3,1))[0], 0);
@@ -714,11 +714,11 @@ TEST (VoxelGrid, Filters)
 
   // neighboring centroid should be in the right position
   Eigen::MatrixXi directions2 = Eigen::Vector3i (0, 0, 1);
-  vector<int> neighbors2 = grid2.getNeighborCentroidIndices (0.048722f, 0.073760f, 0.017434f, directions2);
-  EXPECT_EQ (neighbors2.size (), size_t (directions2.cols ()));
+  std::vector<int> neighbors2 = grid2.getNeighborCentroidIndices (0.048722f, 0.073760f, 0.017434f, directions2);
+  EXPECT_EQ (neighbors2.size (), std::size_t (directions2.cols ()));
   EXPECT_NE (neighbors2.at (0), -1);
-  EXPECT_LE (fabs (output.points[neighbors2.at (0)].x - output.points[centroidIdx2].x), 0.02);
-  EXPECT_LE (fabs (output.points[neighbors2.at (0)].y - output.points[centroidIdx2].y), 0.02);
+  EXPECT_LE (std::abs (output.points[neighbors2.at (0)].x - output.points[centroidIdx2].x), 0.02);
+  EXPECT_LE (std::abs (output.points[neighbors2.at (0)].y - output.points[centroidIdx2].y), 0.02);
   EXPECT_LE (output.points[neighbors2.at (0)].z - output.points[centroidIdx2].z, 0.02 * 2);
 }
 
@@ -775,9 +775,9 @@ TEST (VoxelGrid_No_DownsampleAllData, Filters)
   int centroidIdx = grid.getCentroidIndex (cloud->points[195]);
 
   // for arbitrary points, the centroid should be close
-  EXPECT_LE (fabs (output.points[centroidIdx].x - cloud->points[195].x), 0.02);
-  EXPECT_LE (fabs (output.points[centroidIdx].y - cloud->points[195].y), 0.02);
-  EXPECT_LE (fabs (output.points[centroidIdx].z - cloud->points[195].z), 0.02);
+  EXPECT_LE (std::abs (output.points[centroidIdx].x - cloud->points[195].x), 0.02);
+  EXPECT_LE (std::abs (output.points[centroidIdx].y - cloud->points[195].y), 0.02);
+  EXPECT_LE (std::abs (output.points[centroidIdx].z - cloud->points[195].z), 0.02);
 
   // if getNeighborCentroidIndices works then the other helper functions work as well
   EXPECT_EQ (grid.getNeighborCentroidIndices (output.points[0], Eigen::MatrixXi::Zero(3,1))[0], 0);
@@ -785,11 +785,11 @@ TEST (VoxelGrid_No_DownsampleAllData, Filters)
 
   // neighboring centroid should be in the right position
   Eigen::MatrixXi directions = Eigen::Vector3i (0, 0, 1);
-  vector<int> neighbors = grid.getNeighborCentroidIndices (cloud->points[195], directions);
-  EXPECT_EQ (neighbors.size (), size_t (directions.cols ()));
+  std::vector<int> neighbors = grid.getNeighborCentroidIndices (cloud->points[195], directions);
+  EXPECT_EQ (neighbors.size (), std::size_t (directions.cols ()));
   EXPECT_NE (neighbors.at (0), -1);
-  EXPECT_LE (fabs (output.points[neighbors.at (0)].x - output.points[centroidIdx].x), 0.02);
-  EXPECT_LE (fabs (output.points[neighbors.at (0)].y - output.points[centroidIdx].y), 0.02);
+  EXPECT_LE (std::abs (output.points[neighbors.at (0)].x - output.points[centroidIdx].x), 0.02);
+  EXPECT_LE (std::abs (output.points[neighbors.at (0)].y - output.points[centroidIdx].y), 0.02);
   EXPECT_LE ( output.points[neighbors.at (0)].z - output.points[centroidIdx].z, 0.02 * 2);
 
   // Test the pcl::PCLPointCloud2 method
@@ -850,9 +850,9 @@ TEST (VoxelGrid_No_DownsampleAllData, Filters)
   EXPECT_NE (centroidIdx2, -1);
 
   // for arbitrary points, the centroid should be close
-  EXPECT_LE (fabs (output.points[centroidIdx2].x - 0.048722), 0.02);
-  EXPECT_LE (fabs (output.points[centroidIdx2].y - 0.073760), 0.02);
-  EXPECT_LE (fabs (output.points[centroidIdx2].z - 0.017434), 0.02);
+  EXPECT_LE (std::abs (output.points[centroidIdx2].x - 0.048722), 0.02);
+  EXPECT_LE (std::abs (output.points[centroidIdx2].y - 0.073760), 0.02);
+  EXPECT_LE (std::abs (output.points[centroidIdx2].z - 0.017434), 0.02);
 
   // if getNeighborCentroidIndices works then the other helper functions work as well
   EXPECT_EQ (grid2.getNeighborCentroidIndices (output.points[0].x, output.points[0].y, output.points[0].z, Eigen::MatrixXi::Zero(3,1))[0], 0);
@@ -860,11 +860,11 @@ TEST (VoxelGrid_No_DownsampleAllData, Filters)
 
   // neighboring centroid should be in the right position
   Eigen::MatrixXi directions2 = Eigen::Vector3i (0, 0, 1);
-  vector<int> neighbors2 = grid2.getNeighborCentroidIndices (0.048722f, 0.073760f, 0.017434f, directions2);
-  EXPECT_EQ (neighbors2.size (), size_t (directions2.cols ()));
+  std::vector<int> neighbors2 = grid2.getNeighborCentroidIndices (0.048722f, 0.073760f, 0.017434f, directions2);
+  EXPECT_EQ (neighbors2.size (), std::size_t (directions2.cols ()));
   EXPECT_NE (neighbors2.at (0), -1);
-  EXPECT_LE (fabs (output.points[neighbors2.at (0)].x - output.points[centroidIdx2].x), 0.02);
-  EXPECT_LE (fabs (output.points[neighbors2.at (0)].y - output.points[centroidIdx2].y), 0.02);
+  EXPECT_LE (std::abs (output.points[neighbors2.at (0)].x - output.points[centroidIdx2].x), 0.02);
+  EXPECT_LE (std::abs (output.points[neighbors2.at (0)].y - output.points[centroidIdx2].y), 0.02);
   EXPECT_LE (output.points[neighbors2.at (0)].z - output.points[centroidIdx2].z, 0.02 * 2);
 }
 
@@ -991,7 +991,7 @@ TEST (VoxelGrid_RGBA, Filters)
     pt.x = 0.0f;
     pt.y = 0.0f;
     pt.z = 0.0f;
-    pt.rgba = *reinterpret_cast<uint32_t*> (&rgba);
+    pt.rgba = *reinterpret_cast<std::uint32_t*> (&rgba);
     cloud_rgba_.points.push_back (pt);
   }
 
@@ -1148,7 +1148,7 @@ TEST (VoxelGrid_XYZNormal, Filters)
           voxel.normal_y = std::numeric_limits<float>::quiet_NaN ();
           voxel.normal_z = std::numeric_limits<float>::quiet_NaN ();
         }
-        else if (pcl_isfinite (point.normal_x))
+        else if (std::isfinite (point.normal_x))
         {
           float norm = 1.0f / sqrt (point.normal_x * point.normal_x + point.normal_y * point.normal_y + point.normal_z * point.normal_z );
           point.normal_x *= norm;
@@ -1195,7 +1195,7 @@ TEST (VoxelGrid_XYZNormal, Filters)
         EXPECT_EQ (voxel.y, point.y);
         EXPECT_EQ (voxel.z, point.z);
 
-        if (pcl_isfinite(voxel.normal_x) || pcl_isfinite (point.normal_x))
+        if (std::isfinite(voxel.normal_x) || std::isfinite (point.normal_x))
         {
           EXPECT_EQ (voxel.normal_x, point.normal_x);
           EXPECT_EQ (voxel.normal_y, point.normal_y);
@@ -1231,7 +1231,7 @@ TEST (VoxelGrid_XYZNormal, Filters)
         EXPECT_EQ (voxel.y, point.y);
         EXPECT_EQ (voxel.z, point.z);
 
-        if (pcl_isfinite(voxel.normal_x) || pcl_isfinite (point.normal_x))
+        if (std::isfinite(voxel.normal_x) || std::isfinite (point.normal_x))
         {
           EXPECT_EQ (voxel.normal_x, point.normal_x);
           EXPECT_EQ (voxel.normal_y, point.normal_y);
@@ -1287,11 +1287,11 @@ TEST (VoxelGridCovariance, Filters)
 
   // neighboring centroid should be in the right position
   Eigen::MatrixXi directions = Eigen::Vector3i (0, 1, 0);
-  vector<int> neighbors = grid.getNeighborCentroidIndices (cloud->points[38], directions);
-  EXPECT_EQ (neighbors.size (), size_t (directions.cols ()));
+  std::vector<int> neighbors = grid.getNeighborCentroidIndices (cloud->points[38], directions);
+  EXPECT_EQ (neighbors.size (), std::size_t (directions.cols ()));
   EXPECT_NE (neighbors.at (0), -1);
-  EXPECT_LE (fabs (output.points[neighbors.at (0)].x - output.points[centroidIdx].x), 0.02);
-  EXPECT_LE (fabs (output.points[neighbors.at (0)].y - output.points[centroidIdx].y), 0.02);
+  EXPECT_LE (std::abs (output.points[neighbors.at (0)].x - output.points[centroidIdx].x), 0.02);
+  EXPECT_LE (std::abs (output.points[neighbors.at (0)].y - output.points[centroidIdx].y), 0.02);
   EXPECT_LE (output.points[neighbors.at (0)].z - output.points[centroidIdx].z, 0.02 * 2);
 
   // testing search functions
@@ -1299,8 +1299,8 @@ TEST (VoxelGridCovariance, Filters)
   grid.filter (output, true);
 
   // testing k nearest neighbors search
-  vector<VoxelGridCovariance<pcl::PointXYZ>::LeafConstPtr> leaves;
-  vector<float> distances;
+  std::vector<VoxelGridCovariance<pcl::PointXYZ>::LeafConstPtr> leaves;
+  std::vector<float> distances;
   grid.nearestKSearch (PointXYZ(0,1,0), 1, leaves, distances);
 
   EXPECT_EQ (int (leaves.size ()), 1);
@@ -1345,24 +1345,24 @@ TEST (ProjectInliers, Filters)
   proj.setModelCoefficients (coefficients);
   proj.filter (output);
 
-  for (size_t i = 0; i < output.points.size (); ++i)
-    EXPECT_NEAR (output.points[i].z, 0.0, 1e-4);
+  for (const auto &point : output.points)
+    EXPECT_NEAR (point.z, 0.0, 1e-4);
 
-    // Test the pcl::PCLPointCloud2 method
-    ProjectInliers<PCLPointCloud2> proj2;
+  // Test the pcl::PCLPointCloud2 method
+  ProjectInliers<PCLPointCloud2> proj2;
 
-    PCLPointCloud2 output_blob;
+  PCLPointCloud2 output_blob;
 
-    proj2.setModelType (SACMODEL_PLANE);
-    proj2.setInputCloud (cloud_blob);
-    proj2.setModelCoefficients (coefficients);
-    proj2.filter (output_blob);
+  proj2.setModelType (SACMODEL_PLANE);
+  proj2.setInputCloud (cloud_blob);
+  proj2.setModelCoefficients (coefficients);
+  proj2.filter (output_blob);
 
-    fromPCLPointCloud2 (output_blob, output);
+  fromPCLPointCloud2 (output_blob, output);
 
-    for (size_t i = 0; i < output.points.size (); ++i)
-    EXPECT_NEAR (output.points[i].z, 0.0, 1e-4);
-  }
+  for (const auto &point : output.points)
+    EXPECT_NEAR (point.z, 0.0, 1e-4);
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 TEST (RadiusOutlierRemoval, Filters)
@@ -1590,11 +1590,11 @@ TEST (ConditionalRemoval, Filters)
   condrem.filter (output);
 
   int num_not_nan = 0;
-  for (size_t i = 0; i < output.points.size (); i++)
+  for (const auto &point : output.points)
   {
-    if (pcl_isfinite (output.points[i].x) &&
-        pcl_isfinite (output.points[i].y) &&
-        pcl_isfinite (output.points[i].z))
+    if (std::isfinite (point.x) &&
+        std::isfinite (point.y) &&
+        std::isfinite (point.z))
     num_not_nan++;
   }
 
@@ -1627,11 +1627,11 @@ TEST (ConditionalRemoval, Filters)
   condrem_.filter (output);
 
   num_not_nan = 0;
-  for (size_t i = 0; i < output.points.size (); i++)
+  for (const auto &point : output.points)
   {
-    if (pcl_isfinite (output.points[i].x) &&
-        pcl_isfinite (output.points[i].y) &&
-        pcl_isfinite (output.points[i].z))
+    if (std::isfinite (point.x) &&
+        std::isfinite (point.y) &&
+        std::isfinite (point.z))
     num_not_nan++;
   }
 
@@ -1651,7 +1651,7 @@ TEST (ConditionalRemovalSetIndices, Filters)
   PointCloud<PointXYZ> output;
 
   // build some indices
-  boost::shared_ptr<vector<int> > indices (new vector<int> (2));
+  pcl::IndicesPtr indices (new pcl::Indices (2));
   (*indices)[0] = 0;
   (*indices)[1] = static_cast<int> (cloud->points.size ()) - 1;
 
@@ -1695,11 +1695,11 @@ TEST (ConditionalRemovalSetIndices, Filters)
   EXPECT_EQ (cloud->points[cloud->points.size () - 1].z, output.points[output.points.size () - 1].z);
 
   int num_not_nan = 0;
-  for (size_t i = 0; i < output.points.size (); i++)
+  for (const auto &point : output.points)
   {
-    if (pcl_isfinite (output.points[i].x) &&
-        pcl_isfinite (output.points[i].y) &&
-        pcl_isfinite (output.points[i].z))
+    if (std::isfinite (point.x) &&
+        std::isfinite (point.y) &&
+        std::isfinite (point.z))
       num_not_nan++;
   }
 
@@ -1745,11 +1745,11 @@ TEST (ConditionalRemovalSetIndices, Filters)
   EXPECT_EQ (cloud->points[cloud->points.size () - 1].z, output.points[output.points.size () - 1].z);
 
   num_not_nan = 0;
-  for (size_t i = 0; i < output.points.size (); i++)
+  for (const auto &point : output.points)
   {
-    if (pcl_isfinite (output.points[i].x) &&
-        pcl_isfinite (output.points[i].y) &&
-        pcl_isfinite (output.points[i].z))
+    if (std::isfinite (point.x) &&
+        std::isfinite (point.y) &&
+        std::isfinite (point.z))
       num_not_nan++;
   }
 
@@ -1780,7 +1780,7 @@ TEST (SamplingSurfaceNormal, Filters)
     }
   }
   incloud->width = 1;
-  incloud->height = uint32_t (incloud->points.size ());
+  incloud->height = std::uint32_t (incloud->points.size ());
 
   pcl::SamplingSurfaceNormal <pcl::PointNormal> ssn_filter;
   ssn_filter.setInputCloud (incloud);
@@ -1788,11 +1788,11 @@ TEST (SamplingSurfaceNormal, Filters)
   ssn_filter.filter (outcloud);
 
   // All the sampled points should have normals along the direction of Z axis
-  for (unsigned int i = 0; i < outcloud.points.size (); i++)
+  for (const auto &point : outcloud.points)
   {
-    EXPECT_NEAR (outcloud.points[i].normal[0], 0, 1e-3);
-    EXPECT_NEAR (outcloud.points[i].normal[1], 0, 1e-3);
-    EXPECT_NEAR (outcloud.points[i].normal[2], 1, 1e-3);
+    EXPECT_NEAR (point.normal[0], 0, 1e-3);
+    EXPECT_NEAR (point.normal[1], 0, 1e-3);
+    EXPECT_NEAR (point.normal[2], 1, 1e-3);
   }
 }
 
@@ -1814,7 +1814,7 @@ TEST (ShadowPoints, Filters)
   input->points.push_back (pt);
 
   input->width = 1;
-  input->height = static_cast<uint32_t> (input->points.size ());
+  input->height = static_cast<std::uint32_t> (input->points.size ());
 
 	NormalEstimation<PointXYZ, PointNormal> ne;
 	ne.setInputCloud (input);
@@ -1843,7 +1843,7 @@ TEST (ShadowPoints, Filters)
   spfilter.setKeepOrganized (true);
   spfilter.filter (output);
   EXPECT_EQ (output.size (), input->size ());
-  EXPECT_TRUE (pcl_isnan (output.at (input->size () - 1).x));
+  EXPECT_TRUE (std::isnan (output.at (input->size () - 1).x));
   removed = spfilter.getRemovedIndices ();
   EXPECT_EQ (int (removed->size ()), 1);
 
@@ -1881,7 +1881,7 @@ TEST (FrustumCulling, Filters)
     }
   }
   input->width = 1;
-  input->height = static_cast<uint32_t> (input->points.size ());
+  input->height = static_cast<std::uint32_t> (input->points.size ());
 
   pcl::FrustumCulling<pcl::PointXYZ> fc (true); // Extract removed indices
   fc.setInputCloud (input);
@@ -1925,11 +1925,11 @@ TEST (FrustumCulling, Filters)
   fc.setKeepOrganized (true);
   fc.filter (*output);
   EXPECT_EQ (output->size (), input->size ());
-  for (size_t i = 0; i < output->size (); i++)
+  for (const auto &point : *output)
   {
-    EXPECT_TRUE (pcl_isnan (output->at (i).x));
-    EXPECT_TRUE (pcl_isnan (output->at (i).y));
-    EXPECT_TRUE (pcl_isnan (output->at (i).z));
+    EXPECT_TRUE (std::isnan (point.x));
+    EXPECT_TRUE (std::isnan (point.y));
+    EXPECT_TRUE (std::isnan (point.z));
   }
   removed = fc.getRemovedIndices ();
   EXPECT_EQ (removed->size (), input->size ());
@@ -2039,7 +2039,7 @@ TEST (MedianFilter, Filters)
   cloud_manual.is_dense = false;
   cloud_manual.resize (5 * 5);
 
-  for (size_t i = 0; i < 5; ++i)
+  for (std::size_t i = 0; i < 5; ++i)
   {
     cloud_manual (i, 0).z = static_cast<float> (i + 1);
     cloud_manual (i, 1).z = static_cast<float> (i + 6);
@@ -2099,7 +2099,7 @@ TEST (MedianFilter, Filters)
   out_1_correct (3, 4).z = 100.f;
   out_1_correct (4, 4).z = 100.f;
 
-  for (size_t i = 0; i < 5 * 5; ++i)
+  for (std::size_t i = 0; i < 5 * 5; ++i)
     EXPECT_NEAR (out_1_correct[i].z, out_1[i].z, 1e-5);
 
 
@@ -2119,7 +2119,7 @@ TEST (MedianFilter, Filters)
   out_2_correct = out_1_correct;
   out_2_correct (2, 4).z = 450.f;
 
-  for (size_t i = 0; i < 5 * 5; ++i)
+  for (std::size_t i = 0; i < 5 * 5; ++i)
     EXPECT_NEAR (out_2_correct[i].z, out_2[i].z, 1e-5);
 
 
@@ -2186,7 +2186,7 @@ TEST (NormalRefinement, Filters)
   // Run estimation
   pcl::NormalEstimation<pcl::PointXYZRGB, pcl::PointXYZRGBNormal> ne;
   cloud_organized_normal.reserve (cloud_organized_nonan.size ());
-  for (unsigned int i = 0; i < cloud_organized_nonan.size (); ++i)
+  for (std::size_t i = 0; i < cloud_organized_nonan.size (); ++i)
   {
     // Output point
     pcl::PointXYZRGBNormal normali;
@@ -2257,16 +2257,16 @@ TEST (NormalRefinement, Filters)
   int num_nans = 0;
 
   // Loop
-  for (unsigned int i = 0; i < idx_table.size (); ++i)
+  for (const int &idx : idx_table)
   {
     float tmp;
 
     // Estimated (need to avoid zeros and NaNs)
-    const pcl::PointXYZRGBNormal& calci = cloud_organized_normal[idx_table[i]];
-    if ((fabsf (calci.normal_x) + fabsf (calci.normal_y) + fabsf (calci.normal_z)) > 0.0f)
+    const pcl::PointXYZRGBNormal& calci = cloud_organized_normal[idx];
+    if ((std::abs (calci.normal_x) + std::abs (calci.normal_y) + std::abs (calci.normal_z)) > 0.0f)
     {
       tmp = 1.0f - (calci.normal_x * a + calci.normal_y * b + calci.normal_z * c);
-      if (pcl_isfinite (tmp))
+      if (std::isfinite (tmp))
       {
         errs_est.push_back (tmp);
         err_est_mean += tmp;
@@ -2274,11 +2274,11 @@ TEST (NormalRefinement, Filters)
     }
 
     // Refined
-    const pcl::PointXYZRGBNormal& refinedi = cloud_organized_normal_refined[idx_table[i]];
-    if ((fabsf (refinedi.normal_x) + fabsf (refinedi.normal_y) + fabsf (refinedi.normal_z)) > 0.0f)
+    const pcl::PointXYZRGBNormal& refinedi = cloud_organized_normal_refined[idx];
+    if ((std::abs (refinedi.normal_x) + std::abs (refinedi.normal_y) + std::abs (refinedi.normal_z)) > 0.0f)
     {
       tmp = 1.0f - (refinedi.normal_x * a + refinedi.normal_y * b + refinedi.normal_z * c);
-      if (pcl_isfinite(tmp))
+      if (std::isfinite(tmp))
       {
         errs_refined.push_back (tmp);
         err_refined_mean += tmp;
@@ -2301,14 +2301,14 @@ TEST (NormalRefinement, Filters)
 
   // Error variance of estimated
   float err_est_var = 0.0f;
-  for (unsigned int i = 0; i < errs_est.size (); ++i)
-    err_est_var = (errs_est[i] - err_est_mean) * (errs_est[i] - err_est_mean);
+  for (const float &err : errs_est)
+    err_est_var = (err - err_est_mean) * (err - err_est_mean);
   err_est_var /= static_cast<float> (errs_est.size () - 1);
 
   // Error variance of refined
   float err_refined_var = 0.0f;
-  for (unsigned int i = 0; i < errs_refined.size (); ++i)
-    err_refined_var = (errs_refined[i] - err_refined_mean) * (errs_refined[i] - err_refined_mean);
+  for (const float &err : errs_refined)
+    err_refined_var = (err - err_refined_mean) * (err - err_refined_mean);
   err_refined_var /= static_cast<float> (errs_refined.size () - 1);
 
   // Refinement should not produce any zeros and NaNs

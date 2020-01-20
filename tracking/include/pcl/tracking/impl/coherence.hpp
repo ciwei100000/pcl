@@ -19,12 +19,12 @@ namespace pcl
     PointCloudCoherence<PointInT>::calcPointCoherence (PointInT &source, PointInT &target)
     {
       double val = 0.0;
-      for (size_t i = 0; i < point_coherences_.size (); i++)
+      for (std::size_t i = 0; i < point_coherences_.size (); i++)
       {
         PointCoherencePtr coherence = point_coherences_[i];
-        double d = log(coherence->compute (source, target));
+        double d = std::log(coherence->compute (source, target));
         //double d = coherence->compute (source, target);
-        if (! pcl_isnan(d))
+        if (! std::isnan(d))
           val += d;
         else
           PCL_WARN ("nan!\n");

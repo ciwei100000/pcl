@@ -47,7 +47,7 @@ estimateRigidTransformation (const pcl::PointCloud<PointSource> &cloud_src,
                              const pcl::PointCloud<PointTarget> &cloud_tgt,
                              Matrix4 &transformation_matrix) const
 {
-  size_t nr_points = cloud_src.points.size ();
+  std::size_t nr_points = cloud_src.points.size ();
   if (cloud_tgt.points.size () != nr_points)
   {
     PCL_ERROR ("[pcl::TransformationEstimationPointToPlaneLLSWeighted::estimateRigidTransformation] Number or points in source (%lu) differs than target (%lu)!\n", nr_points, cloud_tgt.points.size ());
@@ -74,7 +74,7 @@ estimateRigidTransformation (const pcl::PointCloud<PointSource> &cloud_src,
                              const pcl::PointCloud<PointTarget> &cloud_tgt,
                              Matrix4 &transformation_matrix) const
 {
-  size_t nr_points = indices_src.size ();
+  std::size_t nr_points = indices_src.size ();
   if (cloud_tgt.points.size () != nr_points)
   {
     PCL_ERROR ("[pcl::TransformationEstimationPointToPlaneLLSWeighted::estimateRigidTransformation] Number or points in source (%lu) differs than target (%lu)!\n", indices_src.size (), cloud_tgt.points.size ());
@@ -104,7 +104,7 @@ estimateRigidTransformation (const pcl::PointCloud<PointSource> &cloud_src,
                              const std::vector<int> &indices_tgt,
                              Matrix4 &transformation_matrix) const
 {
-  size_t nr_points = indices_src.size ();
+  std::size_t nr_points = indices_src.size ();
   if (indices_tgt.size () != nr_points)
   {
     PCL_ERROR ("[pcl::TransformationEstimationPointToPlaneLLSWeighted::estimateRigidTransformation] Number or points in source (%lu) differs than target (%lu)!\n", indices_src.size (), indices_tgt.size ());
@@ -134,7 +134,7 @@ estimateRigidTransformation (const pcl::PointCloud<PointSource> &cloud_src,
   ConstCloudIterator<PointSource> source_it (cloud_src, correspondences, true);
   ConstCloudIterator<PointTarget> target_it (cloud_tgt, correspondences, false);
   std::vector<Scalar> weights (correspondences.size ());
-  for (size_t i = 0; i < correspondences.size (); ++i)
+  for (std::size_t i = 0; i < correspondences.size (); ++i)
     weights[i] = correspondences[i].weight;
   typename std::vector<Scalar>::const_iterator weights_it = weights.begin ();
   estimateRigidTransformation (source_it, target_it, weights_it, transformation_matrix);
@@ -149,15 +149,15 @@ constructTransformationMatrix (const double & alpha, const double & beta, const 
 {
   // Construct the transformation matrix from rotation and translation 
   transformation_matrix = Eigen::Matrix<Scalar, 4, 4>::Zero ();
-  transformation_matrix (0, 0) = static_cast<Scalar> ( cos (gamma) * cos (beta));
-  transformation_matrix (0, 1) = static_cast<Scalar> (-sin (gamma) * cos (alpha) + cos (gamma) * sin (beta) * sin (alpha));
-  transformation_matrix (0, 2) = static_cast<Scalar> ( sin (gamma) * sin (alpha) + cos (gamma) * sin (beta) * cos (alpha));
-  transformation_matrix (1, 0) = static_cast<Scalar> ( sin (gamma) * cos (beta));
-  transformation_matrix (1, 1) = static_cast<Scalar> ( cos (gamma) * cos (alpha) + sin (gamma) * sin (beta) * sin (alpha));
-  transformation_matrix (1, 2) = static_cast<Scalar> (-cos (gamma) * sin (alpha) + sin (gamma) * sin (beta) * cos (alpha));
+  transformation_matrix (0, 0) = static_cast<Scalar> ( std::cos (gamma) * std::cos (beta));
+  transformation_matrix (0, 1) = static_cast<Scalar> (-sin (gamma) * std::cos (alpha) + std::cos (gamma) * sin (beta) * sin (alpha));
+  transformation_matrix (0, 2) = static_cast<Scalar> ( sin (gamma) * sin (alpha) + std::cos (gamma) * sin (beta) * std::cos (alpha));
+  transformation_matrix (1, 0) = static_cast<Scalar> ( sin (gamma) * std::cos (beta));
+  transformation_matrix (1, 1) = static_cast<Scalar> ( std::cos (gamma) * std::cos (alpha) + sin (gamma) * sin (beta) * sin (alpha));
+  transformation_matrix (1, 2) = static_cast<Scalar> (-std::cos (gamma) * sin (alpha) + sin (gamma) * sin (beta) * std::cos (alpha));
   transformation_matrix (2, 0) = static_cast<Scalar> (-sin (beta));
-  transformation_matrix (2, 1) = static_cast<Scalar> ( cos (beta) * sin (alpha));
-  transformation_matrix (2, 2) = static_cast<Scalar> ( cos (beta) * cos (alpha));
+  transformation_matrix (2, 1) = static_cast<Scalar> ( std::cos (beta) * sin (alpha));
+  transformation_matrix (2, 2) = static_cast<Scalar> ( std::cos (beta) * std::cos (alpha));
 
   transformation_matrix (0, 3) = static_cast<Scalar> (tx);
   transformation_matrix (1, 3) = static_cast<Scalar> (ty);
@@ -173,8 +173,8 @@ estimateRigidTransformation (ConstCloudIterator<PointSource>& source_it,
                              typename std::vector<Scalar>::const_iterator& weights_it,
                              Matrix4 &transformation_matrix) const
 {
-  typedef Eigen::Matrix<double, 6, 1> Vector6d;
-  typedef Eigen::Matrix<double, 6, 6> Matrix6d;
+  using Vector6d = Eigen::Matrix<double, 6, 1>;
+  using Matrix6d = Eigen::Matrix<double, 6, 6>;
 
   Matrix6d ATA;
   Vector6d ATb;
@@ -183,15 +183,15 @@ estimateRigidTransformation (ConstCloudIterator<PointSource>& source_it,
 
   while (source_it.isValid () && target_it.isValid ())
   {
-    if (!pcl_isfinite (source_it->x) ||
-        !pcl_isfinite (source_it->y) ||
-        !pcl_isfinite (source_it->z) ||
-        !pcl_isfinite (target_it->x) ||
-        !pcl_isfinite (target_it->y) ||
-        !pcl_isfinite (target_it->z) ||
-        !pcl_isfinite (target_it->normal_x) ||
-        !pcl_isfinite (target_it->normal_y) ||
-        !pcl_isfinite (target_it->normal_z))
+    if (!std::isfinite (source_it->x) ||
+        !std::isfinite (source_it->y) ||
+        !std::isfinite (source_it->z) ||
+        !std::isfinite (target_it->x) ||
+        !std::isfinite (target_it->y) ||
+        !std::isfinite (target_it->z) ||
+        !std::isfinite (target_it->normal_x) ||
+        !std::isfinite (target_it->normal_y) ||
+        !std::isfinite (target_it->normal_z))
     {
       ++ source_it;
       ++ target_it;

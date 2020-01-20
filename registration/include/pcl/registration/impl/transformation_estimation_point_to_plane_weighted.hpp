@@ -53,7 +53,6 @@ pcl::registration::TransformationEstimationPointToPlaneWeighted<PointSource, Poi
   , tmp_idx_src_ ()
   , tmp_idx_tgt_ ()
   , warp_point_ (new WarpPointRigid6D<PointSource, PointTarget, MatScalar>)
-  , correspondence_weights_ ()
   , use_correspondence_weights_ (true)
 {
 };
@@ -225,7 +224,7 @@ pcl::registration::TransformationEstimationPointToPlaneWeighted<PointSource, Poi
     const pcl::Correspondences &correspondences,
     Matrix4 &transformation_matrix) const
 {
-  const int nr_correspondences = static_cast<const int> (correspondences.size ());
+  const int nr_correspondences = static_cast<int> (correspondences.size ());
   std::vector<int> indices_src (nr_correspondences);
   std::vector<int> indices_tgt (nr_correspondences);
   for (int i = 0; i < nr_correspondences; ++i)
@@ -237,7 +236,7 @@ pcl::registration::TransformationEstimationPointToPlaneWeighted<PointSource, Poi
   if (use_correspondence_weights_)
   {
     correspondence_weights_.resize (nr_correspondences);
-    for (size_t i = 0; i < nr_correspondences; ++i)
+    for (std::size_t i = 0; i < nr_correspondences; ++i)
       correspondence_weights_[i] = correspondences[i].weight;
   }
 

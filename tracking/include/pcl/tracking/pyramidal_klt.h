@@ -35,9 +35,9 @@
  *
  */
 
-#ifndef PCL_TRACKING_PYRAMIDAL_KLT_H
-#define PCL_TRACKING_PYRAMIDAL_KLT_H
+#pragma once
 
+#include <pcl/pcl_macros.h>
 #include <pcl/point_types.h>
 #include <pcl/tracking/tracker.h>
 #include <pcl/common/intensity.h>
@@ -63,13 +63,15 @@ namespace pcl
     class PyramidalKLTTracker : public Tracker<PointInT, Eigen::Affine3f>
     {
       public:
-        typedef pcl::tracking::Tracker<PointInT, Eigen::Affine3f> TrackerBase;
-        typedef typename TrackerBase::PointCloudIn PointCloudIn;
-        typedef typename PointCloudIn::Ptr PointCloudInPtr;
-        typedef typename PointCloudIn::ConstPtr PointCloudInConstPtr;
-        typedef pcl::PointCloud<float> FloatImage;
-        typedef FloatImage::Ptr FloatImagePtr;
-        typedef FloatImage::ConstPtr FloatImageConstPtr;
+        using TrackerBase = pcl::tracking::Tracker<PointInT, Eigen::Affine3f>;
+        using PointCloudIn = typename TrackerBase::PointCloudIn;
+        using PointCloudInPtr = typename PointCloudIn::Ptr;
+        using PointCloudInConstPtr = typename PointCloudIn::ConstPtr;
+        using FloatImage = pcl::PointCloud<float>;
+        using FloatImagePtr = FloatImage::Ptr;
+        using FloatImageConstPtr = FloatImage::ConstPtr;
+        using Ptr = shared_ptr<PyramidalKLTTracker<PointInT, IntensityT> >;
+        using ConstPtr = shared_ptr<const PyramidalKLTTracker<PointInT, IntensityT> >;
 
         using TrackerBase::tracker_name_;
         using TrackerBase::input_;
@@ -96,7 +98,7 @@ namespace pcl
         }
 
         /// Destructor
-        virtual ~PyramidalKLTTracker () {}
+        ~PyramidalKLTTracker () {}
 
         /** \brief Set the number of pyramid levels
           * \param levels desired number of pyramid levels
@@ -211,15 +213,15 @@ namespace pcl
 
         /** \brief Return the computed transformation from tracked points. */
         Eigen::Affine3f
-        getResult () const { return (motion_); }
+        getResult () const override { return (motion_); }
 
         /// \brief \return initialization state
         bool
         getInitialized () const { return (initialized_); }
 
       protected:
-        virtual bool
-        initCompute ();
+        bool
+        initCompute () override;
 
         /** \brief compute Scharr derivatives of a source cloud.
           * \param[in]  src the image for which gradients are to be computed
@@ -320,8 +322,8 @@ namespace pcl
                std::vector<int>& status,
                Eigen::Affine3f& motion) const;
 
-        virtual void
-        computeTracking ();
+        void
+        computeTracking () override;
 
         /// \brief input pyranid at t-1
         std::vector<FloatImageConstPtr> ref_pyramid_;
@@ -368,10 +370,9 @@ namespace pcl
         /// \brief index of last element in kernel
         int kernel_last_;
       public:
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+        PCL_MAKE_ALIGNED_OPERATOR_NEW
     };
   }
 }
 
 #include <pcl/tracking/impl/pyramidal_klt.hpp>
-#endif

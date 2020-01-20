@@ -42,6 +42,7 @@
 #include <pcl/apps/modeler/render_window_item.h>
 
 #include <QFileInfo>
+#include <QSettings>
 #include <vtkActor.h>
 #include <vtkRenderer.h>
 
@@ -201,9 +202,9 @@ pcl::modeler::MainWindow::slotOpenRecentProject()
 void 
 pcl::modeler::MainWindow::createRecentPointCloudActions()
 {
-  for (size_t i = 0; i < MAX_RECENT_NUMBER; ++ i)
+  for (std::size_t i = 0; i < MAX_RECENT_NUMBER; ++ i)
   {
-    recent_pointcloud_actions_.push_back(boost::shared_ptr<QAction>(new QAction(this)));
+    recent_pointcloud_actions_.push_back(std::shared_ptr<QAction>(new QAction(this)));
     ui_->menuRecentPointClouds->addAction(recent_pointcloud_actions_[i].get());
     recent_pointcloud_actions_[i]->setVisible(false);
     connect(recent_pointcloud_actions_[i].get(), SIGNAL(triggered()), this, SLOT(slotOpenRecentPointCloud()));
@@ -225,9 +226,9 @@ pcl::modeler::MainWindow::updateRecentPointCloudActions()
 void 
 pcl::modeler::MainWindow::createRecentProjectActions()
 {
-  for (size_t i = 0; i < MAX_RECENT_NUMBER; ++ i)
+  for (std::size_t i = 0; i < MAX_RECENT_NUMBER; ++ i)
   {
-    recent_project_actions_.push_back(boost::shared_ptr<QAction>(new QAction(this)));
+    recent_project_actions_.push_back(std::shared_ptr<QAction>(new QAction(this)));
     ui_->menuRecentPointClouds->addAction(recent_project_actions_[i].get());
     recent_project_actions_[i]->setVisible(false);
     connect(recent_project_actions_[i].get(), SIGNAL(triggered()), this, SLOT(slotOpenRecentProject()));
@@ -254,7 +255,7 @@ pcl::modeler::MainWindow::openProjectImpl (const QString&)
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void 
-pcl::modeler::MainWindow::updateRecentActions (std::vector<boost::shared_ptr<QAction> >& recent_actions, QStringList& recent_items)
+pcl::modeler::MainWindow::updateRecentActions (std::vector<std::shared_ptr<QAction>>& recent_actions, QStringList& recent_items)
 {
   QMutableStringListIterator recent_items_it (recent_items);
   while (recent_items_it.hasNext ())
@@ -273,7 +274,7 @@ pcl::modeler::MainWindow::updateRecentActions (std::vector<boost::shared_ptr<QAc
     recent_actions[i]->setVisible (true);
   }
 
-  for (size_t i = recent_number, i_end = recent_actions.size (); i < i_end; ++ i)
+  for (std::size_t i = recent_number, i_end = recent_actions.size (); i < i_end; ++ i)
     recent_actions[i]->setVisible (false);
 
   while (recent_items.size () > recent_number)

@@ -61,13 +61,13 @@ using namespace pcl;
 
 void processAndSave( vtkSmartPointer<vtkImageData>  depth_data,
                      vtkSmartPointer<vtkImageData>  rgb_data,
-                     std::string                    time,
+                     const std::string&             time,
                      float                          focal_length,
                      bool                           format,
                      bool                           color,
                      bool                           depth,
                      bool                           use_output_path,
-                     std::string                    output_path)
+                     const std::string&             output_path)
 {
   // Retrieve the entries from the image data and copy them into the output RGB cloud
   int rgb_components = rgb_data->GetNumberOfScalarComponents();
@@ -123,9 +123,9 @@ void processAndSave( vtkSmartPointer<vtkImageData>  depth_data,
       Intensity     depth_point;
       PointXYZRGBA  xyzrgba_point;
 
-      color_point.r = xyzrgba_point.r = static_cast<uint8_t> (rgb_data->GetScalarComponentAsFloat(u,v,0,0));
-      color_point.g = xyzrgba_point.g = static_cast<uint8_t> (rgb_data->GetScalarComponentAsFloat(u,v,0,1));
-      color_point.b = xyzrgba_point.b = static_cast<uint8_t> (rgb_data->GetScalarComponentAsFloat(u,v,0,2));
+      color_point.r = xyzrgba_point.r = static_cast<std::uint8_t> (rgb_data->GetScalarComponentAsFloat(u,v,0,0));
+      color_point.g = xyzrgba_point.g = static_cast<std::uint8_t> (rgb_data->GetScalarComponentAsFloat(u,v,0,1));
+      color_point.b = xyzrgba_point.b = static_cast<std::uint8_t> (rgb_data->GetScalarComponentAsFloat(u,v,0,2));
       xyzrgba_point.a = 0;
 
       pc_image.points.push_back(color_point);
@@ -134,7 +134,7 @@ void processAndSave( vtkSmartPointer<vtkImageData>  depth_data,
       float d =  depth_data->GetScalarComponentAsFloat(u,v,0,0);
       depth_point.intensity = d;
 
-      if(d != 0 && !pcl_isnan(d) && !pcl_isnan(d))
+      if(d != 0 && !std::isnan(d) && !std::isnan(d))
       {
         xyzrgba_point.z = d * 0.001f;
         xyzrgba_point.x = static_cast<float> (u) * d * 0.001f * constant;
@@ -181,7 +181,7 @@ void processAndSave( vtkSmartPointer<vtkImageData>  depth_data,
   return;
 }
 
-void print_usage(void)
+void print_usage()
 {
   PCL_INFO("usage: convert -rgb <rgb_path> -depth <depth_path> -out <output_path> options\n");
   PCL_INFO("This program converts rgb and depth tiff files to pcd files");
@@ -203,16 +203,16 @@ int main(int argc, char ** argv)
     exit(-1);
   }
 
-  bool verbose = 0;
+  bool verbose = false;
   pcl::console::parse_argument (argc, argv, "-v", verbose);
 
-  bool format = 0;
+  bool format = false;
   pcl::console::parse_argument (argc, argv, "-b", format);
 
-  bool color = 0;
+  bool color = false;
   pcl::console::parse_argument (argc, argv, "-c", format);
 
-  bool depth = 0;
+  bool depth = false;
   pcl::console::parse_argument (argc, argv, "-d", format);
 
   std::string rgb_path_, depth_path_, output_path_;
@@ -256,7 +256,7 @@ int main(int argc, char ** argv)
     for (boost::filesystem::directory_iterator itr(rgb_path_); itr != end_itr; ++itr)
     {
       std::string ext = itr->path().extension().string();
-      if(ext.compare(".tiff") == 0)
+      if(ext == ".tiff")
       {
         tiff_rgb_files.push_back (itr->path ().string ());
         tiff_rgb_paths.push_back (itr->path ());
@@ -298,7 +298,7 @@ int main(int argc, char ** argv)
     for (boost::filesystem::directory_iterator itr(depth_path_); itr != end_itr; ++itr)
     {
       std::string ext = itr->path().extension().string();
-      if(ext.compare(".tiff") == 0)
+      if(ext == ".tiff")
       {
         tiff_depth_files.push_back (itr->path ().string ());
         tiff_depth_paths.push_back (itr->path ());
@@ -324,7 +324,7 @@ int main(int argc, char ** argv)
   sort (tiff_depth_files.begin (), tiff_depth_files.end ());
   sort (tiff_depth_paths.begin (), tiff_depth_paths.end ());
 
-  for(unsigned int i=0; i<tiff_rgb_paths.size(); i++)
+  for(std::size_t i = 0; i < tiff_rgb_paths.size(); i++)
   {
     // Load the input file
     vtkSmartPointer<vtkImageData> rgb_data;
@@ -351,17 +351,17 @@ int main(int argc, char ** argv)
       //std::cout << "RGB Time: " << rgb_time << std::endl;
 
       // Try to read the depth file
-      int found = 0; // indicates if a corresponding depth file was found
+      bool found = false; // indicates if a corresponding depth file was found
       // Find the correct file name
-      for(size_t j = 0; j < tiff_depth_paths.size(); j++)
+      for(std::size_t j = 0; j < tiff_depth_paths.size(); j++)
       {
         std::string depth_filename = tiff_depth_paths[i].filename().string();
         std::string depth_time = depth_filename.substr(6,22);
 
-        if(depth_time.compare(rgb_time) == 0) // found the correct depth
+        if(depth_time == rgb_time) // found the correct depth
         {
           //std::cout << "Depth Time: " << depth_time << std::endl;
-          found = 1;
+          found = true;
 
           // Process here!
 
@@ -389,16 +389,13 @@ int main(int argc, char ** argv)
           // TODO: remove this depth entry from vector before break > speed up search time
           break;
         }
-        else
-        {
-          // Continue with the next depth entry
-          continue;
-        }
-        if(found == 0)
-        {
-          std::cout << "We couldn't find a Depth file for this RGB image" << std::endl;
-        }
+        // Continue with the next depth entry
+        continue;
       } //for depth_paths
+      if(!found)
+      {
+        std::cout << "We couldn't find a Depth file for this RGB image" << std::endl;
+      }
     } //if ret = 2 or 3
   } //for rgb paths
   return 0;

@@ -42,10 +42,10 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT> void
-pcl::extractEuclideanClusters (const PointCloud<PointT> &cloud, 
-                               const boost::shared_ptr<search::Search<PointT> > &tree,
+pcl::extractEuclideanClusters (const PointCloud<PointT> &cloud,
+                               const typename search::Search<PointT>::Ptr &tree,
                                float tolerance, std::vector<PointIndices> &clusters,
-                               unsigned int min_pts_per_cluster, 
+                               unsigned int min_pts_per_cluster,
                                unsigned int max_pts_per_cluster)
 {
   if (tree->getInputCloud ()->points.size () != cloud.points.size ())
@@ -81,7 +81,7 @@ pcl::extractEuclideanClusters (const PointCloud<PointT> &cloud,
         continue;
       }
 
-      for (size_t j = nn_start_idx; j < nn_indices.size (); ++j)             // can't assume sorted (default isn't!)
+      for (std::size_t j = nn_start_idx; j < nn_indices.size (); ++j)             // can't assume sorted (default isn't!)
       {
         if (nn_indices[j] == -1 || processed[nn_indices[j]])        // Has this point been processed before ?
           continue;
@@ -99,7 +99,7 @@ pcl::extractEuclideanClusters (const PointCloud<PointT> &cloud,
     {
       pcl::PointIndices r;
       r.indices.resize (seed_queue.size ());
-      for (size_t j = 0; j < seed_queue.size (); ++j)
+      for (std::size_t j = 0; j < seed_queue.size (); ++j)
         r.indices[j] = seed_queue[j];
 
       // These two lines should not be needed: (can anyone confirm?) -FF
@@ -115,11 +115,11 @@ pcl::extractEuclideanClusters (const PointCloud<PointT> &cloud,
 //////////////////////////////////////////////////////////////////////////////////////////////
 /** @todo: fix the return value, make sure the exit is not needed anymore*/
 template <typename PointT> void
-pcl::extractEuclideanClusters (const PointCloud<PointT> &cloud, 
+pcl::extractEuclideanClusters (const PointCloud<PointT> &cloud,
                                const std::vector<int> &indices,
-                               const boost::shared_ptr<search::Search<PointT> > &tree,
+                               const typename search::Search<PointT>::Ptr &tree,
                                float tolerance, std::vector<PointIndices> &clusters,
-                               unsigned int min_pts_per_cluster, 
+                               unsigned int min_pts_per_cluster,
                                unsigned int max_pts_per_cluster)
 {
   // \note If the tree was created over <cloud, indices>, we guarantee a 1-1 mapping between what the tree returns
@@ -143,16 +143,16 @@ pcl::extractEuclideanClusters (const PointCloud<PointT> &cloud,
   std::vector<int> nn_indices;
   std::vector<float> nn_distances;
   // Process all points in the indices vector
-  for (int i = 0; i < static_cast<int> (indices.size ()); ++i)
+  for (const int &index : indices)
   {
-    if (processed[indices[i]])
+    if (processed[index])
       continue;
 
     std::vector<int> seed_queue;
     int sq_idx = 0;
-    seed_queue.push_back (indices[i]);
+    seed_queue.push_back (index);
 
-    processed[indices[i]] = true;
+    processed[index] = true;
 
     while (sq_idx < static_cast<int> (seed_queue.size ()))
     {
@@ -169,7 +169,7 @@ pcl::extractEuclideanClusters (const PointCloud<PointT> &cloud,
         continue;
       }
 
-      for (size_t j = nn_start_idx; j < nn_indices.size (); ++j)             // can't assume sorted (default isn't!)
+      for (std::size_t j = nn_start_idx; j < nn_indices.size (); ++j)             // can't assume sorted (default isn't!)
       {
         if (nn_indices[j] == -1 || processed[nn_indices[j]])        // Has this point been processed before ?
           continue;
@@ -187,7 +187,7 @@ pcl::extractEuclideanClusters (const PointCloud<PointT> &cloud,
     {
       pcl::PointIndices r;
       r.indices.resize (seed_queue.size ());
-      for (size_t j = 0; j < seed_queue.size (); ++j)
+      for (std::size_t j = 0; j < seed_queue.size (); ++j)
         // This is the only place where indices come into play
         r.indices[j] = seed_queue[j];
 
@@ -210,8 +210,8 @@ template <typename PointT> void
 pcl::EuclideanClusterExtraction<PointT>::extract (std::vector<PointIndices> &clusters)
 {
   if (!initCompute () || 
-      (input_ != 0   && input_->points.empty ()) ||
-      (indices_ != 0 && indices_->empty ()))
+      (input_   && input_->points.empty ()) ||
+      (indices_ && indices_->empty ()))
   {
     clusters.clear ();
     return;
@@ -240,7 +240,7 @@ pcl::EuclideanClusterExtraction<PointT>::extract (std::vector<PointIndices> &clu
 }
 
 #define PCL_INSTANTIATE_EuclideanClusterExtraction(T) template class PCL_EXPORTS pcl::EuclideanClusterExtraction<T>;
-#define PCL_INSTANTIATE_extractEuclideanClusters(T) template void PCL_EXPORTS pcl::extractEuclideanClusters<T>(const pcl::PointCloud<T> &, const boost::shared_ptr<pcl::search::Search<T> > &, float , std::vector<pcl::PointIndices> &, unsigned int, unsigned int);
-#define PCL_INSTANTIATE_extractEuclideanClusters_indices(T) template void PCL_EXPORTS pcl::extractEuclideanClusters<T>(const pcl::PointCloud<T> &, const std::vector<int> &, const boost::shared_ptr<pcl::search::Search<T> > &, float , std::vector<pcl::PointIndices> &, unsigned int, unsigned int);
+#define PCL_INSTANTIATE_extractEuclideanClusters(T) template void PCL_EXPORTS pcl::extractEuclideanClusters<T>(const pcl::PointCloud<T> &, const typename pcl::search::Search<T>::Ptr &, float , std::vector<pcl::PointIndices> &, unsigned int, unsigned int);
+#define PCL_INSTANTIATE_extractEuclideanClusters_indices(T) template void PCL_EXPORTS pcl::extractEuclideanClusters<T>(const pcl::PointCloud<T> &, const std::vector<int> &, const typename pcl::search::Search<T>::Ptr &, float , std::vector<pcl::PointIndices> &, unsigned int, unsigned int);
 
 #endif        // PCL_EXTRACT_CLUSTERS_IMPL_H_

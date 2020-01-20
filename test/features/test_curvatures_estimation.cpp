@@ -47,10 +47,10 @@ using namespace pcl;
 using namespace pcl::io;
 using namespace std;
 
-typedef search::KdTree<PointXYZ>::Ptr KdTreePtr;
+using KdTreePtr = search::KdTree<PointXYZ>::Ptr;
 
 PointCloud<PointXYZ> cloud;
-vector<int> indices;
+std::vector<int> indices;
 KdTreePtr tree;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -63,7 +63,7 @@ TEST (PCL, PrincipalCurvaturesEstimation)
   PointCloud<Normal>::Ptr normals (new PointCloud<Normal> ());
   // set parameters
   n.setInputCloud (cloud.makeShared ());
-  boost::shared_ptr<vector<int> > indicesptr (new vector<int> (indices));
+  pcl::IndicesPtr indicesptr (new pcl::Indices (indices));
   n.setIndices (indicesptr);
   n.setSearchMethod (tree);
   n.setKSearch (10); // Use 10 nearest neighbors to estimate the normals
@@ -76,9 +76,9 @@ TEST (PCL, PrincipalCurvaturesEstimation)
 
   // computePointPrincipalCurvatures (indices)
   pc.computePointPrincipalCurvatures (*normals, 0, indices, pcx, pcy, pcz, pc1, pc2);
-  EXPECT_NEAR (fabs (pcx), 0.98509, 1e-4);
-  EXPECT_NEAR (fabs (pcy), 0.10714, 1e-4);
-  EXPECT_NEAR (fabs (pcz), 0.13462, 1e-4);
+  EXPECT_NEAR (std::abs (pcx), 0.98509, 1e-4);
+  EXPECT_NEAR (std::abs (pcy), 0.10714, 1e-4);
+  EXPECT_NEAR (std::abs (pcz), 0.13462, 1e-4);
   EXPECT_NEAR (pc1, 0.23997423052787781, 1e-4);
   EXPECT_NEAR (pc2, 0.19400238990783691, 1e-4);
 
@@ -118,11 +118,11 @@ TEST (PCL, PrincipalCurvaturesEstimation)
   EXPECT_EQ (pcs->points.size (), indices.size ());
 
   // Adjust for small numerical inconsitencies (due to nn_indices not being sorted)
-  EXPECT_NEAR (fabs (pcs->points[0].principal_curvature[0]), 0.98509, 1e-4);
-  EXPECT_NEAR (fabs (pcs->points[0].principal_curvature[1]), 0.10713, 1e-4);
-  EXPECT_NEAR (fabs (pcs->points[0].principal_curvature[2]), 0.13462, 1e-4);
-  EXPECT_NEAR (fabs (pcs->points[0].pc1), 0.23997458815574646, 1e-4);
-  EXPECT_NEAR (fabs (pcs->points[0].pc2), 0.19400238990783691, 1e-4);
+  EXPECT_NEAR (std::abs (pcs->points[0].principal_curvature[0]), 0.98509, 1e-4);
+  EXPECT_NEAR (std::abs (pcs->points[0].principal_curvature[1]), 0.10713, 1e-4);
+  EXPECT_NEAR (std::abs (pcs->points[0].principal_curvature[2]), 0.13462, 1e-4);
+  EXPECT_NEAR (std::abs (pcs->points[0].pc1), 0.23997458815574646, 1e-4);
+  EXPECT_NEAR (std::abs (pcs->points[0].pc2), 0.19400238990783691, 1e-4);
 
   EXPECT_NEAR (pcs->points[2].principal_curvature[0], 0.98079, 1e-4);
   EXPECT_NEAR (pcs->points[2].principal_curvature[1], -0.04019, 1e-4);
@@ -160,7 +160,7 @@ main (int argc, char** argv)
   }
 
   indices.resize (cloud.points.size ());
-  for (size_t i = 0; i < indices.size (); ++i)
+  for (std::size_t i = 0; i < indices.size (); ++i)
     indices[i] = static_cast<int> (i);
 
   tree.reset (new search::KdTree<PointXYZ> (false));

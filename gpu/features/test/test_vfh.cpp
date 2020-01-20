@@ -34,16 +34,6 @@
  *  Author: Anatoly Baskeheev, Itseez Ltd, (myname.mysurname@mycompany.com)
  */
 
-
-#if (defined(__GNUC__) && !defined(__CUDACC__) && (GTEST_GCC_VER_ >= 40000)) 
-    #define GTEST_USE_OWN_TR1_TUPLE 0
-#endif
-
-#if defined(_MSC_VER) && (_MSC_VER >= 1500)
-    #define GTEST_USE_OWN_TR1_TUPLE 0
-#endif
-
-
 #include "gtest/gtest.h"
 
 #include <pcl/point_types.h>
@@ -65,7 +55,7 @@ TEST(PCL_FeaturesGPU, vfh1)
     source.estimateNormals();
     source.generateIndices(3);
                    
-    vector<PointXYZ> normals_for_gpu(source.normals->points.size());    
+    std::vector<PointXYZ> normals_for_gpu(source.normals->points.size());    
     std::transform(source.normals->points.begin(), source.normals->points.end(), normals_for_gpu.begin(), DataSource::Normal2PointXYZ());        
     
     //uploading data to GPU
@@ -94,7 +84,7 @@ TEST(PCL_FeaturesGPU, vfh1)
         pc_gpu.compute(vfh_features);
     }
 
-    vector<VFHSignature308> downloaded;
+    std::vector<VFHSignature308> downloaded;
     vfh_features.download(downloaded);
 
     pcl::VFHEstimation<PointXYZ, Normal, VFHSignature308> fe;
@@ -113,10 +103,10 @@ TEST(PCL_FeaturesGPU, vfh1)
     VFHSignature308& gpu = downloaded[0];
     VFHSignature308& cpu = vfh.points[0];
         
-    size_t FSize = sizeof(VFHSignature308)/sizeof(gpu.histogram[0]);                                
+    std::size_t FSize = sizeof(VFHSignature308)/sizeof(gpu.histogram[0]);                                
         
     float norm = 0, norm_diff = 0;
-    for(size_t j = 0; j < FSize; ++j)
+    for(std::size_t j = 0; j < FSize; ++j)
     {
         norm_diff += (gpu.histogram[j] - cpu.histogram[j]) * (gpu.histogram[j] - cpu.histogram[j]);
         norm += cpu.histogram[j] * cpu.histogram[j];
@@ -137,7 +127,7 @@ TEST(PCL_FeaturesGPU, vfh_norm_bins_false)
     source.estimateNormals();
     source.generateIndices(3);
                    
-    vector<PointXYZ> normals_for_gpu(source.normals->points.size());    
+    std::vector<PointXYZ> normals_for_gpu(source.normals->points.size());    
     std::transform(source.normals->points.begin(), source.normals->points.end(), normals_for_gpu.begin(), DataSource::Normal2PointXYZ());        
     
     //uploading data to GPU
@@ -163,7 +153,7 @@ TEST(PCL_FeaturesGPU, vfh_norm_bins_false)
     DeviceArray<VFHSignature308> vfh_features;
     pc_gpu.compute(vfh_features);
 
-    vector<VFHSignature308> downloaded;
+    std::vector<VFHSignature308> downloaded;
     vfh_features.download(downloaded);
 
     pcl::VFHEstimation<PointXYZ, Normal, VFHSignature308> fe;
@@ -180,10 +170,10 @@ TEST(PCL_FeaturesGPU, vfh_norm_bins_false)
     VFHSignature308& gpu = downloaded[0];
     VFHSignature308& cpu = vfh.points[0];
         
-    size_t FSize = sizeof(VFHSignature308)/sizeof(gpu.histogram[0]);                                
+    std::size_t FSize = sizeof(VFHSignature308)/sizeof(gpu.histogram[0]);                                
         
     float norm = 0, norm_diff = 0;
-    for(size_t j = 0; j < FSize; ++j)
+    for(std::size_t j = 0; j < FSize; ++j)
     {
         norm_diff += (gpu.histogram[j] - cpu.histogram[j]) * (gpu.histogram[j] - cpu.histogram[j]);
         norm += cpu.histogram[j] * cpu.histogram[j];
@@ -204,7 +194,7 @@ TEST(PCL_FeaturesGPU, vfh_norm_distance_true)
     source.estimateNormals();
     source.generateIndices(3);
                    
-    vector<PointXYZ> normals_for_gpu(source.normals->points.size());    
+    std::vector<PointXYZ> normals_for_gpu(source.normals->points.size());    
     std::transform(source.normals->points.begin(), source.normals->points.end(), normals_for_gpu.begin(), DataSource::Normal2PointXYZ());        
     
     //uploading data to GPU
@@ -230,7 +220,7 @@ TEST(PCL_FeaturesGPU, vfh_norm_distance_true)
     DeviceArray<VFHSignature308> vfh_features;
     pc_gpu.compute(vfh_features);
 
-    vector<VFHSignature308> downloaded;
+    std::vector<VFHSignature308> downloaded;
     vfh_features.download(downloaded);
 
     pcl::VFHEstimation<PointXYZ, Normal, VFHSignature308> fe;
@@ -247,10 +237,10 @@ TEST(PCL_FeaturesGPU, vfh_norm_distance_true)
     VFHSignature308& gpu = downloaded[0];
     VFHSignature308& cpu = vfh.points[0];
         
-    size_t FSize = sizeof(VFHSignature308)/sizeof(gpu.histogram[0]);                                
+    std::size_t FSize = sizeof(VFHSignature308)/sizeof(gpu.histogram[0]);                                
         
     float norm = 0, norm_diff = 0;
-    for(size_t j = 0; j < FSize; ++j)
+    for(std::size_t j = 0; j < FSize; ++j)
     {
         norm_diff += (gpu.histogram[j] - cpu.histogram[j]) * (gpu.histogram[j] - cpu.histogram[j]);
         norm += cpu.histogram[j] * cpu.histogram[j];
@@ -272,7 +262,7 @@ TEST(PCL_FeaturesGPU, vfh_fill_size_component_true)
     source.estimateNormals();
     source.generateIndices(3);
                    
-    vector<PointXYZ> normals_for_gpu(source.normals->points.size());    
+    std::vector<PointXYZ> normals_for_gpu(source.normals->points.size());    
     std::transform(source.normals->points.begin(), source.normals->points.end(), normals_for_gpu.begin(), DataSource::Normal2PointXYZ());        
     
     //uploading data to GPU
@@ -298,7 +288,7 @@ TEST(PCL_FeaturesGPU, vfh_fill_size_component_true)
     DeviceArray<VFHSignature308> vfh_features;
     pc_gpu.compute(vfh_features);
 
-    vector<VFHSignature308> downloaded;
+    std::vector<VFHSignature308> downloaded;
     vfh_features.download(downloaded);
 
     pcl::VFHEstimation<PointXYZ, Normal, VFHSignature308> fe;
@@ -315,10 +305,10 @@ TEST(PCL_FeaturesGPU, vfh_fill_size_component_true)
     VFHSignature308& gpu = downloaded[0];
     VFHSignature308& cpu = vfh.points[0];
         
-    size_t FSize = sizeof(VFHSignature308)/sizeof(gpu.histogram[0]);                                
+    std::size_t FSize = sizeof(VFHSignature308)/sizeof(gpu.histogram[0]);                                
         
     float norm = 0, norm_diff = 0;
-    for(size_t j = 0; j < FSize; ++j)
+    for(std::size_t j = 0; j < FSize; ++j)
     {
         norm_diff += (gpu.histogram[j] - cpu.histogram[j]) * (gpu.histogram[j] - cpu.histogram[j]);
         norm += cpu.histogram[j] * cpu.histogram[j];

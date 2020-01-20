@@ -36,8 +36,7 @@
  *
  */
 
-#ifndef PCL_SEARCH_SEARCH_H_
-#define PCL_SEARCH_SEARCH_H_
+#pragma once
 
 #include <pcl/point_cloud.h>
 #include <pcl/for_each_type.h>
@@ -74,15 +73,15 @@ namespace pcl
     class Search
     {
       public:
-        typedef pcl::PointCloud<PointT> PointCloud;
-        typedef typename PointCloud::Ptr PointCloudPtr;
-        typedef typename PointCloud::ConstPtr PointCloudConstPtr;
+        using PointCloud = pcl::PointCloud<PointT>;
+        using PointCloudPtr = typename PointCloud::Ptr;
+        using PointCloudConstPtr = typename PointCloud::ConstPtr;
 
-        typedef boost::shared_ptr<pcl::search::Search<PointT> > Ptr;
-        typedef boost::shared_ptr<const pcl::search::Search<PointT> > ConstPtr;
+        using Ptr = shared_ptr<pcl::search::Search<PointT> >;
+        using ConstPtr = shared_ptr<const pcl::search::Search<PointT> >;
 
-        typedef boost::shared_ptr<std::vector<int> > IndicesPtr;
-        typedef boost::shared_ptr<const std::vector<int> > IndicesConstPtr;
+        using IndicesPtr = shared_ptr<std::vector<int> >;
+        using IndicesConstPtr = shared_ptr<const std::vector<int> >;
 
         /** Constructor. */
         Search (const std::string& name = "", bool sorted = false);
@@ -232,15 +231,15 @@ namespace pcl
                          std::vector< std::vector<float> > &k_sqr_distances) const
         {
           // Copy all the data fields from the input cloud to the output one
-          typedef typename pcl::traits::fieldList<PointT>::type FieldListInT;
-          typedef typename pcl::traits::fieldList<PointTDiff>::type FieldListOutT;
-          typedef typename pcl::intersect<FieldListInT, FieldListOutT>::type FieldList;
+          using FieldListInT = typename pcl::traits::fieldList<PointT>::type;
+          using FieldListOutT = typename pcl::traits::fieldList<PointTDiff>::type;
+          using FieldList = typename pcl::intersect<FieldListInT, FieldListOutT>::type;
 
           pcl::PointCloud<PointT> pc;
           if (indices.empty ())
           {
             pc.resize (cloud.size());
-            for (size_t i = 0; i < cloud.size(); i++)
+            for (std::size_t i = 0; i < cloud.size(); i++)
             {
               pcl::for_each_type <FieldList> (pcl::NdConcatenateFunctor <PointTDiff, PointT> (
                                               cloud[i], pc[i]));
@@ -250,7 +249,7 @@ namespace pcl
           else
           {
             pc.resize (indices.size());
-            for (size_t i = 0; i < indices.size(); i++)
+            for (std::size_t i = 0; i < indices.size(); i++)
             {
               pcl::for_each_type <FieldList> (pcl::NdConcatenateFunctor <PointTDiff, PointT> (
                                               cloud[indices[i]], pc[i]));
@@ -375,22 +374,22 @@ namespace pcl
                        unsigned int max_nn = 0) const
         {
           // Copy all the data fields from the input cloud to the output one
-          typedef typename pcl::traits::fieldList<PointT>::type FieldListInT;
-          typedef typename pcl::traits::fieldList<PointTDiff>::type FieldListOutT;
-          typedef typename pcl::intersect<FieldListInT, FieldListOutT>::type FieldList;
+          using FieldListInT = typename pcl::traits::fieldList<PointT>::type;
+          using FieldListOutT = typename pcl::traits::fieldList<PointTDiff>::type;
+          using FieldList = typename pcl::intersect<FieldListInT, FieldListOutT>::type;
 
           pcl::PointCloud<PointT> pc;
           if (indices.empty ())
           {
             pc.resize (cloud.size ());
-            for (size_t i = 0; i < cloud.size (); ++i)
+            for (std::size_t i = 0; i < cloud.size (); ++i)
               pcl::for_each_type <FieldList> (pcl::NdConcatenateFunctor <PointTDiff, PointT> (cloud[i], pc[i]));
             radiusSearch (pc, std::vector<int> (), radius, k_indices, k_sqr_distances, max_nn);
           }
           else
           {
             pc.resize (indices.size ());
-            for (size_t i = 0; i < indices.size (); ++i)
+            for (std::size_t i = 0; i < indices.size (); ++i)
               pcl::for_each_type <FieldList> (pcl::NdConcatenateFunctor <PointTDiff, PointT> (cloud[indices[i]], pc[i]));
             radiusSearch (pc, std::vector<int>(), radius, k_indices, k_sqr_distances, max_nn);
           }
@@ -428,5 +427,3 @@ namespace pcl
 #ifdef PCL_NO_PRECOMPILE
 #include <pcl/search/impl/search.hpp>
 #endif
-
-#endif  //#ifndef _PCL_SEARCH_SEARCH_H_

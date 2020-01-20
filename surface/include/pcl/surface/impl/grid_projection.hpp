@@ -47,17 +47,15 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointNT>
 pcl::GridProjection<PointNT>::GridProjection () :
-  cell_hash_map_ (), min_p_ (), max_p_ (), leaf_size_ (0.001), gaussian_scale_ (),
-  data_size_ (0), max_binary_search_level_ (10), k_ (50), padding_size_ (3), data_ (),
-  vector_at_data_point_ (), surface_ (), occupied_cell_list_ ()
+  cell_hash_map_ (), leaf_size_ (0.001), gaussian_scale_ (),
+  data_size_ (0), max_binary_search_level_ (10), k_ (50), padding_size_ (3), data_ () 
 {}
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointNT>
 pcl::GridProjection<PointNT>::GridProjection (double resolution) :
-  cell_hash_map_ (), min_p_ (), max_p_ (), leaf_size_ (resolution), gaussian_scale_ (),
-  data_size_ (0), max_binary_search_level_ (10), k_ (50), padding_size_ (3), data_ (),
-  vector_at_data_point_ (), surface_ (), occupied_cell_list_ ()
+  cell_hash_map_ (), leaf_size_ (resolution), gaussian_scale_ (),
+  data_size_ (0), max_binary_search_level_ (10), k_ (50), padding_size_ (3), data_ () 
 {}
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -75,7 +73,7 @@ pcl::GridProjection<PointNT>::~GridProjection ()
 template <typename PointNT> void
 pcl::GridProjection<PointNT>::scaleInputDataPoint (double scale_factor)
 {
-  for (size_t i = 0; i < data_->points.size(); ++i)
+  for (std::size_t i = 0; i < data_->points.size(); ++i)
   {
     data_->points[i].x /= static_cast<float> (scale_factor);
     data_->points[i].y /= static_cast<float> (scale_factor);
@@ -101,7 +99,7 @@ pcl::GridProjection<PointNT>::getBoundingBox ()
   // Round the max_p_, min_p_ so that they are aligned with the cells vertices
   int upper_right_index[3];
   int lower_left_index[3];
-  for (size_t i = 0; i < 3; ++i)
+  for (std::size_t i = 0; i < 3; ++i)
   {
     upper_right_index[i] = static_cast<int> (max_p_(i) / leaf_size_ + 5);
     lower_left_index[i] = static_cast<int> (min_p_(i) / leaf_size_ - 5);
@@ -198,23 +196,22 @@ pcl::GridProjection<PointNT>::createSurfaceForCell (const Eigen::Vector3i &index
   indices[3] = Eigen::Vector3i (index[0] + 1, index[1], index[2]);
 
   // Get the coordinate of the 4 end points, and the corresponding vectors
-  for (size_t i = 0; i < 4; ++i)
+  for (std::size_t i = 0; i < 4; ++i)
   {
     pts[i] = vertices[I_SHIFT_PT[i]];
     unsigned int index_1d = getIndexIn1D (indices[i]);
     if (cell_hash_map_.find (index_1d) == cell_hash_map_.end () ||
         occupied_cell_list_[index_1d] == 0)
       return;
-    else
-      vector_at_pts[i] = cell_hash_map_.at (index_1d).vect_at_grid_pt;
+    vector_at_pts[i] = cell_hash_map_.at (index_1d).vect_at_grid_pt;
   }
 
   // Go through the 3 edges, test whether they are intersected by the surface
-  for (size_t i = 0; i < 3; ++i)
+  for (std::size_t i = 0; i < 3; ++i)
   {
     std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > end_pts (2);
     std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> > vect_at_end_pts (2);
-    for (size_t j = 0; j < 2; ++j)
+    for (std::size_t j = 0; j < 2; ++j)
     {
       end_pts[j] = pts[I_SHIFT_EDGE[i][j]];
       vect_at_end_pts[j] = vector_at_pts[I_SHIFT_EDGE[i][j]];
@@ -251,7 +248,7 @@ pcl::GridProjection<PointNT>::createSurfaceForCell (const Eigen::Vector3i &index
         default:
           break;
       }
-      for (size_t k = 0; k < 4; k++)
+      for (std::size_t k = 0; k < 4; k++)
       {
         polygon_indices_1d[k] = getIndexIn1D (polygon[k]);
         if (!occupied_cell_list_[polygon_indices_1d[k]])
@@ -262,7 +259,7 @@ pcl::GridProjection<PointNT>::createSurfaceForCell (const Eigen::Vector3i &index
       }
       if (is_all_in_hash_map)
       {
-        for (size_t k = 0; k < 4; k++)
+        for (std::size_t k = 0; k < 4; k++)
         {
           polygon_pts[k] = cell_hash_map_.at (polygon_indices_1d[k]).pt_on_surface;
           surface_.push_back (polygon_pts[k]);
@@ -358,7 +355,7 @@ pcl::GridProjection<PointNT>::getVectorAtPoint (const Eigen::Vector4f &p,
   double sum = 0.0;
   double mag = 0.0;
 
-  for (size_t i = 0; i < pt_union_indices.size (); ++i)
+  for (std::size_t i = 0; i < pt_union_indices.size (); ++i)
   {
     Eigen::Vector4f pp (data_->points[pt_union_indices[i]].x, data_->points[pt_union_indices[i]].y, data_->points[pt_union_indices[i]].z, 0);
     pt_union_dist[i] = (pp - p).squaredNorm ();
@@ -374,7 +371,7 @@ pcl::GridProjection<PointNT>::getVectorAtPoint (const Eigen::Vector4f &p,
       data_->points[pt_union_indices[0]].normal[1],
       data_->points[pt_union_indices[0]].normal[2]);
 
-  for (size_t i = 0; i < pt_union_weight.size (); ++i)
+  for (std::size_t i = 0; i < pt_union_weight.size (); ++i)
   {
     pt_union_weight[i] /= sum;
     Eigen::Vector3f vec (data_->points[pt_union_indices[i]].normal[0],
@@ -407,7 +404,7 @@ pcl::GridProjection<PointNT>::getVectorAtPointKNN (const Eigen::Vector4f &p,
   for (int i = 0; i < k_; i++)
   {
     //k_weight[i] = pow (M_E, -pow (k_squared_distances[i], 2.0) / gaussian_scale_);
-    k_weight[i] = std::pow (static_cast<float>(M_E), static_cast<float>(-pow (static_cast<float>(k_squared_distances[i]), 2.0f) / gaussian_scale_));
+    k_weight[i] = std::pow (static_cast<float>(M_E), static_cast<float>(-std::pow (static_cast<float>(k_squared_distances[i]), 2.0f) / gaussian_scale_));
     sum += k_weight[i];
   }
   pcl::VectorAverage3f vector_average;
@@ -422,7 +419,7 @@ pcl::GridProjection<PointNT>::getVectorAtPointKNN (const Eigen::Vector4f &p,
   vector_average.getEigenVector1 (out_vector);
   out_vector.normalize ();
   double d1 = getD1AtPoint (p, out_vector, k_indices);
-  out_vector = out_vector * sum;
+  out_vector *= sum;
   vo = ((d1 > 0) ? -1 : 1) * out_vector;
 
 }
@@ -435,7 +432,7 @@ pcl::GridProjection<PointNT>::getMagAtPoint (const Eigen::Vector4f &p,
   std::vector <double> pt_union_dist (pt_union_indices.size ());
   std::vector <double> pt_union_weight (pt_union_indices.size ());
   double sum = 0.0;
-  for (size_t i = 0; i < pt_union_indices.size (); ++i)
+  for (std::size_t i = 0; i < pt_union_indices.size (); ++i)
   {
     Eigen::Vector4f pp (data_->points[pt_union_indices[i]].x, data_->points[pt_union_indices[i]].y, data_->points[pt_union_indices[i]].z, 0);
     pt_union_dist[i] = (pp - p).norm ();
@@ -480,7 +477,7 @@ pcl::GridProjection<PointNT>::isIntersected (const std::vector<Eigen::Vector4f, 
   assert (vect_at_end_pts.size () == 2);
 
   double length[2];
-  for (size_t i = 0; i < 2; ++i)
+  for (std::size_t i = 0; i < 2; ++i)
   {
     length[i] = vect_at_end_pts[i].norm ();
     vect_at_end_pts[i].normalize ();
@@ -522,37 +519,34 @@ pcl::GridProjection<PointNT>::findIntersection (int level,
   double d1 = getD1AtPoint (start_pt, vec, pt_union_indices);
   std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > new_end_pts (2);
   std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> > new_vect_at_end_pts (2);
-  if ((fabs (d1) < 10e-3) || (level == max_binary_search_level_))
+  if ((std::abs (d1) < 10e-3) || (level == max_binary_search_level_))
   {
     intersection = start_pt;
     return;
   }
-  else
+  vec.normalize ();
+  if (vec.dot (vect_at_end_pts[0]) < 0)
   {
-    vec.normalize ();
-    if (vec.dot (vect_at_end_pts[0]) < 0)
-    {
-      Eigen::Vector4f new_start_pt = end_pts[0] + (start_pt - end_pts[0]) * 0.5;
-      new_end_pts[0] = end_pts[0];
-      new_end_pts[1] = start_pt;
-      new_vect_at_end_pts[0] = vect_at_end_pts[0];
-      new_vect_at_end_pts[1] = vec;
-      findIntersection (level + 1, new_end_pts, new_vect_at_end_pts, new_start_pt, pt_union_indices, intersection);
-      return;
-    }
-    if (vec.dot (vect_at_end_pts[1]) < 0)
-    {
-      Eigen::Vector4f new_start_pt = start_pt + (end_pts[1] - start_pt) * 0.5;
-      new_end_pts[0] = start_pt;
-      new_end_pts[1] = end_pts[1];
-      new_vect_at_end_pts[0] = vec;
-      new_vect_at_end_pts[1] = vect_at_end_pts[1];
-      findIntersection (level + 1, new_end_pts, new_vect_at_end_pts, new_start_pt, pt_union_indices, intersection);
-      return;
-    }
-    intersection = start_pt;
+    Eigen::Vector4f new_start_pt = end_pts[0] + (start_pt - end_pts[0]) * 0.5;
+    new_end_pts[0] = end_pts[0];
+    new_end_pts[1] = start_pt;
+    new_vect_at_end_pts[0] = vect_at_end_pts[0];
+    new_vect_at_end_pts[1] = vec;
+    findIntersection (level + 1, new_end_pts, new_vect_at_end_pts, new_start_pt, pt_union_indices, intersection);
     return;
   }
+  if (vec.dot (vect_at_end_pts[1]) < 0)
+  {
+    Eigen::Vector4f new_start_pt = start_pt + (end_pts[1] - start_pt) * 0.5;
+    new_end_pts[0] = start_pt;
+    new_end_pts[1] = end_pts[1];
+    new_vect_at_end_pts[0] = vec;
+    new_vect_at_end_pts[1] = vect_at_end_pts[1];
+    findIntersection (level + 1, new_end_pts, new_vect_at_end_pts, new_start_pt, pt_union_indices, intersection);
+    return;
+  }
+  intersection = start_pt;
+  return;
 }
 
 
@@ -636,9 +630,9 @@ pcl::GridProjection<PointNT>::reconstructPolygons (std::vector<pcl::Vertices> &p
   for (int cp = 0; cp < static_cast<int> (data_->points.size ()); ++cp)
   {
     // Check if the point is invalid
-    if (!pcl_isfinite (data_->points[cp].x) ||
-        !pcl_isfinite (data_->points[cp].y) ||
-        !pcl_isfinite (data_->points[cp].z))
+    if (!std::isfinite (data_->points[cp].x) ||
+        !std::isfinite (data_->points[cp].y) ||
+        !std::isfinite (data_->points[cp].z))
       continue;
 
     Eigen::Vector3i index_3d;
@@ -682,7 +676,7 @@ pcl::GridProjection<PointNT>::reconstructPolygons (std::vector<pcl::Vertices> &p
   }
 
   // Update the hashtable and store the vector and point
-  BOOST_FOREACH (typename HashMap::value_type entry, cell_hash_map_)
+  for (const auto &entry : cell_hash_map_)
   {
     getIndexIn3D (entry.first, index);
     std::vector <int> pt_union_indices;
@@ -699,7 +693,7 @@ pcl::GridProjection<PointNT>::reconstructPolygons (std::vector<pcl::Vertices> &p
   }
 
   // Go through the hash table another time to extract surface
-  BOOST_FOREACH (typename HashMap::value_type entry, cell_hash_map_)
+  for (const auto &entry : cell_hash_map_)
   {
     getIndexIn3D (entry.first, index);
     std::vector <int> pt_union_indices;
@@ -735,13 +729,13 @@ pcl::GridProjection<PointNT>::performReconstruction (pcl::PolygonMesh &output)
   output.header = input_->header;
 
   pcl::PointCloud<pcl::PointXYZ> cloud;
-  cloud.width = static_cast<uint32_t> (surface_.size ());
+  cloud.width = static_cast<std::uint32_t> (surface_.size ());
   cloud.height = 1;
   cloud.is_dense = true;
 
   cloud.points.resize (surface_.size ());
   // Copy the data from surface_ to cloud
-  for (size_t i = 0; i < cloud.points.size (); ++i)
+  for (std::size_t i = 0; i < cloud.points.size (); ++i)
   {
     cloud.points[i].x = surface_[i].x ();
     cloud.points[i].y = surface_[i].y ();
@@ -760,13 +754,13 @@ pcl::GridProjection<PointNT>::performReconstruction (pcl::PointCloud<PointNT> &p
 
   // The mesh surface is held in surface_. Copy it to the output format
   points.header = input_->header;
-  points.width = static_cast<uint32_t> (surface_.size ());
+  points.width = static_cast<std::uint32_t> (surface_.size ());
   points.height = 1;
   points.is_dense = true;
 
   points.resize (surface_.size ());
   // Copy the data from surface_ to cloud
-  for (size_t i = 0; i < points.size (); ++i)
+  for (std::size_t i = 0; i < points.size (); ++i)
   {
     points[i].x = surface_[i].x ();
     points[i].y = surface_[i].y ();

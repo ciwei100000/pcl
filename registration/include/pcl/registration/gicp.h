@@ -38,8 +38,7 @@
  *
  */
 
-#ifndef PCL_GICP_H_
-#define PCL_GICP_H_
+#pragma once
 
 #include <pcl/registration/icp.h>
 #include <pcl/registration/bfgs.h>
@@ -79,29 +78,29 @@ namespace pcl
       using IterativeClosestPoint<PointSource, PointTarget>::min_number_correspondences_;
       using IterativeClosestPoint<PointSource, PointTarget>::update_visualizer_;
 
-      typedef pcl::PointCloud<PointSource> PointCloudSource;
-      typedef typename PointCloudSource::Ptr PointCloudSourcePtr;
-      typedef typename PointCloudSource::ConstPtr PointCloudSourceConstPtr;
+      using PointCloudSource = pcl::PointCloud<PointSource>;
+      using PointCloudSourcePtr = typename PointCloudSource::Ptr;
+      using PointCloudSourceConstPtr = typename PointCloudSource::ConstPtr;
 
-      typedef pcl::PointCloud<PointTarget> PointCloudTarget;
-      typedef typename PointCloudTarget::Ptr PointCloudTargetPtr;
-      typedef typename PointCloudTarget::ConstPtr PointCloudTargetConstPtr;
+      using PointCloudTarget = pcl::PointCloud<PointTarget>;
+      using PointCloudTargetPtr = typename PointCloudTarget::Ptr;
+      using PointCloudTargetConstPtr = typename PointCloudTarget::ConstPtr;
 
-      typedef PointIndices::Ptr PointIndicesPtr;
-      typedef PointIndices::ConstPtr PointIndicesConstPtr;
+      using PointIndicesPtr = PointIndices::Ptr;
+      using PointIndicesConstPtr = PointIndices::ConstPtr;
 
-      typedef std::vector< Eigen::Matrix3d, Eigen::aligned_allocator<Eigen::Matrix3d> > MatricesVector;
-      typedef boost::shared_ptr< MatricesVector > MatricesVectorPtr;
-      typedef boost::shared_ptr< const MatricesVector > MatricesVectorConstPtr;
+      using MatricesVector = std::vector< Eigen::Matrix3d, Eigen::aligned_allocator<Eigen::Matrix3d> >;
+      using MatricesVectorPtr = shared_ptr<MatricesVector>;
+      using MatricesVectorConstPtr = shared_ptr<const MatricesVector>;
       
-      typedef typename Registration<PointSource, PointTarget>::KdTree InputKdTree;
-      typedef typename Registration<PointSource, PointTarget>::KdTreePtr InputKdTreePtr;
+      using InputKdTree = typename Registration<PointSource, PointTarget>::KdTree;
+      using InputKdTreePtr = typename Registration<PointSource, PointTarget>::KdTreePtr;
 
-      typedef boost::shared_ptr< GeneralizedIterativeClosestPoint<PointSource, PointTarget> > Ptr;
-      typedef boost::shared_ptr< const GeneralizedIterativeClosestPoint<PointSource, PointTarget> > ConstPtr;
+      using Ptr = shared_ptr< GeneralizedIterativeClosestPoint<PointSource, PointTarget> >;
+      using ConstPtr = shared_ptr< const GeneralizedIterativeClosestPoint<PointSource, PointTarget> >;
 
 
-      typedef Eigen::Matrix<double, 6, 1> Vector6d;
+      using Vector6d = Eigen::Matrix<double, 6, 1>;
 
       /** \brief Empty constructor. */
       GeneralizedIterativeClosestPoint () 
@@ -116,16 +115,21 @@ namespace pcl
         max_iterations_ = 200;
         transformation_epsilon_ = 5e-4;
         corr_dist_threshold_ = 5.;
-        rigid_transformation_estimation_ = 
-          boost::bind (&GeneralizedIterativeClosestPoint<PointSource, PointTarget>::estimateRigidTransformationBFGS, 
-                       this, _1, _2, _3, _4, _5); 
+        rigid_transformation_estimation_ = [this] (const PointCloudSource& cloud_src,
+                                                   const std::vector<int>& indices_src,
+                                                   const PointCloudTarget& cloud_tgt,
+                                                   const std::vector<int>& indices_tgt,
+                                                   Eigen::Matrix4f& transformation_matrix)
+        {
+          estimateRigidTransformationBFGS (cloud_src, indices_src, cloud_tgt, indices_tgt, transformation_matrix);
+        };
       }
 
       /** \brief Provide a pointer to the input dataset
         * \param cloud the const boost shared pointer to a PointCloud message
         */
       inline void
-      setInputSource (const PointCloudSourceConstPtr &cloud)
+      setInputSource (const PointCloudSourceConstPtr &cloud) override
       {
 
         if (cloud->points.empty ())
@@ -135,7 +139,7 @@ namespace pcl
         }
         PointCloudSource input = *cloud;
         // Set all the point.data[3] values to 1 to aid the rigid transformation
-        for (size_t i = 0; i < input.size (); ++i)
+        for (std::size_t i = 0; i < input.size (); ++i)
           input[i].data[3] = 1.0;
         
         pcl::IterativeClosestPoint<PointSource, PointTarget>::setInputSource (cloud);
@@ -157,7 +161,7 @@ namespace pcl
         * \param[in] target the input point cloud target
         */
       inline void 
-      setInputTarget (const PointCloudTargetConstPtr &target)
+      setInputTarget (const PointCloudTargetConstPtr &target) override
       {
         pcl::IterativeClosestPoint<PointSource, PointTarget>::setInputTarget(target);
         target_covariances_.reset ();
@@ -190,7 +194,7 @@ namespace pcl
                                        Eigen::Matrix4f &transformation_matrix);
       
       /** \brief \return Mahalanobis distance matrix for the given point index */
-      inline const Eigen::Matrix3d& mahalanobis(size_t index) const
+      inline const Eigen::Matrix3d& mahalanobis(std::size_t index) const
       {
         assert(index < mahalanobis_.size());
         return mahalanobis_[index];
@@ -311,10 +315,10 @@ namespace pcl
       matricesInnerProd(const Eigen::MatrixXd& mat1, const Eigen::MatrixXd& mat2) const
       {
         double r = 0.;
-        size_t n = mat1.rows();
+        std::size_t n = mat1.rows();
         // tr(mat1^t.mat2)
-        for(size_t i = 0; i < n; i++)
-          for(size_t j = 0; j < n; j++)
+        for(std::size_t i = 0; i < n; i++)
+          for(std::size_t j = 0; j < n; j++)
             r += mat1 (j, i) * mat2 (i,j);
         return r;
       }
@@ -324,7 +328,7 @@ namespace pcl
         * \param guess the initial guess of the transformation to compute
         */
       void 
-      computeTransformation (PointCloudSource &output, const Eigen::Matrix4f &guess);
+      computeTransformation (PointCloudSource &output, const Eigen::Matrix4f &guess) override;
 
       /** \brief Search for the closest nearest neighbor of a given point.
         * \param query the point to search a nearest neighbour for
@@ -348,14 +352,14 @@ namespace pcl
       {
         OptimizationFunctorWithIndices (const GeneralizedIterativeClosestPoint* gicp)
           : BFGSDummyFunctor<double,6> (), gicp_(gicp) {}
-        double operator() (const Vector6d& x);
-        void  df(const Vector6d &x, Vector6d &df);
-        void fdf(const Vector6d &x, double &f, Vector6d &df);
+        double operator() (const Vector6d& x) override;
+        void  df(const Vector6d &x, Vector6d &df) override;
+        void fdf(const Vector6d &x, double &f, Vector6d &df) override;
 
         const GeneralizedIterativeClosestPoint *gicp_;
       };
       
-      boost::function<void(const pcl::PointCloud<PointSource> &cloud_src,
+      std::function<void(const pcl::PointCloud<PointSource> &cloud_src,
                            const std::vector<int> &src_indices,
                            const pcl::PointCloud<PointTarget> &cloud_tgt,
                            const std::vector<int> &tgt_indices,
@@ -364,5 +368,3 @@ namespace pcl
 }
 
 #include <pcl/registration/impl/gicp.hpp>
-
-#endif  //#ifndef PCL_GICP_H_

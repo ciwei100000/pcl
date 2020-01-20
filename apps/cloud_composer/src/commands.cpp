@@ -5,7 +5,7 @@
 
 pcl::cloud_composer::CloudCommand::CloudCommand (QList <const CloudComposerItem*> input_data, QUndoCommand* parent)
   : QUndoCommand (parent)
-  , original_data_ (input_data)
+  , original_data_ (std::move(input_data))
   , can_use_templates_(false)
   , template_type_ (-1)
 {
@@ -51,7 +51,7 @@ bool
 pcl::cloud_composer::CloudCommand::canUseTemplates (ConstItemList &input_data)
 {
   //Make sure the input list isn't empty
-  if (input_data.size () == 0)
+  if (input_data.empty ())
   {
     qCritical () << "Cannot call a templated tool on an empty input in CloudCommand::executeToolOnTemplateCloud!";
     template_type_ = -2;
@@ -115,10 +115,10 @@ pcl::cloud_composer::CloudCommand::executeToolOnTemplateCloud (AbstractTool* too
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool 
-pcl::cloud_composer::CloudCommand::replaceOriginalWithNew (QList <const CloudComposerItem*> originals, QList <CloudComposerItem*> new_items)
+pcl::cloud_composer::CloudCommand::replaceOriginalWithNew (const QList <const CloudComposerItem*>& originals, const QList <CloudComposerItem*>& new_items)
 { 
   //Find the input item's parent
-  if (originals.size () < 1)
+  if (originals.empty ())
   {
     qCritical () << "No items to replace specified!";
     return false;
@@ -135,7 +135,7 @@ pcl::cloud_composer::CloudCommand::replaceOriginalWithNew (QList <const CloudCom
     }
   }
   // If parent is 0, it's parent is invisiblerootitem (That's how Qt defines it... boo!)
-  if (parent_item == 0)
+  if (parent_item == nullptr)
     parent_item = project_model_->invisibleRootItem ();
   
   //Now remove all the originals
@@ -161,7 +161,7 @@ pcl::cloud_composer::CloudCommand::replaceOriginalWithNew (QList <const CloudCom
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool 
-pcl::cloud_composer::CloudCommand::restoreOriginalRemoveNew (QList <const CloudComposerItem*> originals, QList <CloudComposerItem*> new_items)
+pcl::cloud_composer::CloudCommand::restoreOriginalRemoveNew (const QList <const CloudComposerItem*>& originals, const QList <CloudComposerItem*>& new_items)
 { 
   
   //Now remove all the new items
@@ -169,7 +169,7 @@ pcl::cloud_composer::CloudCommand::restoreOriginalRemoveNew (QList <const CloudC
   {
     QStandardItem* parent_item = item->parent ();
     // If parent is 0, it's parent is invisiblerootitem (That's how Qt defines it... boo!)
-    if (parent_item == 0)
+    if (parent_item == nullptr)
       parent_item = project_model_->invisibleRootItem ();
     QPersistentModelIndex to_remove_index = QPersistentModelIndex(project_model_->indexFromItem (item));
     if (!to_remove_index.isValid ())
@@ -205,7 +205,7 @@ pcl::cloud_composer::CloudCommand::restoreOriginalRemoveNew (QList <const CloudC
 //////////// MODIFY CLOUD COMMAND
 
 pcl::cloud_composer::ModifyItemCommand::ModifyItemCommand (QList <const CloudComposerItem*> input_data, QUndoCommand* parent)
-  : CloudCommand (input_data, parent)
+  : CloudCommand (std::move(input_data), parent)
 { 
   
 }
@@ -225,7 +225,7 @@ pcl::cloud_composer::ModifyItemCommand::runCommand (AbstractTool* tool)
       output = tool->performAction (input_list, static_cast<PointTypeFlags::PointType> (template_type_));
     else
       output = tool->performAction (input_list);
-    if (output.size () == 0)
+    if (output.empty ())
       qWarning () << "Warning: Tool " << tool->getToolName () << "returned no item in a ModifyItemCommand";
     else 
     {
@@ -244,10 +244,7 @@ pcl::cloud_composer::ModifyItemCommand::runCommand (AbstractTool* tool)
     qDebug () << "Modify Item command generated "<<num_items_returned<<" which does not match input of "<<original_data_.size () <<" items";
     return true;
   }
-  else
-  {
-    return true;
-  }
+  return true;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -283,7 +280,7 @@ pcl::cloud_composer::ModifyItemCommand::redo ()
 //////////// New Item CLOUD COMMAND ///////////////////////////////////////////////////////////////////////////
 
 pcl::cloud_composer::NewItemCloudCommand::NewItemCloudCommand (QList <const CloudComposerItem*> input_data, QUndoCommand* parent)
-  : CloudCommand (input_data, parent)
+  : CloudCommand (std::move(input_data), parent)
 {
   
 }
@@ -304,7 +301,7 @@ pcl::cloud_composer::NewItemCloudCommand::runCommand (AbstractTool* tool)
       output = tool->performAction (input_list, static_cast<PointTypeFlags::PointType> (template_type_));
     else
       output = tool->performAction (input_list);
-    if (output.size () == 0)
+    if (output.empty ())
       qWarning () << "Warning: Tool " << tool->getToolName () << "returned no item in a NewItemCloudCommand";
     else 
     {
@@ -319,12 +316,8 @@ pcl::cloud_composer::NewItemCloudCommand::runCommand (AbstractTool* tool)
     qDebug () << "New Item command generated "<<num_new_items<<" new items";
     return true;
   }
-  else
-  {
-    qWarning () << "New Item command generated no new items!";
-    return false;
-  }
-   
+  qWarning () << "New Item command generated no new items!";
+  return false;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -390,7 +383,7 @@ pcl::cloud_composer::NewItemCloudCommand::redo ()
 //////////// Split CLOUD COMMAND ///////////////////////////////////////////////////////////////////////////
 
 pcl::cloud_composer::SplitCloudCommand::SplitCloudCommand (QList <const CloudComposerItem*> input_data, QUndoCommand* parent)
-  : CloudCommand (input_data, parent)
+  : CloudCommand (std::move(input_data), parent)
 {
   
 }
@@ -412,7 +405,7 @@ pcl::cloud_composer::SplitCloudCommand::runCommand (AbstractTool* tool)
       output = tool->performAction (input_list, static_cast<PointTypeFlags::PointType> (template_type_));
     else
       output = tool->performAction (input_list);
-    if (output.size () == 0)
+    if (output.empty ())
       qWarning () << "Warning: Tool " << tool->getToolName () << "returned no item in a SplitCloudCommand";
     else 
     {
@@ -427,12 +420,8 @@ pcl::cloud_composer::SplitCloudCommand::runCommand (AbstractTool* tool)
     qDebug () << "Split Item command generated "<<num_new_items<<" new items";
     return true;
   }
-  else
-  {
-    qWarning () << "Split Item command generated no new items!";
-    return false;
-  }
-
+  qWarning () << "Split Item command generated no new items!";
+  return false;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -469,7 +458,7 @@ pcl::cloud_composer::SplitCloudCommand::redo ()
 //////////// Delete CLOUD COMMAND ///////////////////////////////////////////////////////////////////////////
 
 pcl::cloud_composer::DeleteItemCommand::DeleteItemCommand (QList <const CloudComposerItem*> input_data, QUndoCommand* parent)
-  : CloudCommand (input_data, parent)
+  : CloudCommand (std::move(input_data), parent)
 {
   
 }
@@ -489,7 +478,7 @@ pcl::cloud_composer::DeleteItemCommand::runCommand (AbstractTool*)
     output_data_.append (output_pair);
     this->setText ("Delete "+item->text ());
   }
-  if (original_data_.size () > 0)
+  if (!original_data_.empty ())
     this->setText ("Delete multiple items");
   return true;
 }
@@ -527,7 +516,7 @@ pcl::cloud_composer::DeleteItemCommand::redo ()
 //////////// MERGE CLOUD COMMAND ///////////////////////////////////////////////////////////////////////////
 
 pcl::cloud_composer::MergeCloudCommand::MergeCloudCommand (ConstItemList input_data, QUndoCommand* parent)
-  : CloudCommand (input_data, parent)
+  : CloudCommand (std::move(input_data), parent)
 {
   
 }
@@ -553,7 +542,7 @@ pcl::cloud_composer::MergeCloudCommand::runCommand (AbstractTool* tool)
   OutputPair output_pair = {original_data_, output_items};
   output_data_.append (output_pair);
   
-  if (output_items.size () == 0)
+  if (output_items.empty ())
   {
     qWarning () << "Warning: Tool " << tool->getToolName () << "returned no item in a MergeCloudCommand";
     return false;

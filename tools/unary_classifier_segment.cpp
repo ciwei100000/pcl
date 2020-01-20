@@ -53,10 +53,10 @@ double default_feature_threshold = 5.0;
 double default_normal_radius_search = 0.01;
 double default_fpfh_radius_search = 0.05;
 
-typedef PointXYZRGBA PointT;
-typedef PointCloud<PointT> CloudT;
-typedef PointCloud<PointXYZRGBL> CloudLT;
-typedef PointCloud<FPFHSignature33> FeatureT;
+using PointT = PointXYZRGBA;
+using CloudT = PointCloud<PointT>;
+using CloudLT = PointCloud<PointXYZRGBL>;
+using FeatureT = PointCloud<FPFHSignature33>;
 
 void
 printHelp (int, char **argv)
@@ -90,7 +90,7 @@ loadTrainedFeatures (std::vector<FeatureT::Ptr> &out,
       print_highlight ("Loading %s \n", ss.str ().c_str ());
       
       FeatureT::Ptr features (new FeatureT);
-      if (loadPCDFile (ss.str ().c_str (), *features) < 0)
+      if (loadPCDFile (ss.str (), *features) < 0)
         return false;
 
       out.push_back (features);

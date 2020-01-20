@@ -45,7 +45,7 @@
 template <typename PointSource, typename PointTarget, typename FeatureT> void 
 pcl::SampleConsensusPrerejective<PointSource, PointTarget, FeatureT>::setSourceFeatures (const FeatureCloudConstPtr &features)
 {
-  if (features == NULL || features->empty ())
+  if (features == nullptr || features->empty ())
   {
     PCL_ERROR ("[pcl::%s::setSourceFeatures] Invalid or empty point cloud dataset given!\n", getClassName ().c_str ());
     return;
@@ -57,7 +57,7 @@ pcl::SampleConsensusPrerejective<PointSource, PointTarget, FeatureT>::setSourceF
 template <typename PointSource, typename PointTarget, typename FeatureT> void 
 pcl::SampleConsensusPrerejective<PointSource, PointTarget, FeatureT>::setTargetFeatures (const FeatureCloudConstPtr &features)
 {
-  if (features == NULL || features->empty ())
+  if (features == nullptr || features->empty ())
   {
     PCL_ERROR ("[pcl::%s::setTargetFeatures] Invalid or empty point cloud dataset given!\n", getClassName ().c_str ());
     return;
@@ -122,7 +122,7 @@ pcl::SampleConsensusPrerejective<PointSource, PointTarget, FeatureT>::findSimila
   std::vector<float> nn_distances (k_correspondences_);
   
   // Loop over the sampled features
-  for (size_t i = 0; i < sample_indices.size (); ++i)
+  for (std::size_t i = 0; i < sample_indices.size (); ++i)
   {
     // Current feature index
     const int idx = sample_indices[i];
@@ -307,7 +307,7 @@ pcl::SampleConsensusPrerejective<PointSource, PointTarget, FeatureT>::getFitness
   transformPointCloud (*input_, input_transformed, final_transformation_);
   
   // For each point in the source dataset
-  for (size_t i = 0; i < input_transformed.points.size (); ++i)
+  for (std::size_t i = 0; i < input_transformed.points.size (); ++i)
   {
     // Find its nearest neighbor in the target
     std::vector<int> nn_indices (1);
@@ -326,7 +326,7 @@ pcl::SampleConsensusPrerejective<PointSource, PointTarget, FeatureT>::getFitness
   }
 
   // Calculate MSE
-  if (inliers.size () > 0)
+  if (!inliers.empty ())
     fitness_score /= static_cast<float> (inliers.size ());
   else
     fitness_score = std::numeric_limits<float>::max ();

@@ -39,10 +39,12 @@
 #ifndef BIVARIATE_POLYNOMIAL_HPP
 #define BIVARIATE_POLYNOMIAL_HPP
 
+#include <algorithm>
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename real>
 pcl::BivariatePolynomialT<real>::BivariatePolynomialT (int new_degree) :
-  degree(0), parameters(NULL), gradient_x(NULL), gradient_y(NULL)
+  degree(0), parameters(nullptr), gradient_x(nullptr), gradient_y(nullptr)
 {
   setDegree(new_degree);
 }
@@ -79,17 +81,17 @@ pcl::BivariatePolynomialT<real>::setDegree (int newDegree)
     delete[] parameters;
     parameters = new real[getNoOfParameters ()];
   }
-  delete gradient_x; gradient_x = NULL;
-  delete gradient_y; gradient_y = NULL;
+  delete gradient_x; gradient_x = nullptr;
+  delete gradient_y; gradient_y = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename real> void
 pcl::BivariatePolynomialT<real>::memoryCleanUp ()
 {
-  delete[] parameters; parameters = NULL;
-  delete gradient_x; gradient_x = NULL;
-  delete gradient_y; gradient_y = NULL;
+  delete[] parameters; parameters = nullptr;
+  delete gradient_x; gradient_x = nullptr;
+  delete gradient_y; gradient_y = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,11 +115,8 @@ pcl::BivariatePolynomialT<real>::deepCopy (const pcl::BivariatePolynomialT<real>
     gradient_x = new pcl::BivariatePolynomialT<real> ();
     gradient_y = new pcl::BivariatePolynomialT<real> ();
   }
-  real* tmpParameters1 = parameters;
-  const real* tmpParameters2 = other.parameters;
-  unsigned int noOfParameters = getNoOfParameters ();
-  for (unsigned int i=0; i<noOfParameters; i++)
-    *tmpParameters1++ = *tmpParameters2++;
+
+  std::copy_n(other.parameters, getNoOfParameters (), parameters);
 
   if (other.gradient_x != NULL) 
   {
@@ -202,7 +201,7 @@ pcl::BivariatePolynomialT<real>::findCriticalPoints (std::vector<real>& x_values
              (parameters[1]*parameters[1] - real(4)*parameters[0]*parameters[3]),
          y = (real(-2)*parameters[0]*x - parameters[2]) / parameters[1];
     
-    if (!pcl_isfinite(x) || !pcl_isfinite(y))
+    if (!std::isfinite(x) || !std::isfinite(y))
       return;
     
     int type = 2;
@@ -240,7 +239,7 @@ pcl::operator<< (std::ostream& os, const pcl::BivariatePolynomialT<real>& p)
       if (!first) 
       {
         os << (currentParameter<0.0?" - ":" + ");
-        currentParameter = fabs (currentParameter);
+        currentParameter = std::abs (currentParameter);
       }
       os << currentParameter;
       if (xDegree>0) 

@@ -39,10 +39,12 @@
  */
 #ifndef PCL_NDT_2D_IMPL_H_
 #define PCL_NDT_2D_IMPL_H_
-#include <cmath>
 
 #include <pcl/registration/eigen.h>
 #include <pcl/registration/boost.h>
+
+#include <cmath>
+#include <memory>
 
 namespace pcl
 {
@@ -95,11 +97,11 @@ namespace pcl
     template <typename PointT>
     class NormalDist
     {
-      typedef pcl::PointCloud<PointT> PointCloud;
+      using PointCloud = pcl::PointCloud<PointT>;
 
       public:
         NormalDist ()
-          : min_n_ (3), n_ (0), pt_indices_ (), mean_ (), covar_inv_ ()
+          : min_n_ (3), n_ (0)
         {
         }
         
@@ -107,7 +109,7 @@ namespace pcl
           * \param[in] i Point index to store
           */
         void
-        addIdx (size_t i)
+        addIdx (std::size_t i)
         {
           pt_indices_.push_back (i);
         }
@@ -122,8 +124,7 @@ namespace pcl
           Eigen::Vector2d sx  = Eigen::Vector2d::Zero ();
           Eigen::Matrix2d sxx = Eigen::Matrix2d::Zero ();
           
-          std::vector<size_t>::const_iterator i;
-          for (i = pt_indices_.begin (); i != pt_indices_.end (); i++)
+          for (auto i = pt_indices_.cbegin (); i != pt_indices_.cend (); i++)
           {
             Eigen::Vector2d p (cloud[*i]. x, cloud[*i]. y);
             sx  += p;
@@ -181,7 +182,7 @@ namespace pcl
             1, 0, -(x * sin_theta + y*cos_theta),
             0, 1,   x * cos_theta - y*sin_theta;
           
-          for (size_t i = 0; i < 3; i++)
+          for (std::size_t i = 0; i < 3; i++)
             r.grad[i] = double (qt_cvi * jacobian.col (i)) * exp_qt_cvi_q;
           
           // second derivative only for i == j == 2:
@@ -190,8 +191,8 @@ namespace pcl
             -(x * sin_theta + y*cos_theta)
           );
 
-          for (size_t i = 0; i < 3; i++)
-            for (size_t j = 0; j < 3; j++)
+          for (std::size_t i = 0; i < 3; i++)
+            for (std::size_t j = 0; j < 3; j++)
               r.hessian (i,j) = -exp_qt_cvi_q * (
                 double (-qt_cvi*jacobian.col (i)) * double (-qt_cvi*jacobian.col (j)) +
                 (-qt_cvi * ((i==2 && j==2)? d2q_didj : Eigen::Vector2d::Zero ())) +
@@ -202,10 +203,10 @@ namespace pcl
         }
 
     protected:
-        const size_t min_n_;
+        const std::size_t min_n_;
 
-        size_t n_;
-        std::vector<size_t> pt_indices_;
+        std::size_t n_;
+        std::vector<std::size_t> pt_indices_;
         Eigen::Vector2d mean_;
         Eigen::Matrix2d covar_inv_;
     };
@@ -217,9 +218,9 @@ namespace pcl
     template <typename PointT> 
     class NDTSingleGrid: public boost::noncopyable
     {
-      typedef typename pcl::PointCloud<PointT> PointCloud;
-      typedef typename pcl::PointCloud<PointT>::ConstPtr PointCloudConstPtr;
-      typedef typename pcl::ndt2d::NormalDist<PointT> NormalDist;
+      using PointCloud = pcl::PointCloud<PointT>;
+      using PointCloudConstPtr = typename PointCloud::ConstPtr;
+      using NormalDist = pcl::ndt2d::NormalDist<PointT>;
 
       public:
         NDTSingleGrid (PointCloudConstPtr cloud,
@@ -233,8 +234,8 @@ namespace pcl
         {
           // sort through all points, assigning them to distributions:
           NormalDist* n;
-          size_t used_points = 0;
-          for (size_t i = 0; i < cloud->size (); i++)
+          std::size_t used_points = 0;
+          for (std::size_t i = 0; i < cloud->size (); i++)
           if ((n = normalDistForPoint (cloud->at (i))))
           {
             n->addIdx (i);
@@ -263,8 +264,7 @@ namespace pcl
           // the correct part of the grid:
           if (n)
             return n->test (transformed_pt, cos_theta, sin_theta);
-          else
-            return ValueAndDerivatives<3,double>::Zero ();
+          return ValueAndDerivatives<3,double>::Zero ();
         }
 
       protected:
@@ -276,12 +276,12 @@ namespace pcl
         {
           // this would be neater in 3d...
           Eigen::Vector2f idxf;
-          for (size_t i = 0; i < 2; i++)
+          for (std::size_t i = 0; i < 2; i++)
             idxf[i] = (p.getVector3fMap ()[i] - min_[i]) / step_[i];
           Eigen::Vector2i idxi = idxf.cast<int> ();
-          for (size_t i = 0; i < 2; i++)
+          for (std::size_t i = 0; i < 2; i++)
             if (idxi[i] >= cells_[i] || idxi[i] < 0)
-              return NULL;
+              return nullptr;
           // const cast to avoid duplicating this function in const and
           // non-const variants...
           return const_cast<NormalDist*> (&normal_distributions_.coeffRef (idxi[0], idxi[1]));
@@ -304,9 +304,9 @@ namespace pcl
     template <typename PointT> 
     class NDT2D: public boost::noncopyable
     {
-      typedef typename pcl::PointCloud<PointT> PointCloud;
-      typedef typename pcl::PointCloud<PointT>::ConstPtr PointCloudConstPtr;
-      typedef NDTSingleGrid<PointT> SingleGrid;
+      using PointCloud = pcl::PointCloud<PointT>;
+      using PointCloudConstPtr = typename PointCloud::ConstPtr;
+      using SingleGrid = NDTSingleGrid<PointT>;
 
       public:
         /** \brief
@@ -322,10 +322,10 @@ namespace pcl
         {
           Eigen::Vector2f dx (step[0]/2, 0);
           Eigen::Vector2f dy (0, step[1]/2);
-          single_grids_[0] = boost::make_shared<SingleGrid> (cloud, about,        extent, step);
-          single_grids_[1] = boost::make_shared<SingleGrid> (cloud, about +dx,    extent, step);
-          single_grids_[2] = boost::make_shared<SingleGrid> (cloud, about +dy,    extent, step);
-          single_grids_[3] = boost::make_shared<SingleGrid> (cloud, about +dx+dy, extent, step);
+          single_grids_[0].reset(new SingleGrid (cloud, about,        extent, step));
+          single_grids_[1].reset(new SingleGrid (cloud, about +dx,    extent, step));
+          single_grids_[2].reset(new SingleGrid (cloud, about +dy,    extent, step));
+          single_grids_[3].reset(new SingleGrid (cloud, about +dx+dy, extent, step));
         }
         
         /** \brief Return the 'score' (denormalised likelihood) and derivatives of score of the point p given this distribution.
@@ -337,13 +337,13 @@ namespace pcl
         test (const PointT& transformed_pt, const double& cos_theta, const double& sin_theta) const
         {
           ValueAndDerivatives<3,double> r = ValueAndDerivatives<3,double>::Zero ();
-          for (size_t i = 0; i < 4; i++)
-              r += single_grids_[i]->test (transformed_pt, cos_theta, sin_theta);
+          for (const auto &single_grid : single_grids_)
+              r += single_grid->test (transformed_pt, cos_theta, sin_theta);
           return r;
         }
 
       protected:
-        boost::shared_ptr<SingleGrid> single_grids_[4];
+        std::shared_ptr<SingleGrid> single_grids_[4];
     };
 
   } // namespace ndt2d
@@ -357,8 +357,8 @@ namespace Eigen
    */
   template<typename PointT> struct NumTraits<pcl::ndt2d::NormalDist<PointT> >
   {
-    typedef double Real;
-    typedef double Literal;
+    using Real = double;
+    using Literal = double;
     static Real dummy_precision () { return 1.0; }
     enum {
       IsComplex = 0,
@@ -414,7 +414,7 @@ pcl::NormalDistributionsTransform2D<PointSource, PointTarget>::computeTransforma
     previous_transformation_ = transformation;    
 
     ndt2d::ValueAndDerivatives<3, double> score = ndt2d::ValueAndDerivatives<3, double>::Zero ();
-    for (size_t i = 0; i < intm_cloud.size (); i++)
+    for (std::size_t i = 0; i < intm_cloud.size (); i++)
       score += target_ndt.test (intm_cloud[i], cos_theta, sin_theta);
     
     PCL_DEBUG ("[pcl::NormalDistributionsTransform2D::computeTransformation] NDT score %f (x=%f,y=%f,r=%f)\n",
@@ -470,10 +470,10 @@ pcl::NormalDistributionsTransform2D<PointSource, PointTarget>::computeTransforma
 
     nr_iterations_++;
     
-    if (update_visualizer_ != 0)
+    if (update_visualizer_)
       update_visualizer_ (output, *indices_, *target_, *indices_);
 
-    //std::cout << "eps=" << fabs ((transformation - previous_transformation_).sum ()) << std::endl;
+    //std::cout << "eps=" << std::abs ((transformation - previous_transformation_).sum ()) << std::endl;
 
     Eigen::Matrix4f transformation_delta = transformation.inverse() * previous_transformation_;
     double cos_angle = 0.5 * (transformation_delta.coeff (0, 0) + transformation_delta.coeff (1, 1) + transformation_delta.coeff (2, 2) - 1);

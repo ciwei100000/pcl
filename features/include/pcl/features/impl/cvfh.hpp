@@ -98,61 +98,54 @@ pcl::CVFHEstimation<PointInT, PointNT, PointOutT>::extractEuclideanClustersSmoot
   std::vector<int> nn_indices;
   std::vector<float> nn_distances;
   // Process all points in the indices vector
-  for (int i = 0; i < static_cast<int> (cloud.points.size ()); ++i)
+  for (std::size_t i = 0; i < cloud.points.size (); ++i)
   {
     if (processed[i])
       continue;
-
-    std::vector<unsigned int> seed_queue;
-    int sq_idx = 0;
-    seed_queue.push_back (i);
-
     processed[i] = true;
 
-    while (sq_idx < static_cast<int> (seed_queue.size ()))
+    pcl::PointIndices r;
+    r.header = cloud.header;
+    auto& seed_queue = r.indices;
+
+    seed_queue.push_back (i);
+
+    // loop has an emplace_back, making it difficult to use modern loops
+    for (std::size_t idx = 0; idx != seed_queue.size (); ++idx)
     {
-      // Search for sq_idx
-      if (!tree->radiusSearch (seed_queue[sq_idx], tolerance, nn_indices, nn_distances))
+      // Search for seed_queue[index]
+      if (!tree->radiusSearch (seed_queue[idx], tolerance, nn_indices, nn_distances))
       {
-        sq_idx++;
         continue;
       }
 
-      for (size_t j = 1; j < nn_indices.size (); ++j) // nn_indices[0] should be sq_idx
+      // skip index 0, since nn_indices[0] == idx, worth it?
+      for (std::size_t j = 1; j < nn_indices.size (); ++j)
       {
         if (processed[nn_indices[j]]) // Has this point been processed before ?
           continue;
 
         //processed[nn_indices[j]] = true;
         // [-1;1]
+        const double dot_p = normals.points[seed_queue[idx]].getNormalVector3fMap().dot(
+                        normals.points[nn_indices[j]].getNormalVector3fMap());
 
-        double dot_p = normals.points[seed_queue[sq_idx]].normal[0] * normals.points[nn_indices[j]].normal[0]
-                     + normals.points[seed_queue[sq_idx]].normal[1] * normals.points[nn_indices[j]].normal[1]
-                     + normals.points[seed_queue[sq_idx]].normal[2] * normals.points[nn_indices[j]].normal[2];
-
-        if (fabs (acos (dot_p)) < eps_angle)
+        if (std::acos (dot_p) < eps_angle)
         {
           processed[nn_indices[j]] = true;
-          seed_queue.push_back (nn_indices[j]);
+          seed_queue.emplace_back (nn_indices[j]);
         }
       }
-
-      sq_idx++;
     }
 
     // If this queue is satisfactory, add to the clusters
     if (seed_queue.size () >= min_pts_per_cluster && seed_queue.size () <= max_pts_per_cluster)
     {
-      pcl::PointIndices r;
-      r.indices.resize (seed_queue.size ());
-      for (size_t j = 0; j < seed_queue.size (); ++j)
-        r.indices[j] = seed_queue[j];
-
       std::sort (r.indices.begin (), r.indices.end ());
       r.indices.erase (std::unique (r.indices.begin (), r.indices.end ()), r.indices.end ());
 
-      r.header = cloud.header;
-      clusters.push_back (r); // We could avoid a copy by working directly in the vector
+      // Might be better to work directly in the cluster somehow
+      clusters.emplace_back (std::move(r)); // Trying to avoid a copy by moving
     }
   }
 }
@@ -169,19 +162,19 @@ pcl::CVFHEstimation<PointInT, PointNT, PointOutT>::filterNormalsWithHighCurvatur
   indices_out.resize (cloud.points.size ());
   indices_in.resize (cloud.points.size ());
 
-  size_t in, out;
+  std::size_t in, out;
   in = out = 0;
 
-  for (int i = 0; i < static_cast<int> (indices_to_use.size ()); i++)
+  for (const int &index : indices_to_use)
   {
-    if (cloud.points[indices_to_use[i]].curvature > threshold)
+    if (cloud.points[index].curvature > threshold)
     {
-      indices_out[out] = indices_to_use[i];
+      indices_out[out] = index;
       out++;
     }
     else
     {
-      indices_in[in] = indices_to_use[i];
+      indices_in[in] = index;
       in++;
     }
   }
@@ -218,11 +211,11 @@ pcl::CVFHEstimation<PointInT, PointNT, PointOutT>::computeFeature (PointCloudOut
   filterNormalsWithHighCurvature (*normals_, *indices_, indices_out, indices_in, curv_threshold_);
 
   pcl::PointCloud<pcl::PointNormal>::Ptr normals_filtered_cloud (new pcl::PointCloud<pcl::PointNormal> ());
-  normals_filtered_cloud->width = static_cast<uint32_t> (indices_in.size ());
+  normals_filtered_cloud->width = static_cast<std::uint32_t> (indices_in.size ());
   normals_filtered_cloud->height = 1;
   normals_filtered_cloud->points.resize (normals_filtered_cloud->width);
 
-  for (size_t i = 0; i < indices_in.size (); ++i)
+  for (std::size_t i = 0; i < indices_in.size (); ++i)
   {
     normals_filtered_cloud->points[i].x = surface_->points[indices_in[i]].x;
     normals_filtered_cloud->points[i].y = surface_->points[indices_in[i]].y;
@@ -270,22 +263,22 @@ pcl::CVFHEstimation<PointInT, PointNT, PointOutT>::computeFeature (PointCloudOut
   output.height = 1;
 
   // ---[ Step 1b : check if any dominant cluster was found
-  if (clusters.size () > 0)
+  if (!clusters.empty ())
   { // ---[ Step 1b.1 : If yes, compute CVFH using the cluster information
 
-    for (size_t i = 0; i < clusters.size (); ++i) //for each cluster
+    for (const auto &cluster : clusters) //for each cluster
     {
       Eigen::Vector4f avg_normal = Eigen::Vector4f::Zero ();
       Eigen::Vector4f avg_centroid = Eigen::Vector4f::Zero ();
 
-      for (size_t j = 0; j < clusters[i].indices.size (); j++)
+      for (const auto &index : cluster.indices)
       {
-        avg_normal += normals_filtered_cloud->points[clusters[i].indices[j]].getNormalVector4fMap ();
-        avg_centroid += normals_filtered_cloud->points[clusters[i].indices[j]].getVector4fMap ();
+        avg_normal += normals_filtered_cloud->points[index].getNormalVector4fMap ();
+        avg_centroid += normals_filtered_cloud->points[index].getVector4fMap ();
       }
 
-      avg_normal /= static_cast<float> (clusters[i].indices.size ());
-      avg_centroid /= static_cast<float> (clusters[i].indices.size ());
+      avg_normal /= static_cast<float> (cluster.indices.size ());
+      avg_centroid /= static_cast<float> (cluster.indices.size ());
 
       Eigen::Vector4f centroid_test;
       pcl::compute3DCentroid (*normals_filtered_cloud, centroid_test);
@@ -301,9 +294,9 @@ pcl::CVFHEstimation<PointInT, PointNT, PointOutT>::computeFeature (PointCloudOut
 
     //compute modified VFH for all dominant clusters and add them to the list!
     output.points.resize (dominant_normals_.size ());
-    output.width = static_cast<uint32_t> (dominant_normals_.size ());
+    output.width = static_cast<std::uint32_t> (dominant_normals_.size ());
 
-    for (size_t i = 0; i < dominant_normals_.size (); ++i)
+    for (std::size_t i = 0; i < dominant_normals_.size (); ++i)
     {
       //configure VFH computation for CVFH
       vfh.setNormalToUse (dominant_normals_[i]);

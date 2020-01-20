@@ -1,3 +1,5 @@
+#include <thread>
+
 #include <pcl/features/ppf.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/filters/voxel_grid.h>
@@ -13,13 +15,14 @@
 
 using namespace pcl;
 using namespace std;
+using namespace std::chrono_literals;
 
 const Eigen::Vector4f subsampling_leaf_size (0.02f, 0.02f, 0.02f, 0.0f);
 const float normal_estimation_search_radius = 0.05f;
 
 
 PointCloud<PointNormal>::Ptr
-subsampleAndCalculateNormals (PointCloud<PointXYZ>::Ptr cloud)
+subsampleAndCalculateNormals (const PointCloud<PointXYZ>::Ptr& cloud)
 {
   PointCloud<PointXYZ>::Ptr cloud_subsampled (new PointCloud<PointXYZ> ());
   VoxelGrid<PointXYZ> subsampling_filter;
@@ -60,7 +63,7 @@ main (int argc, char** argv)
   PCL_INFO ("Scene read: %s\n", argv[2]);
 
   PCL_INFO ("Reading models ...\n");
-  vector<PointCloud<PointXYZ>::Ptr > cloud_models;
+  std::vector<PointCloud<PointXYZ>::Ptr > cloud_models;
   ifstream pcd_file_list (argv[1]);
   while (!pcd_file_list.eof())
   {
@@ -96,13 +99,13 @@ main (int argc, char** argv)
   }
 
   PointCloud<PointNormal>::Ptr cloud_scene_input = subsampleAndCalculateNormals (cloud_scene);
-  vector<PointCloud<PointNormal>::Ptr > cloud_models_with_normals;
+  std::vector<PointCloud<PointNormal>::Ptr > cloud_models_with_normals;
 
   PCL_INFO ("Training models ...\n");
-  vector<PPFHashMapSearch::Ptr> hashmap_search_vector;
-  for (size_t model_i = 0; model_i < cloud_models.size (); ++model_i)
+  std::vector<PPFHashMapSearch::Ptr> hashmap_search_vector;
+  for (const auto &cloud_model : cloud_models)
   {
-    PointCloud<PointNormal>::Ptr cloud_model_input = subsampleAndCalculateNormals (cloud_models[model_i]);
+    PointCloud<PointNormal>::Ptr cloud_model_input = subsampleAndCalculateNormals (cloud_model);
     cloud_models_with_normals.push_back (cloud_model_input);
 
     PointCloud<PPFSignature>::Ptr cloud_model_ppf (new PointCloud<PPFSignature> ());
@@ -123,7 +126,7 @@ main (int argc, char** argv)
   viewer.addPointCloud (cloud_scene);
   viewer.spinOnce (10);
   PCL_INFO ("Registering models to scene ...\n");
-  for (size_t model_i = 0; model_i < cloud_models.size (); ++model_i)
+  for (std::size_t model_i = 0; model_i < cloud_models.size (); ++model_i)
   {
 
     PPFRegistration<PointNormal, PointNormal> ppf_registration;
@@ -139,8 +142,8 @@ main (int argc, char** argv)
     ppf_registration.align (cloud_output_subsampled);
 
     PointCloud<PointXYZ>::Ptr cloud_output_subsampled_xyz (new PointCloud<PointXYZ> ());
-    for (size_t i = 0; i < cloud_output_subsampled.points.size (); ++i)
-      cloud_output_subsampled_xyz->points.push_back ( PointXYZ (cloud_output_subsampled.points[i].x, cloud_output_subsampled.points[i].y, cloud_output_subsampled.points[i].z));
+    for (const auto &point : cloud_output_subsampled.points)
+      cloud_output_subsampled_xyz->points.emplace_back(point.x, point.y, point.z);
 
 
     Eigen::Matrix4f mat = ppf_registration.getFinalTransformation ();
@@ -166,7 +169,7 @@ main (int argc, char** argv)
   while (!viewer.wasStopped ())
   {
     viewer.spinOnce (100);
-    boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+    std::this_thread::sleep_for(100ms);
   }
 
   return 0;

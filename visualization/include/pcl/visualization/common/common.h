@@ -34,8 +34,8 @@
  * $Id$
  *
  */
-#ifndef PCL_PCL_VISUALIZER_COMMON_H_
-#define PCL_PCL_VISUALIZER_COMMON_H_
+
+#pragma once
 
 #if defined __GNUC__
 #pragma GCC system_header
@@ -46,6 +46,9 @@
 #include <vtkMatrix4x4.h>
 #include <vtkSmartPointer.h>
 #include <vtkLookupTable.h>
+
+class vtkCamera;
+class vtkRenderWindow;
 
 namespace pcl
 {
@@ -148,6 +151,18 @@ namespace pcl
     class PCL_EXPORTS Camera
     {
       public:
+        /** Construct a camera with meaningful default values.
+          * The camera is positioned at origin, looks along z-axis and has up-vector along y-axis. Window position and
+          * size are initialized with (0, 0) and (1, 1) respectively. */
+        Camera ();
+
+        /** Construct a camera by copying parameters from a VTK camera.
+          * Window position and size are initialized with (0, 0) and (1, 1) respectively.*/
+        Camera (vtkCamera& camera);
+
+        /** Construct a camera by copying parameters from a VTK camera and a VTK render window. */
+        Camera (vtkCamera& camera, vtkRenderWindow& window);
+
         /** \brief Focal point or lookAt.
           * \note The view direction can be obtained by (focal-pos).normalized ()
           */
@@ -213,5 +228,3 @@ namespace pcl
 }
 
 #include <pcl/visualization/common/impl/common.hpp>
-
-#endif

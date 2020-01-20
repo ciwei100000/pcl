@@ -112,7 +112,7 @@ pcl::filters::GaussianKernel<PointInT, PointOutT>::operator() (const std::vector
   {
     if (*dist_it <= threshold_ && isFinite ((*input_) [*idx_it]))
     {
-      float weight = expf (-0.5f * (*dist_it) / sigma_sqr_);
+      float weight = std::exp (-0.5f * (*dist_it) / sigma_sqr_);
       result += weight * (*input_) [*idx_it];
       total_weight += weight;
     }
@@ -141,7 +141,7 @@ pcl::filters::GaussianKernelRGB<PointInT, PointOutT>::operator() (const std::vec
   {
     if (*dist_it <= threshold_ && isFinite ((*input_) [*idx_it]))
     {
-      float weight = expf (-0.5f * (*dist_it) / sigma_sqr_);
+      float weight = std::exp (-0.5f * (*dist_it) / sigma_sqr_);
       result.x += weight * (*input_) [*idx_it].x;
       result.y += weight * (*input_) [*idx_it].y;
       result.z += weight * (*input_) [*idx_it].z;
@@ -156,9 +156,9 @@ pcl::filters::GaussianKernelRGB<PointInT, PointOutT>::operator() (const std::vec
     total_weight = 1.f/total_weight;
     r*= total_weight; g*= total_weight; b*= total_weight;
     result.x*= total_weight; result.y*= total_weight; result.z*= total_weight;
-    result.r = static_cast<pcl::uint8_t> (r);
-    result.g = static_cast<pcl::uint8_t> (g);
-    result.b = static_cast<pcl::uint8_t> (b);
+    result.r = static_cast<std::uint8_t> (r);
+    result.g = static_cast<std::uint8_t> (g);
+    result.b = static_cast<std::uint8_t> (b);
   }
   else
     makeInfinite (result);
@@ -240,7 +240,7 @@ pcl::filters::Convolution3D<PointInT, PointOutT, KernelT>::convolve (PointCloudO
 #ifdef _OPENMP
 #pragma omp parallel for shared (output) private (nn_indices, nn_distances) num_threads (threads_)
 #endif
-  for (int64_t point_idx = 0; point_idx < static_cast<int64_t> (surface_->size ()); ++point_idx)
+  for (std::int64_t point_idx = 0; point_idx < static_cast<std::int64_t> (surface_->size ()); ++point_idx)
   {
     const PointInT& point_in = surface_->points [point_idx];
     PointOutT& point_out = output [point_idx];

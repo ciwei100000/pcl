@@ -43,6 +43,9 @@
 #include <pcl/console/parse.h>
 #include <pcl/common/time.h>
 
+#include <mutex>
+
+
 #define FPS_CALC(_WHAT_) \
 do \
 { \
@@ -63,9 +66,9 @@ template <typename PointType>
 class OpenNIVoxelGrid
 {
   public:
-    typedef pcl::PointCloud<PointType> Cloud;
-    typedef typename Cloud::Ptr CloudPtr;
-    typedef typename Cloud::ConstPtr CloudConstPtr;
+    using Cloud = pcl::PointCloud<PointType>;
+    using CloudPtr = typename Cloud::Ptr;
+    using CloudConstPtr = typename Cloud::ConstPtr;
 
     OpenNIVoxelGrid (const std::string& device_id = "", 
                      const std::string& = "z", float = 0, float = 5.0,
@@ -88,7 +91,7 @@ class OpenNIVoxelGrid
     set (const CloudConstPtr& cloud)
     {
       //lock while we set our cloud;
-      boost::mutex::scoped_lock lock (mtx_);
+      std::lock_guard<std::mutex> lock (mtx_);
       cloud_  = cloud;
     }
 
@@ -96,7 +99,7 @@ class OpenNIVoxelGrid
     get ()
     {
       //lock while we swap our cloud and reset it.
-      boost::mutex::scoped_lock lock (mtx_);
+      std::lock_guard<std::mutex> lock (mtx_);
       CloudPtr temp_cloud (new Cloud);
      
       grid_.setInputCloud (cloud_);
@@ -108,12 +111,12 @@ class OpenNIVoxelGrid
     void
     run ()
     {
-      pcl::Grabber* interface = new pcl::OpenNIGrabber (device_id_);
+      pcl::OpenNIGrabber interface {device_id_};
 
-      boost::function<void (const CloudConstPtr&)> f = boost::bind (&OpenNIVoxelGrid::cloud_cb_, this, _1);
-      boost::signals2::connection c = interface->registerCallback (f);
+      std::function<void (const CloudConstPtr&)> f = [this] (const CloudConstPtr& cloud) { cloud_cb_ (cloud); };
+      boost::signals2::connection c = interface.registerCallback (f);
       
-      interface->start ();
+      interface.start ();
       
       while (!viewer.wasStopped ())
       {
@@ -125,13 +128,13 @@ class OpenNIVoxelGrid
         }
       }
 
-      interface->stop ();
+      interface.stop ();
     }
 
     pcl::VoxelGrid<PointType> grid_;
     pcl::visualization::CloudViewer viewer;
     std::string device_id_;
-    boost::mutex mtx_;
+    std::mutex mtx_;
     CloudConstPtr cloud_;
 };
 
@@ -149,15 +152,15 @@ usage (char ** argv)
   {
     for (unsigned deviceIdx = 0; deviceIdx < driver.getNumberDevices (); ++deviceIdx)
     {
-      cout << "Device: " << deviceIdx + 1 << ", vendor: " << driver.getVendorName (deviceIdx) << ", product: " << driver.getProductName (deviceIdx)
-              << ", connected: " << driver.getBus (deviceIdx) << " @ " << driver.getAddress (deviceIdx) << ", serial number: \'" << driver.getSerialNumber (deviceIdx) << "\'" << endl;
-      cout << "device_id may be #1, #2, ... for the first second etc device in the list or" << endl
-           << "                 bus@address for the device connected to a specific usb-bus / address combination (works only in Linux) or" << endl
-           << "                 <serial-number> (only in Linux and for devices which provide serial numbers)"  << endl;
+      std::cout << "Device: " << deviceIdx + 1 << ", vendor: " << driver.getVendorName (deviceIdx) << ", product: " << driver.getProductName (deviceIdx)
+              << ", connected: " << driver.getBus (deviceIdx) << " @ " << driver.getAddress (deviceIdx) << ", serial number: \'" << driver.getSerialNumber (deviceIdx) << "\'" << std::endl;
+      std::cout << "device_id may be #1, #2, ... for the first second etc device in the list or" << std::endl
+           << "                 bus@address for the device connected to a specific usb-bus / address combination (works only in Linux) or" << std::endl
+           << "                 <serial-number> (only in Linux and for devices which provide serial numbers)"  << std::endl;
     }
   }
   else
-    cout << "No devices connected." << endl;
+    std::cout << "No devices connected." << std::endl;
 }
 
 int 

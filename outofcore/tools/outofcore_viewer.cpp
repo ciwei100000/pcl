@@ -81,16 +81,16 @@ using pcl::console::print_error;
 using pcl::console::print_warn;
 using pcl::console::print_info;
 
-//typedef PCLPointCloud2 PointT;
-typedef PointXYZ PointT;
+//using PointT = PCLPointCloud2;
+using PointT = PointXYZ;
 
-typedef OutofcoreOctreeBase<OutofcoreOctreeDiskContainer<PointT>, PointT> octree_disk;
-typedef OutofcoreOctreeBaseNode<OutofcoreOctreeDiskContainer<PointT>, PointT> octree_disk_node;
+using octree_disk = OutofcoreOctreeBase<OutofcoreOctreeDiskContainer<PointT>, PointT>;
+using octree_disk_node = OutofcoreOctreeBaseNode<OutofcoreOctreeDiskContainer<PointT>, PointT>;
 
-//typedef octree_base<OutofcoreOctreeDiskContainer<PointT> , PointT> octree_disk;
-typedef boost::shared_ptr<octree_disk> OctreeDiskPtr;
-//typedef octree_base_node<octree_disk_container<PointT> , PointT> octree_disk_node;
-typedef Eigen::aligned_allocator<PointT> AlignedPointT;
+//using octree_disk = octree_base<OutofcoreOctreeDiskContainer<PointT> , PointT>;
+using OctreeDiskPtr = octree_disk::Ptr;
+//using octree_disk_node = octree_base_node<octree_disk_container<PointT> , PointT>;
+using AlignedPointT = Eigen::aligned_allocator<PointT>;
 
 // VTK
 #include <vtkActor.h>
@@ -131,7 +131,6 @@ typedef Eigen::aligned_allocator<PointT> AlignedPointT;
 // Boost
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/thread.hpp>
 
 // Globals
 vtkSmartPointer<vtkRenderWindow> window;
@@ -150,7 +149,7 @@ public:
   }
 
   void
-  Execute (vtkObject *caller, unsigned long vtkNotUsed(eventId), void* vtkNotUsed(callData))
+  Execute (vtkObject *caller, unsigned long vtkNotUsed(eventId), void* vtkNotUsed(callData)) override
   {
     vtkRenderWindowInteractor *interactor = vtkRenderWindowInteractor::SafeDownCast (caller);
     vtkRenderer *renderer = interactor->FindPokedRenderer (interactor->GetEventPosition ()[0],
@@ -159,7 +158,7 @@ public:
     std::string key (interactor->GetKeySym ());
     bool shift_down = interactor->GetShiftKey();
 
-    cout << "Key Pressed: " << key << endl;
+    std::cout << "Key Pressed: " << key << std::endl;
 
     Scene *scene = Scene::instance ();
     OutofcoreCloud *cloud = static_cast<OutofcoreCloud*> (scene->getObjectByName ("my_octree"));
@@ -226,7 +225,7 @@ renderEndCallback(vtkObject* vtkNotUsed(caller), unsigned long int vtkNotUsed(ev
 int
 outofcoreViewer (boost::filesystem::path tree_root, int depth, bool display_octree=true, unsigned int gpu_cache_size=512)
 {
-  cout << boost::filesystem::absolute (tree_root) << endl;
+  std::cout << boost::filesystem::absolute (tree_root) << std::endl;
 
   // Create top level scene
   Scene *scene = Scene::instance ();

@@ -48,7 +48,6 @@ pcl::filters::Convolution<PointIn, PointOut>::Convolution ()
   : borders_policy_ (BORDERS_POLICY_IGNORE)
   , distance_threshold_ (std::numeric_limits<float>::infinity ())
   , input_ ()
-  , kernel_ ()
   , half_width_ ()
   , kernel_width_ ()
   , threads_ (1)
@@ -93,8 +92,8 @@ pcl::filters::Convolution<PointIn, PointOut>::convolveRows (PointCloudOut& outpu
     initCompute (output);
     switch (borders_policy_)
     {
-      case BORDERS_POLICY_MIRROR : convolve_rows_mirror (output);
-      case BORDERS_POLICY_DUPLICATE : convolve_rows_duplicate (output);
+      case BORDERS_POLICY_MIRROR : convolve_rows_mirror (output); break;
+      case BORDERS_POLICY_DUPLICATE : convolve_rows_duplicate (output); break;
       case BORDERS_POLICY_IGNORE : convolve_rows (output);
     }
   }
@@ -113,8 +112,8 @@ pcl::filters::Convolution<PointIn, PointOut>::convolveCols (PointCloudOut& outpu
     initCompute (output);
     switch (borders_policy_)
     {
-      case BORDERS_POLICY_MIRROR : convolve_cols_mirror (output);
-      case BORDERS_POLICY_DUPLICATE : convolve_cols_duplicate (output);
+      case BORDERS_POLICY_MIRROR : convolve_cols_mirror (output); break;
+      case BORDERS_POLICY_DUPLICATE : convolve_cols_duplicate (output); break;
       case BORDERS_POLICY_IGNORE : convolve_cols (output);
     }
   }
@@ -253,9 +252,9 @@ namespace pcl
         g += kernel_[k] * static_cast<float> ((*input_) (l,j).g);
         b += kernel_[k] * static_cast<float> ((*input_) (l,j).b);
       }
-      result.r = static_cast<pcl::uint8_t> (r);
-      result.g = static_cast<pcl::uint8_t> (g);
-      result.b = static_cast<pcl::uint8_t> (b);
+      result.r = static_cast<std::uint8_t> (r);
+      result.g = static_cast<std::uint8_t> (g);
+      result.b = static_cast<std::uint8_t> (b);
       return (result);
     }
 
@@ -273,9 +272,9 @@ namespace pcl
         g += kernel_[k] * static_cast<float> ((*input_) (i,l).g);
         b += kernel_[k] * static_cast<float> ((*input_) (i,l).b);
       }
-      result.r = static_cast<pcl::uint8_t> (r);
-      result.g = static_cast<pcl::uint8_t> (g);
-      result.b = static_cast<pcl::uint8_t> (b);
+      result.r = static_cast<std::uint8_t> (r);
+      result.g = static_cast<std::uint8_t> (g);
+      result.b = static_cast<std::uint8_t> (b);
       return (result);
     }
 
@@ -306,9 +305,9 @@ namespace pcl
         weight = 1.f/weight;
         r*= weight; g*= weight; b*= weight;
         result.x*= weight; result.y*= weight; result.z*= weight;
-        result.r = static_cast<pcl::uint8_t> (r);
-        result.g = static_cast<pcl::uint8_t> (g);
-        result.b = static_cast<pcl::uint8_t> (b);
+        result.r = static_cast<std::uint8_t> (r);
+        result.g = static_cast<std::uint8_t> (g);
+        result.b = static_cast<std::uint8_t> (b);
       }
       return (result);
     }
@@ -339,9 +338,9 @@ namespace pcl
         weight = 1.f/weight;
         r*= weight; g*= weight; b*= weight;
         result.x*= weight; result.y*= weight; result.z*= weight;
-        result.r = static_cast<pcl::uint8_t> (r);
-        result.g = static_cast<pcl::uint8_t> (g);
-        result.b = static_cast<pcl::uint8_t> (b);
+        result.r = static_cast<std::uint8_t> (r);
+        result.g = static_cast<std::uint8_t> (g);
+        result.b = static_cast<std::uint8_t> (b);
       }
       return (result);
     }
@@ -358,9 +357,9 @@ namespace pcl
         g += kernel_[k] * static_cast<float> ((*input_) (l,j).g);
         b += kernel_[k] * static_cast<float> ((*input_) (l,j).b);
       }
-      result.r = static_cast<pcl::uint8_t> (r);
-      result.g = static_cast<pcl::uint8_t> (g);
-      result.b = static_cast<pcl::uint8_t> (b);
+      result.r = static_cast<std::uint8_t> (r);
+      result.g = static_cast<std::uint8_t> (g);
+      result.b = static_cast<std::uint8_t> (b);
       return (result);
     }
 
@@ -375,9 +374,9 @@ namespace pcl
         g += kernel_[k] * static_cast<float> ((*input_) (i,l).g);
         b += kernel_[k] * static_cast<float> ((*input_) (i,l).b);
       }
-      result.r = static_cast<pcl::uint8_t> (r);
-      result.g = static_cast<pcl::uint8_t> (g);
-      result.b = static_cast<pcl::uint8_t> (b);
+      result.r = static_cast<std::uint8_t> (r);
+      result.g = static_cast<std::uint8_t> (g);
+      result.b = static_cast<std::uint8_t> (b);
       return (result);
     }
 

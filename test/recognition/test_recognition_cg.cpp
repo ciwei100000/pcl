@@ -47,18 +47,16 @@
 #include <pcl/filters/uniform_sampling.h>
 #include <pcl/recognition/cg/hough_3d.h>
 #include <pcl/recognition/cg/geometric_consistency.h>
-#include <pcl/kdtree/kdtree_flann.h>
-#include <pcl/kdtree/impl/kdtree_flann.hpp>
 #include <pcl/common/eigen.h>
 
 using namespace std;
 using namespace pcl;
 using namespace pcl::io;
 
-typedef PointXYZ PointType;
-typedef Normal NormalType;
-typedef ReferenceFrame RFType;
-typedef SHOT352 DescriptorType;
+using PointType = PointXYZ;
+using NormalType = Normal;
+using RFType = ReferenceFrame;
+using DescriptorType = SHOT352;
 
 PointCloud<PointType>::Ptr model_ (new PointCloud<PointType> ());
 PointCloud<PointType>::Ptr model_downsampled_ (new PointCloud<PointType> ());
@@ -82,12 +80,12 @@ computeRmsE (const PointCloud<PointType>::ConstPtr &model, const PointCloud<Poin
   double sqr_norm_sum = 0;
   int found_points = 0;
 
-  vector<int> neigh_indices (1);
-  vector<float> neigh_sqr_dists (1);
-  for (size_t i = 0; i < transformed_model.size (); ++i)
+  std::vector<int> neigh_indices (1);
+  std::vector<float> neigh_sqr_dists (1);
+  for (const auto &model : transformed_model)
   {
 
-    int found_neighs = tree.nearestKSearch (transformed_model.at (i), 1, neigh_indices, neigh_sqr_dists);
+    int found_neighs = tree.nearestKSearch (model, 1, neigh_indices, neigh_sqr_dists);
     if(found_neighs == 1)
     {
       ++found_points;
@@ -98,7 +96,7 @@ computeRmsE (const PointCloud<PointType>::ConstPtr &model, const PointCloud<Poin
   if (found_points > 0)
     return sqrt (sqr_norm_sum / double (transformed_model.size ()));
 
-  return numeric_limits<double>::max ();
+  return std::numeric_limits<double>::max ();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +118,7 @@ TEST (PCL, Hough3DGrouping)
   rf_est.setSearchSurface (scene_);
   rf_est.compute (*scene_rf);
 
-  vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> > rototranslations;
+  std::vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> > rototranslations;
 
   //Actual CG
   Hough3DGrouping<PointType, PointType, RFType, RFType> clusterer;
@@ -138,15 +136,15 @@ TEST (PCL, Hough3DGrouping)
 
   // Pick transformation with lowest error
   double min_rms_e = std::numeric_limits<double>::max ();
-  for (size_t i = 0; i < rototranslations.size (); ++i)
-    min_rms_e = std::min (min_rms_e, computeRmsE (model_, scene_, rototranslations[i]));
+  for (const auto &rototranslation : rototranslations)
+    min_rms_e = std::min (min_rms_e, computeRmsE (model_, scene_, rototranslation));
   EXPECT_LT (min_rms_e, 1E-2);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 TEST (PCL, GeometricConsistencyGrouping)
 {
-  vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> > rototranslations;
+  std::vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> > rototranslations;
 
   GeometricConsistencyGrouping<PointType, PointType> clusterer;
   clusterer.setInputCloud (model_downsampled_);
@@ -168,19 +166,19 @@ main (int argc, char** argv)
 {
   if (argc < 3)
   {
-    cerr << "No test file given. Please download `milk.pcd` and `milk_cartoon_all_small_clorox.pcd` and pass their paths to the test." << endl;
+    std::cerr << "No test file given. Please download `milk.pcd` and `milk_cartoon_all_small_clorox.pcd` and pass their paths to the test." << std::endl;
     return (-1);
   }
 
   if (loadPCDFile (argv[1], *model_) < 0)
   {
-    cerr << "Failed to read test file. Please download `milk.pcd` and pass its path to the test." << endl;
+    std::cerr << "Failed to read test file. Please download `milk.pcd` and pass its path to the test." << std::endl;
     return (-1);
   }
 
   if (loadPCDFile (argv[2], *scene_) < 0)
   {
-    cerr << "Failed to read test file. Please download `milk_cartoon_all_small_clorox.pcd` and pass its path to the test." << endl;
+    std::cerr << "Failed to read test file. Please download `milk_cartoon_all_small_clorox.pcd` and pass its path to the test." << std::endl;
     return (-1);
   }
 
@@ -220,12 +218,12 @@ main (int argc, char** argv)
   KdTreeFLANN<DescriptorType> match_search;
   match_search.setInputCloud (model_descriptors_);
 
-  for (size_t i = 0; i < scene_descriptors_->size (); ++i)
+  for (std::size_t i = 0; i < scene_descriptors_->size (); ++i)
   {
-    if ( pcl_isfinite( scene_descriptors_->at (i).descriptor[0] ) )
+    if ( std::isfinite( scene_descriptors_->at (i).descriptor[0] ) )
     {
-      vector<int> neigh_indices (1);
-      vector<float> neigh_sqr_dists (1);
+      std::vector<int> neigh_indices (1);
+      std::vector<float> neigh_sqr_dists (1);
       int found_neighs = match_search.nearestKSearch (scene_descriptors_->at (i), 1, neigh_indices, neigh_sqr_dists);
       if(found_neighs == 1 && neigh_sqr_dists[0] < 0.25f)
       {

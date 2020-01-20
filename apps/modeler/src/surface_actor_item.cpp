@@ -47,8 +47,8 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 pcl::modeler::SurfaceActorItem::SurfaceActorItem(QTreeWidgetItem* parent,
-                                               const boost::shared_ptr<CloudMesh>& cloud_mesh,
-                                               const vtkSmartPointer<vtkRenderWindow>& render_window)
+                                                 const CloudMesh::Ptr& cloud_mesh,
+                                                 const vtkSmartPointer<vtkRenderWindow>& render_window)
   :ChannelActorItem(parent, cloud_mesh, render_window, vtkSmartPointer<vtkLODActor>::New(), "Surface")
 {
 }
@@ -71,11 +71,7 @@ pcl::modeler::SurfaceActorItem::initImpl()
   poly_data_->GetPointData ()->SetScalars (scalars);
 
   vtkSmartPointer<vtkDataSetMapper> mapper = vtkSmartPointer<vtkDataSetMapper>::New();
-#if VTK_MAJOR_VERSION < 6
-  mapper->SetInput(poly_data_);
-#else
   mapper->SetInputData (poly_data_);
-#endif
 
   double minmax[2];
   scalars->GetRange(minmax);
@@ -84,7 +80,9 @@ pcl::modeler::SurfaceActorItem::initImpl()
   mapper->SetScalarModeToUsePointData ();
   mapper->InterpolateScalarsBeforeMappingOn ();
   mapper->ScalarVisibilityOn ();
+#if VTK_RENDERING_BACKEND_OPENGL_VERSION < 2
   mapper->ImmediateModeRenderingOff ();
+#endif
 
   vtkSmartPointer<vtkLODActor> actor = vtkSmartPointer<vtkLODActor>(dynamic_cast<vtkLODActor*>(actor_.GetPointer()));
   actor->SetMapper(mapper);

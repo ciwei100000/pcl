@@ -39,7 +39,7 @@
 #include <cstring>
 #include <climits>
 #include <pcl/console/print.h>
-#include <errno.h>
+#include <cerrno>
 
 /*
  * Size of hashtable is (1 << HLOG) * sizeof (char *)
@@ -51,8 +51,8 @@
  */
 #define HLOG 13
 
-typedef unsigned int LZF_HSLOT;
-typedef unsigned int LZF_STATE[1 << (HLOG)];
+using LZF_HSLOT = unsigned int;
+using LZF_STATE = unsigned int[1 << (HLOG)];
 
 #if !(defined(__i386) || defined (__amd64))
 # define STRICT_ALIGN 1
@@ -62,9 +62,9 @@ typedef unsigned int LZF_STATE[1 << (HLOG)];
 #if !STRICT_ALIGN
 /* for unaligned accesses we need a 16 bit datatype. */
 # if USHRT_MAX == 65535
-    typedef unsigned short u16;
+    using u16 = unsigned short;
 # elif UINT_MAX == 65535
-    typedef unsigned int u16;
+    using u16 = unsigned int;
 # else
 #  undef STRICT_ALIGN
 #  define STRICT_ALIGN 1
@@ -93,22 +93,6 @@ pcl::lzfCompress (const void *const in_data, unsigned int in_len,
         unsigned char *op = static_cast<unsigned char *> (out_data);
   const unsigned char *in_end  = ip + in_len;
         unsigned char *out_end = op + out_len;
-  const unsigned char *ref;
-
-  // off requires a type wide enough to hold a general pointer difference.
-  // ISO C doesn't have that (size_t might not be enough and ptrdiff_t only
-  // works for differences within a single object). We also assume that no
-  // no bit pattern traps. Since the only platform that is both non-POSIX
-  // and fails to support both assumptions is windows 64 bit, we make a
-  // special workaround for it.
-#if defined (WIN32) && defined (_M_X64) && defined (_MSC_VER)
-  // workaround for missing POSIX compliance
-  unsigned _int64 off; 
-#else
-  unsigned long off;
-#endif
-  unsigned int hval;
-  int lit;
 
   if (!in_len || !out_len)
   {
@@ -120,17 +104,31 @@ pcl::lzfCompress (const void *const in_data, unsigned int in_len,
   memset (htab, 0, sizeof (htab));
 
   // Start run
-  lit = 0; op++;
+  int lit = 0;
+  op++;
 
-  hval = (ip[0] << 8) | ip[1];
+  unsigned int hval = (ip[0] << 8) | ip[1];
   while (ip < in_end - 2)
   {
     unsigned int *hslot;
 
     hval = (hval << 8) | ip[2];
     hslot = htab + IDX (hval);
-    ref = *hslot + (static_cast<const unsigned char*> (in_data)); 
+    const unsigned char *ref = *hslot + (static_cast<const unsigned char*> (in_data)); 
     *hslot = static_cast<unsigned int> (ip - (static_cast<const unsigned char*> (in_data)));
+
+    // off requires a type wide enough to hold a general pointer difference.
+    // ISO C doesn't have that (std::size_t might not be enough and ptrdiff_t only
+    // works for differences within a single object). We also assume that no
+    // no bit pattern traps. Since the only platform that is both non-POSIX
+    // and fails to support both assumptions is windows 64 bit, we make a
+    // special workaround for it.
+#if defined (WIN32) && defined (_M_X64) && defined (_MSC_VER)
+    // workaround for missing POSIX compliance
+    unsigned _int64 off; 
+#else
+    unsigned long off;
+#endif
 
     if (
         // The next test will actually take care of this, but this is faster if htab is initialized
@@ -306,17 +304,8 @@ pcl::lzfDecompress (const void *const in_data,  unsigned int in_len,
         errno = EINVAL;
         return (0);
       }
-      switch (ctrl)
-      {
-        case 32: *op++ = *ip++; case 31: *op++ = *ip++; case 30: *op++ = *ip++; case 29: *op++ = *ip++;
-        case 28: *op++ = *ip++; case 27: *op++ = *ip++; case 26: *op++ = *ip++; case 25: *op++ = *ip++;
-        case 24: *op++ = *ip++; case 23: *op++ = *ip++; case 22: *op++ = *ip++; case 21: *op++ = *ip++;
-        case 20: *op++ = *ip++; case 19: *op++ = *ip++; case 18: *op++ = *ip++; case 17: *op++ = *ip++;
-        case 16: *op++ = *ip++; case 15: *op++ = *ip++; case 14: *op++ = *ip++; case 13: *op++ = *ip++;
-        case 12: *op++ = *ip++; case 11: *op++ = *ip++; case 10: *op++ = *ip++; case  9: *op++ = *ip++;
-        case  8: *op++ = *ip++; case  7: *op++ = *ip++; case  6: *op++ = *ip++; case  5: *op++ = *ip++;
-        case  4: *op++ = *ip++; case  3: *op++ = *ip++; case  2: *op++ = *ip++; case  1: *op++ = *ip++;
-      }
+      for (unsigned ctrl_c = ctrl; ctrl_c; --ctrl_c)
+        *op++ = *ip++;
     }
     // Back reference
     else
@@ -355,40 +344,27 @@ pcl::lzfDecompress (const void *const in_data,  unsigned int in_len,
         return (0);
       }
 
-      switch (len)
+      if (len > 9)
       {
-        default:
+        len += 2;
+
+        if (op >= ref + len)
         {
-          len += 2;
-
-          if (op >= ref + len)
-          {
-            // Disjunct areas
-            memcpy (op, ref, len);
-            op += len;
-          }
-          else
-          {
-            // Overlapping, use byte by byte copying
-            do
-              *op++ = *ref++;
-            while (--len);
-          }
-
-          break;
+          // Disjunct areas
+          memcpy (op, ref, len);
+          op += len;
         }
-        case 9: *op++ = *ref++;
-        case 8: *op++ = *ref++;
-        case 7: *op++ = *ref++;
-        case 6: *op++ = *ref++;
-        case 5: *op++ = *ref++;
-        case 4: *op++ = *ref++;
-        case 3: *op++ = *ref++;
-        case 2: *op++ = *ref++;
-        case 1: *op++ = *ref++;
-        case 0: *op++ = *ref++; // two octets more
-                *op++ = *ref++;
+        else
+        {
+          // Overlapping, use byte by byte copying
+          do
+            *op++ = *ref++;
+          while (--len);
+        }
       }
+      else
+        for (unsigned len_c = len + 2 /* case 0 iterates twice */; len_c; --len_c)
+          *op++ = *ref++;
     }
   }
   while (ip < in_end);

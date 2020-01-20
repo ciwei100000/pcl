@@ -284,7 +284,7 @@ void pairAlign (const PointCloud::Ptr cloud_src, const PointCloud::Ptr cloud_tgt
 		//if the difference between this transformation and the previous one
 		//is smaller than the threshold, refine the process by reducing
 		//the maximal correspondence distance
-    if (fabs ((reg.getLastIncrementalTransformation () - prev).sum ()) < reg.getTransformationEpsilon ())
+    if (std::abs ((reg.getLastIncrementalTransformation () - prev).sum ()) < reg.getTransformationEpsilon ())
       reg.setMaxCorrespondenceDistance (reg.getMaxCorrespondenceDistance () - 0.001);
     
     prev = reg.getLastIncrementalTransformation ();
@@ -346,7 +346,7 @@ int main (int argc, char** argv)
 	PointCloud::Ptr result (new PointCloud), source, target;
   Eigen::Matrix4f GlobalTransform = Eigen::Matrix4f::Identity (), pairTransform;
   
-  for (size_t i = 1; i < data.size (); ++i)
+  for (std::size_t i = 1; i < data.size (); ++i)
   {
     source = data[i-1].cloud;
     target = data[i].cloud;
@@ -362,9 +362,9 @@ int main (int argc, char** argv)
     pcl::transformPointCloud (*temp, *result, GlobalTransform);
 
     //update the global transform
-    GlobalTransform = GlobalTransform * pairTransform;
+    GlobalTransform *= pairTransform;
 
-		//save aligned pair, transformed into the first cloud's frame
+    //save aligned pair, transformed into the first cloud's frame
     std::stringstream ss;
     ss << i << ".pcd";
     pcl::io::savePCDFile (ss.str (), *result, true);

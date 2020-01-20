@@ -129,8 +129,8 @@ pcl::TrajkovicKeypoint3D<PointInT, PointOutT, NormalT>::detectKeypoints (PointCl
         float d = std::min (r1, r2);
         if (d < first_threshold_) continue;
 
-        sn1 = sqrt (sn1);
-        sn2 = sqrt (sn2);
+        sn1 = std::sqrt (sn1);
+        sn2 = std::sqrt (sn2);
         float b1 = normalsDiff (right, up) * sn1;
         b1+= normalsDiff (left, down) * sn2;
         float b2 = normalsDiff (right, down) * sn2;
@@ -221,8 +221,7 @@ pcl::TrajkovicKeypoint3D<PointInT, PointOutT, NormalT>::detectKeypoints (PointCl
   }
   // Non maximas suppression
   std::vector<int> indices = *indices_;
-  std::sort (indices.begin (), indices.end (),
-             boost::bind (&TrajkovicKeypoint3D::greaterCornernessAtIndices, this, _1, _2));
+  std::sort (indices.begin (), indices.end (), [this] (int p1, int p2) { return greaterCornernessAtIndices (p1, p2); });
 
   output.clear ();
   output.reserve (input_->size ());
@@ -236,7 +235,7 @@ pcl::TrajkovicKeypoint3D<PointInT, PointOutT, NormalT>::detectKeypoints (PointCl
 #endif
   for (int i = 0; i < static_cast<int>(indices.size ()); ++i)
   {
-    int idx = indices[static_cast<size_t>(i)];
+    int idx = indices[static_cast<std::size_t>(i)];
     if ((response_->points[idx] < second_threshold_) || occupency_map[idx])
       continue;
 
@@ -262,7 +261,7 @@ pcl::TrajkovicKeypoint3D<PointInT, PointOutT, NormalT>::detectKeypoints (PointCl
   }
 
   output.height = 1;
-  output.width = static_cast<uint32_t> (output.size());
+  output.width = static_cast<std::uint32_t> (output.size());
   // we don not change the denseness
   output.is_dense = true;
 }

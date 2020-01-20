@@ -34,11 +34,11 @@
  * $Id$
  *
  */
-#ifndef TERMINAL_TOOLS_PRINT_H_
-#define TERMINAL_TOOLS_PRINT_H_
 
-#include <stdio.h>
-#include <stdarg.h>
+#pragma once
+
+#include <cstdio>
+#include <cstdarg>
 
 #include <pcl/pcl_exports.h>
 #include <pcl/pcl_config.h>
@@ -119,6 +119,17 @@ namespace pcl
     /** is verbosity level enabled? */
     PCL_EXPORTS bool 
     isVerbosityLevelEnabled (VERBOSITY_LEVEL severity);
+
+    /** \brief Enable or disable colored text output, overriding the default behavior.
+      *
+      * By default, colored output is enabled for interactive terminals or when the environment
+      * variable PCL_CLICOLOR_FORCE is set.
+      *
+      * \param stream the output stream (stdout, stderr, etc)
+      * \param enable whether to emit color codes when calling any of the color related methods
+      */
+    PCL_EXPORTS void
+    enableColoredOutput (FILE *stream, bool enable);
 
     /** \brief Change the text color (on either stdout or stderr) with an attr:fg:bg
       * \param stream the output stream (stdout, stderr, etc)
@@ -247,5 +258,3 @@ namespace pcl
     print (VERBOSITY_LEVEL level, const char *format, ...);
   }
 } 
-
-#endif // TERMINAL_TOOLS_PRINT_H_

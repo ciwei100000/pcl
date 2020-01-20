@@ -33,8 +33,7 @@
  *
  */
 
-#ifndef PCL_CUDA_FILTER_H_
-#define PCL_CUDA_FILTER_H_
+#pragma once
 
 #include <pcl_cuda/pcl_cuda_base.h>
 #include <float.h>
@@ -64,9 +63,9 @@ namespace pcl_cuda
     public:
       using PCLCUDABase<CloudT>::input_;
 
-      typedef typename PCLCUDABase<CloudT>::PointCloud PointCloud;
-      typedef typename PointCloud::Ptr PointCloudPtr;
-      typedef typename PointCloud::ConstPtr PointCloudConstPtr;
+      using PointCloud = typename PCLCUDABase<CloudT>::PointCloud;
+      using PointCloudPtr = typename PointCloud::Ptr;
+      using PointCloudConstPtr = typename PointCloud::ConstPtr;
 
       /** \brief Empty constructor. */
       Filter () : filter_field_name_ (""), 
@@ -176,5 +175,3 @@ namespace pcl_cuda
       getClassName () const { return (filter_name_); }
   };
 }
-
-#endif  //#ifndef PCL_FILTER_H_

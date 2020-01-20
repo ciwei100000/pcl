@@ -37,8 +37,7 @@
  *  $Id$
  */
 
-#ifndef PCL_PFHRGB_H_
-#define PCL_PFHRGB_H_
+#pragma once
 
 #include <pcl/features/feature.h>
 #include <pcl/features/pfh_tools.h>
@@ -49,19 +48,19 @@ namespace pcl
   class PFHRGBEstimation : public FeatureFromNormals<PointInT, PointNT, PointOutT>
   {
     public:
-      typedef boost::shared_ptr<PFHRGBEstimation<PointInT, PointNT, PointOutT> > Ptr;
-      typedef boost::shared_ptr<const PFHRGBEstimation<PointInT, PointNT, PointOutT> > ConstPtr;
+      using Ptr = shared_ptr<PFHRGBEstimation<PointInT, PointNT, PointOutT> >;
+      using ConstPtr = shared_ptr<const PFHRGBEstimation<PointInT, PointNT, PointOutT> >;
       using PCLBase<PointInT>::indices_;
       using Feature<PointInT, PointOutT>::feature_name_;
       using Feature<PointInT, PointOutT>::surface_;
       using Feature<PointInT, PointOutT>::k_;
       using Feature<PointInT, PointOutT>::search_parameter_;
       using FeatureFromNormals<PointInT, PointNT, PointOutT>::normals_;
-      typedef typename Feature<PointInT, PointOutT>::PointCloudOut PointCloudOut;
+      using PointCloudOut = typename Feature<PointInT, PointOutT>::PointCloudOut;
 
 
       PFHRGBEstimation ()
-        : nr_subdiv_ (5), pfhrgb_histogram_ (), pfhrgb_tuple_ (), d_pi_ (1.0f / (2.0f * static_cast<float> (M_PI)))
+        : nr_subdiv_ (5), d_pi_ (1.0f / (2.0f * static_cast<float> (M_PI)))
       {
         feature_name_ = "PFHRGBEstimation";
       }
@@ -77,7 +76,7 @@ namespace pcl
 
     protected:
       void
-      computeFeature (PointCloudOut &output);
+      computeFeature (PointCloudOut &output) override;
 
     private:
       /** \brief The number of subdivisions for each angular feature interval. */
@@ -100,5 +99,3 @@ namespace pcl
 #ifdef PCL_NO_PRECOMPILE
 #include <pcl/features/impl/pfhrgb.hpp>
 #endif
-
-#endif /* PCL_PFHRGB_H_ */

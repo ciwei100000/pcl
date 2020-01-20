@@ -107,8 +107,8 @@ pcl::registration::TransformationEstimationLM<PointSource, PointTarget, MatScala
   warp_point_->setParam (x);
   transformation_matrix = warp_point_->getTransform ();
 
-  tmp_src_ = NULL;
-  tmp_tgt_ = NULL;
+  tmp_src_ = nullptr;
+  tmp_tgt_ = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -187,9 +187,9 @@ pcl::registration::TransformationEstimationLM<PointSource, PointTarget, MatScala
   warp_point_->setParam (x);
   transformation_matrix = warp_point_->getTransform ();
 
-  tmp_src_ = NULL;
-  tmp_tgt_ = NULL;
-  tmp_idx_src_ = tmp_idx_tgt_ = NULL;
+  tmp_src_ = nullptr;
+  tmp_tgt_ = nullptr;
+  tmp_idx_src_ = tmp_idx_tgt_ = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -200,7 +200,7 @@ pcl::registration::TransformationEstimationLM<PointSource, PointTarget, MatScala
     const pcl::Correspondences &correspondences,
     Matrix4 &transformation_matrix) const
 {
-  const int nr_correspondences = static_cast<const int> (correspondences.size ());
+  const int nr_correspondences = static_cast<int> (correspondences.size ());
   std::vector<int> indices_src (nr_correspondences);
   std::vector<int> indices_tgt (nr_correspondences);
   for (int i = 0; i < nr_correspondences; ++i)

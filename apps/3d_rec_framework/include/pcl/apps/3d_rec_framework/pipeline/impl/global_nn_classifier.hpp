@@ -11,27 +11,21 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
   void
   pcl::rec_3d_framework::GlobalNNPipeline<Distance, PointInT, FeatureT>::loadFeaturesAndCreateFLANN ()
   {
-    boost::shared_ptr < std::vector<ModelT> > models = source_->getModels ();
-    for (size_t i = 0; i < models->size (); i++)
+    auto models = source_->getModels ();
+    for (std::size_t i = 0; i < models->size (); i++)
     {
       std::string path = source_->getModelDescriptorDir (models->at (i), training_dir_, descr_name_);
-      bf::path inside = path;
-      bf::directory_iterator end_itr;
 
-      for (bf::directory_iterator itr_in (inside); itr_in != end_itr; ++itr_in)
+      for (const auto& dir_entry : bf::directory_iterator(path))
       {
-#if BOOST_FILESYSTEM_VERSION == 3
-        std::string file_name = (itr_in->path ().filename ()).string();
-#else
-        std::string file_name = (itr_in->path ()).filename ();
-#endif
+        std::string file_name = (dir_entry.path ().filename ()).string();
 
         std::vector < std::string > strs;
         boost::split (strs, file_name, boost::is_any_of ("_"));
 
         if (strs[0] == "descriptor")
         {
-          std::string full_file_name = itr_in->path ().string ();
+          std::string full_file_name = dir_entry.path ().string ();
           std::vector < std::string > strs;
           boost::split (strs, full_file_name, boost::is_any_of ("/"));
 
@@ -85,7 +79,7 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
     typename pcl::PointCloud<FeatureT>::CloudVectorType signatures;
     std::vector < Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> > centroids;
 
-    if (indices_.size ())
+    if (!indices_.empty ())
     {
       pcl::copyPointCloud (*input_, indices_, *in);
     }
@@ -97,9 +91,9 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
     estimator_->estimate (in, processed, signatures, centroids);
     std::vector<index_score> indices_scores;
 
-    if (signatures.size () > 0)
+    if (!signatures.empty ())
     {
-      for (size_t idx = 0; idx < signatures.size (); idx++)
+      for (std::size_t idx = 0; idx < signatures.size (); idx++)
       {
         float* hist = signatures[idx].points[0].histogram;
         int size_feat = sizeof(signatures[idx].points[0].histogram) / sizeof(float);
@@ -128,13 +122,12 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
       first_nn_category_ = flann_models_[indices_scores[0].idx_models_].first.class_;
 
       std::map<std::string, int> category_map;
-      std::map<std::string, int>::iterator it;
       int num_n = std::min (NN_, static_cast<int> (indices_scores.size ()));
 
       for (int i = 0; i < num_n; ++i)
       {
         std::string cat = flann_models_[indices_scores[i].idx_models_].first.class_;
-        it = category_map.find (cat);
+        auto it = category_map.find (cat);
         if (it == category_map.end ())
         {
           category_map[cat] = 1;
@@ -145,10 +138,10 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
         }
       }
 
-      for (it = category_map.begin (); it != category_map.end (); it++)
+      for (const auto &category : category_map)
       {
-        float prob = static_cast<float> (it->second) / static_cast<float> (num_n);
-        categories_.push_back (it->first);
+        float prob = static_cast<float> (category.second) / static_cast<float> (num_n);
+        categories_.push_back (category.first);
         confidences_.push_back (prob);
       }
 
@@ -167,22 +160,22 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
 
     //use the source to know what has to be trained and what not, checking if the descr_name directory exists
     //unless force_retrain is true, then train everything
-    boost::shared_ptr < std::vector<ModelT> > models = source_->getModels ();
+    auto models = source_->getModels ();
     std::cout << "Models size:" << models->size () << std::endl;
 
     if (force_retrain)
     {
-      for (size_t i = 0; i < models->size (); i++)
+      for (std::size_t i = 0; i < models->size (); i++)
       {
         source_->removeDescDirectory (models->at (i), training_dir_, descr_name_);
       }
     }
 
-    for (size_t i = 0; i < models->size (); i++)
+    for (std::size_t i = 0; i < models->size (); i++)
     {
       if (!source_->modelAlreadyTrained (models->at (i), training_dir_, descr_name_))
       {
-        for (size_t v = 0; v < models->at (i).views_->size (); v++)
+        for (std::size_t v = 0; v < models->at (i).views_->size (); v++)
         {
           PointInTPtr processed (new pcl::PointCloud<PointInT>);
           //pro view, compute signatures
@@ -210,7 +203,7 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
           PersistenceUtils::writeFloatToFile (path_entropy.str (), models->at (i).self_occlusions_->at (v));
 
           //save signatures and centroids to disk
-          for (size_t j = 0; j < signatures.size (); j++)
+          for (std::size_t j = 0; j < signatures.size (); j++)
           {
             std::stringstream path_centroid;
             path_centroid << path << "/centroid_" << v << "_" << j << ".txt";

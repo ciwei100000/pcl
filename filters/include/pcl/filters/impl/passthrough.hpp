@@ -56,9 +56,9 @@ pcl::PassThrough<PointT>::applyFilter (PointCloud &output)
     extract_removed_indices_ = temp;
 
     output = *input_;
-    for (int rii = 0; rii < static_cast<int> (removed_indices_->size ()); ++rii)  // rii = removed indices iterator
-      output.points[(*removed_indices_)[rii]].x = output.points[(*removed_indices_)[rii]].y = output.points[(*removed_indices_)[rii]].z = user_filter_value_;
-    if (!pcl_isfinite (user_filter_value_))
+    for (const auto ri : *removed_indices_)  // ri = removed index
+      output.points[ri].x = output.points[ri].y = output.points[ri].z = user_filter_value_;
+    if (!std::isfinite (user_filter_value_))
       output.is_dense = false;
   }
   else
@@ -82,25 +82,25 @@ pcl::PassThrough<PointT>::applyFilterIndices (std::vector<int> &indices)
   if (filter_field_name_.empty ())
   {
     // Only filter for non-finite entries then
-    for (int iii = 0; iii < static_cast<int> (indices_->size ()); ++iii)  // iii = input indices iterator
+    for (const auto ii : *indices_)  // ii = input index
     {
       // Non-finite entries are always passed to removed indices
-      if (!pcl_isfinite (input_->points[(*indices_)[iii]].x) ||
-          !pcl_isfinite (input_->points[(*indices_)[iii]].y) ||
-          !pcl_isfinite (input_->points[(*indices_)[iii]].z))
+      if (!std::isfinite (input_->points[ii].x) ||
+          !std::isfinite (input_->points[ii].y) ||
+          !std::isfinite (input_->points[ii].z))
       {
         if (extract_removed_indices_)
-          (*removed_indices_)[rii++] = (*indices_)[iii];
+          (*removed_indices_)[rii++] = ii;
         continue;
       }
-      indices[oii++] = (*indices_)[iii];
+      indices[oii++] = ii;
     }
   }
   else
   {
     // Attempt to get the field name's index
     std::vector<pcl::PCLPointField> fields;
-    int distance_idx = pcl::getFieldIndex (*input_, filter_field_name_, fields);
+    int distance_idx = pcl::getFieldIndex<PointT> (filter_field_name_, fields);
     if (distance_idx == -1)
     {
       PCL_WARN ("[pcl::%s::applyFilter] Unable to find field name in point type.\n", getClassName ().c_str ());
@@ -110,28 +110,28 @@ pcl::PassThrough<PointT>::applyFilterIndices (std::vector<int> &indices)
     }
 
     // Filter for non-finite entries and the specified field limits
-    for (int iii = 0; iii < static_cast<int> (indices_->size ()); ++iii)  // iii = input indices iterator
+    for (const auto ii : *indices_)  // ii = input index
     {
       // Non-finite entries are always passed to removed indices
-      if (!pcl_isfinite (input_->points[(*indices_)[iii]].x) ||
-          !pcl_isfinite (input_->points[(*indices_)[iii]].y) ||
-          !pcl_isfinite (input_->points[(*indices_)[iii]].z))
+      if (!std::isfinite (input_->points[ii].x) ||
+          !std::isfinite (input_->points[ii].y) ||
+          !std::isfinite (input_->points[ii].z))
       {
         if (extract_removed_indices_)
-          (*removed_indices_)[rii++] = (*indices_)[iii];
+          (*removed_indices_)[rii++] = ii;
         continue;
       }
 
       // Get the field's value
-      const uint8_t* pt_data = reinterpret_cast<const uint8_t*> (&input_->points[(*indices_)[iii]]);
+      const std::uint8_t* pt_data = reinterpret_cast<const std::uint8_t*> (&input_->points[ii]);
       float field_value = 0;
       memcpy (&field_value, pt_data + fields[distance_idx].offset, sizeof (float));
 
       // Remove NAN/INF/-INF values. We expect passthrough to output clean valid data.
-      if (!pcl_isfinite (field_value))
+      if (!std::isfinite (field_value))
       {
         if (extract_removed_indices_)
-          (*removed_indices_)[rii++] = (*indices_)[iii];
+          (*removed_indices_)[rii++] = ii;
         continue;
       }
 
@@ -139,7 +139,7 @@ pcl::PassThrough<PointT>::applyFilterIndices (std::vector<int> &indices)
       if (!negative_ && (field_value < filter_limit_min_ || field_value > filter_limit_max_))
       {
         if (extract_removed_indices_)
-          (*removed_indices_)[rii++] = (*indices_)[iii];
+          (*removed_indices_)[rii++] = ii;
         continue;
       }
 
@@ -147,12 +147,12 @@ pcl::PassThrough<PointT>::applyFilterIndices (std::vector<int> &indices)
       if (negative_ && field_value >= filter_limit_min_ && field_value <= filter_limit_max_)
       {
         if (extract_removed_indices_)
-          (*removed_indices_)[rii++] = (*indices_)[iii];
+          (*removed_indices_)[rii++] = ii;
         continue;
       }
 
       // Otherwise it was a normal point for output (inlier)
-      indices[oii++] = (*indices_)[iii];
+      indices[oii++] = ii;
     }
   }
 

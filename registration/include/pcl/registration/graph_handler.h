@@ -38,8 +38,7 @@
  *
  */
 
-#ifndef PCL_GRAPH_HANDLER_H_
-#define PCL_GRAPH_HANDLER_H_
+#pragma once
 
 #include <pcl/registration/vertex_estimates.h>
 #include <pcl/registration/edge_measurements.h>
@@ -82,13 +81,13 @@ namespace pcl
     class GraphHandler
     {
       public:
-        typedef boost::shared_ptr<GraphHandler<GraphT> > Ptr;
-        typedef boost::shared_ptr<const GraphHandler<GraphT> > ConstPtr;
-        typedef boost::shared_ptr<GraphT> GraphPtr;
-        typedef boost::shared_ptr<const GraphT> GraphConstPtr;
+        using Ptr = shared_ptr<GraphHandler<GraphT> >;
+        using ConstPtr = shared_ptr<const GraphHandler<GraphT> >;
+        using GraphPtr = shared_ptr<GraphT>;
+        using GraphConstPtr = shared_ptr<const GraphT>;
 
-        typedef typename boost::graph_traits<GraphT>::vertex_descriptor Vertex;
-        typedef typename boost::graph_traits<GraphT>::edge_descriptor Edge;
+        using Vertex = typename boost::graph_traits<GraphT>::vertex_descriptor;
+        using Edge = typename boost::graph_traits<GraphT>::edge_descriptor;
 
         /** \brief Empty constructor. */
         GraphHandler () : graph_impl_ (new GraphT ())
@@ -212,5 +211,3 @@ namespace pcl
     };
   }
 }
-
-#endif // PCL_GRAPH_HANDLER_H_

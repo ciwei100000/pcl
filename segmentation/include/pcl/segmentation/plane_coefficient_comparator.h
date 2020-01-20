@@ -37,10 +37,10 @@
  *
  */
 
-#ifndef PCL_SEGMENTATION_PLANE_COEFFICIENT_COMPARATOR_H_
-#define PCL_SEGMENTATION_PLANE_COEFFICIENT_COMPARATOR_H_
+#pragma once
 
 #include <pcl/common/angles.h>
+#include <pcl/pcl_macros.h>
 #include <pcl/segmentation/boost.h>
 #include <pcl/segmentation/comparator.h>
 
@@ -55,22 +55,21 @@ namespace pcl
   class PlaneCoefficientComparator: public Comparator<PointT>
   {
     public:
-      typedef typename Comparator<PointT>::PointCloud PointCloud;
-      typedef typename Comparator<PointT>::PointCloudConstPtr PointCloudConstPtr;
+      using PointCloud = typename Comparator<PointT>::PointCloud;
+      using PointCloudConstPtr = typename Comparator<PointT>::PointCloudConstPtr;
       
-      typedef typename pcl::PointCloud<PointNT> PointCloudN;
-      typedef typename PointCloudN::Ptr PointCloudNPtr;
-      typedef typename PointCloudN::ConstPtr PointCloudNConstPtr;
+      using PointCloudN = pcl::PointCloud<PointNT>;
+      using PointCloudNPtr = typename PointCloudN::Ptr;
+      using PointCloudNConstPtr = typename PointCloudN::ConstPtr;
       
-      typedef boost::shared_ptr<PlaneCoefficientComparator<PointT, PointNT> > Ptr;
-      typedef boost::shared_ptr<const PlaneCoefficientComparator<PointT, PointNT> > ConstPtr;
+      using Ptr = shared_ptr<PlaneCoefficientComparator<PointT, PointNT> >;
+      using ConstPtr = shared_ptr<const PlaneCoefficientComparator<PointT, PointNT> >;
 
       using pcl::Comparator<PointT>::input_;
       
       /** \brief Empty constructor for PlaneCoefficientComparator. */
       PlaneCoefficientComparator ()
         : normals_ ()
-        , plane_coeff_d_ ()
         , angular_threshold_ (pcl::deg2rad (2.0f))
         , distance_threshold_ (0.02f)
         , depth_dependent_ (true)
@@ -81,7 +80,7 @@ namespace pcl
       /** \brief Constructor for PlaneCoefficientComparator.
         * \param[in] plane_coeff_d a reference to a vector of d coefficients of plane equations.  Must be the same size as the input cloud and input normals.  a, b, and c coefficients are in the input normals.
         */
-      PlaneCoefficientComparator (boost::shared_ptr<std::vector<float> >& plane_coeff_d) 
+      PlaneCoefficientComparator (shared_ptr<std::vector<float> >& plane_coeff_d) 
         : normals_ ()
         , plane_coeff_d_ (plane_coeff_d)
         , angular_threshold_ (pcl::deg2rad (2.0f))
@@ -92,13 +91,13 @@ namespace pcl
       }
       
       /** \brief Destructor for PlaneCoefficientComparator. */
-      virtual
+      
       ~PlaneCoefficientComparator ()
       {
       }
 
-      virtual void 
-      setInputCloud (const PointCloudConstPtr& cloud)
+      void 
+      setInputCloud (const PointCloudConstPtr& cloud) override
       {
         input_ = cloud;
       }
@@ -123,7 +122,7 @@ namespace pcl
         * \param[in] plane_coeff_d a pointer to the plane coefficients.
         */
       void
-      setPlaneCoeffD (boost::shared_ptr<std::vector<float> >& plane_coeff_d)
+      setPlaneCoeffD (shared_ptr<std::vector<float> >& plane_coeff_d)
       {
         plane_coeff_d_ = plane_coeff_d;
       }
@@ -150,14 +149,14 @@ namespace pcl
       virtual void
       setAngularThreshold (float angular_threshold)
       {
-        angular_threshold_ = cosf (angular_threshold);
+        angular_threshold_ = std::cos (angular_threshold);
       }
       
       /** \brief Get the angular threshold in radians for difference in normal direction between neighboring points, to be considered part of the same plane. */
       inline float
       getAngularThreshold () const
       {
-        return (acosf (angular_threshold_) );
+        return (std::acos (angular_threshold_) );
       }
 
       /** \brief Set the tolerance in meters for difference in perpendicular distance (d component of plane equation) to the plane between neighboring points, to be considered part of the same plane.
@@ -184,8 +183,8 @@ namespace pcl
         * \param idx1 The first index for the comparison
         * \param idx2 The second index for the comparison
         */
-      virtual bool
-      compare (int idx1, int idx2) const
+      bool
+      compare (int idx1, int idx2) const override
       {
         float threshold = distance_threshold_;
         if (depth_dependent_)
@@ -195,21 +194,19 @@ namespace pcl
           float z = vec.dot (z_axis_);
           threshold *= z * z;
         }
-        return ( (fabs ((*plane_coeff_d_)[idx1] - (*plane_coeff_d_)[idx2]) < threshold)
+        return ( (std::fabs ((*plane_coeff_d_)[idx1] - (*plane_coeff_d_)[idx2]) < threshold)
                  && (normals_->points[idx1].getNormalVector3fMap ().dot (normals_->points[idx2].getNormalVector3fMap () ) > angular_threshold_ ) );
       }
       
     protected:
       PointCloudNConstPtr normals_;
-      boost::shared_ptr<std::vector<float> > plane_coeff_d_;
+      shared_ptr<std::vector<float> > plane_coeff_d_;
       float angular_threshold_;
       float distance_threshold_;
       bool depth_dependent_;
       Eigen::Vector3f z_axis_;
 
     public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      PCL_MAKE_ALIGNED_OPERATOR_NEW
   };
 }
-
-#endif // PCL_SEGMENTATION_PLANE_COEFFICIENT_COMPARATOR_H_

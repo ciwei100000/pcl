@@ -51,7 +51,7 @@ namespace pcl
   namespace tracking
   {
     // utility
-    typedef union
+    union RGBValue
     {
       struct /*anonymous*/
       {
@@ -61,7 +61,7 @@ namespace pcl
       };
       float float_value;
       int int_value;
-    } RGBValue;
+    };
 
     /** \brief Convert a RGB tuple to an HSV one.
       * \param[in] r the input Red component
@@ -155,13 +155,13 @@ namespace pcl
       RGB2HSV (target_rgb.Red, target_rgb.Blue, target_rgb.Green,
                target_h, target_s, target_v);
       // hue value is in 0 ~ 2pi, but circulated.
-      const float _h_diff = fabsf (source_h - target_h);
+      const float _h_diff = std::abs (source_h - target_h);
       // Also need to compute distance other way around circle - but need to check which is closer to 0
       float _h_diff2;
       if (source_h < target_h)
-        _h_diff2 = fabsf (1.0f + source_h - target_h); //Add 2pi to source, subtract target
+        _h_diff2 = std::abs (1.0f + source_h - target_h); //Add 2pi to source, subtract target
       else 
-        _h_diff2 = fabsf (1.0f + target_h - source_h); //Add 2pi to target, subtract source
+        _h_diff2 = std::abs (1.0f + target_h - source_h); //Add 2pi to target, subtract source
       
       float h_diff;
       //Now we need to choose the smaller distance

@@ -71,7 +71,7 @@ void pcl::gpu::people::colorLMap ( int W, int H, const trees::Label* l, unsigned
 void pcl::gpu::people::colorLMap (const pcl::PointCloud<pcl::Label>& cloud_in, pcl::PointCloud<pcl::RGB>& colormap_out)
 {
   colormap_out.resize(cloud_in.size());
-  for(size_t i = 0; i < cloud_in.size (); i++)
+  for(std::size_t i = 0; i < cloud_in.size (); i++)
     colormap_out.points[i] = getLColor(cloud_in.points[i]);
 
   colormap_out.width = cloud_in.width;
@@ -81,7 +81,7 @@ void pcl::gpu::people::colorLMap (const pcl::PointCloud<pcl::Label>& cloud_in, p
 void pcl::gpu::people::uploadColorMap(DeviceArray<pcl::RGB>& color_map)
 {
   // Copy the list of label colors into the devices
-  vector<pcl::RGB> rgba(LUT_COLOR_LABEL_LENGTH);
+  std::vector<pcl::RGB> rgba(LUT_COLOR_LABEL_LENGTH);
   for(int i = 0; i < LUT_COLOR_LABEL_LENGTH; ++i)
   {
     // !!!! generate in RGB format, not BGR

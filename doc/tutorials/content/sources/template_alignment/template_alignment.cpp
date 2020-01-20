@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <Eigen/Core>
+#include <pcl/pcl_macros.h>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/io/pcd_io.h>
@@ -124,7 +125,7 @@ class TemplateAlignment
     {
       float fitness_score;
       Eigen::Matrix4f final_transformation;
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      PCL_MAKE_ALIGNED_OPERATOR_NEW
     };
 
     TemplateAlignment () :
@@ -175,7 +176,7 @@ class TemplateAlignment
     alignAll (std::vector<TemplateAlignment::Result, Eigen::aligned_allocator<Result> > &results)
     {
       results.resize (templates_.size ());
-      for (size_t i = 0; i < templates_.size (); ++i)
+      for (std::size_t i = 0; i < templates_.size (); ++i)
       {
         align (templates_[i], results[i]);
       }
@@ -192,7 +193,7 @@ class TemplateAlignment
       // Find the template with the best (lowest) fitness score
       float lowest_score = std::numeric_limits<float>::infinity ();
       int best_template = 0;
-      for (size_t i = 0; i < results.size (); ++i)
+      for (std::size_t i = 0; i < results.size (); ++i)
       {
         const Result &r = results[i];
         if (r.fitness_score < lowest_score)
@@ -275,7 +276,7 @@ main (int argc, char **argv)
 
   // Set the TemplateAlignment inputs
   TemplateAlignment template_align;
-  for (size_t i = 0; i < object_templates.size (); ++i)
+  for (std::size_t i = 0; i < object_templates.size (); ++i)
   {
     template_align.addTemplateCloud (object_templates[i]);
   }

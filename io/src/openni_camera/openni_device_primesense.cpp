@@ -36,6 +36,7 @@
  *
  */
 #include <pcl/pcl_config.h>
+#include <pcl/make_shared.h>
 #ifdef HAVE_OPENNI
 
 #ifdef __GNUC__
@@ -44,9 +45,11 @@
 
 #include <pcl/io/openni_camera/openni_device_primesense.h>
 #include <pcl/io/openni_camera/openni_image_yuv_422.h>
-#include <iostream>
-#include <sstream>
 #include <pcl/io/boost.h>
+
+#include <iostream>
+#include <mutex>
+#include <sstream>
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 openni_wrapper::DevicePrimesense::DevicePrimesense (
@@ -62,7 +65,7 @@ openni_wrapper::DevicePrimesense::DevicePrimesense (
   setImageOutputMode (getDefaultImageMode ());
   setIROutputMode (getDefaultIRMode ());
 
-  boost::unique_lock<boost::mutex> image_lock (image_mutex_);
+  std::unique_lock<std::mutex> image_lock (image_mutex_);
   XnStatus status = image_generator_.SetIntProperty ("InputFormat", 5);
   if (status != XN_STATUS_OK)
     THROW_OPENNI_EXCEPTION ("Error setting the image input format to Uncompressed YUV422. Reason: %s", xnGetStatusString (status));
@@ -73,7 +76,7 @@ openni_wrapper::DevicePrimesense::DevicePrimesense (
 
   image_lock.unlock ();
 
-  boost::lock_guard<boost::mutex> depth_lock (depth_mutex_);
+  std::lock_guard<std::mutex> depth_lock (depth_mutex_);
   status = depth_generator_.SetIntProperty ("RegistrationType", 1);
   if (status != XN_STATUS_OK)
     THROW_OPENNI_EXCEPTION ("Error setting the registration type. Reason: %s", xnGetStatusString (status));
@@ -167,10 +170,10 @@ openni_wrapper::DevicePrimesense::enumAvailableModes () throw ()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-boost::shared_ptr<openni_wrapper::Image> 
-openni_wrapper::DevicePrimesense::getCurrentImage (boost::shared_ptr<xn::ImageMetaData> image_data) const throw ()
+openni_wrapper::Image::Ptr 
+openni_wrapper::DevicePrimesense::getCurrentImage (pcl::shared_ptr<xn::ImageMetaData> image_data) const throw ()
 {
-  return (boost::shared_ptr<openni_wrapper::Image> (new ImageYUV422 (image_data)));
+  return (openni_wrapper::Image::Ptr (new ImageYUV422 (image_data)));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

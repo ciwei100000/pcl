@@ -53,7 +53,7 @@ projectToPlaneFromViewpoint (pcl::PointCloud<PointT>& cloud, Eigen::Vector4f& no
   Eigen::Vector3f norm (normal[0], normal[1], normal[2]); //(region.coefficients_[0], region.coefficients_[1], region.coefficients_[2]); 
   pcl::PointCloud<PointT> projected_cloud;
   projected_cloud.resize (cloud.points.size ());
-  for (size_t i = 0; i < cloud.points.size (); i++)
+  for (std::size_t i = 0; i < cloud.points.size (); i++)
   {
     Eigen::Vector3f pt (cloud.points[i].x, cloud.points[i].y, cloud.points[i].z);
     //Eigen::Vector3f intersection = (vp, pt, norm, centroid);
@@ -111,7 +111,7 @@ pcl::OrganizedMultiPlaneSegmentation<PointT, PointNT, PointLT>::segment (std::ve
   // Calculate range part of planes' hessian normal form
   std::vector<float> plane_d (input_->points.size ());
   
-  for (unsigned int i = 0; i < input_->size (); ++i)
+  for (std::size_t i = 0; i < input_->size (); ++i)
     plane_d[i] = input_->points[i].getVector3fMap ().dot (normals_->points[i].getNormalVector3fMap ());
   
   // Make a comparator
@@ -134,11 +134,11 @@ pcl::OrganizedMultiPlaneSegmentation<PointT, PointNT, PointLT>::segment (std::ve
   model.values.resize (4);
 
   // Fit Planes to each cluster
-  for (size_t i = 0; i < label_indices.size (); i++)
+  for (const auto &label_index : label_indices)
   {
-    if (static_cast<unsigned> (label_indices[i].indices.size ()) > min_inliers_)
+    if (static_cast<unsigned> (label_index.indices.size ()) > min_inliers_)
     {
-      pcl::computeMeanAndCovarianceMatrix (*input_, label_indices[i].indices, clust_cov, clust_centroid);
+      pcl::computeMeanAndCovarianceMatrix (*input_, label_index.indices, clust_cov, clust_centroid);
       Eigen::Vector4f plane_params;
       
       EIGEN_ALIGN16 Eigen::Vector3f::Scalar eigen_value;
@@ -163,7 +163,7 @@ pcl::OrganizedMultiPlaneSegmentation<PointT, PointNT, PointLT>::segment (std::ve
       float curvature;
       float eig_sum = clust_cov.coeff (0) + clust_cov.coeff (4) + clust_cov.coeff (8);
       if (eig_sum != 0)
-        curvature = fabsf (eigen_value / eig_sum);
+        curvature = std::abs (eigen_value / eig_sum);
       else
         curvature = 0;
 
@@ -174,7 +174,7 @@ pcl::OrganizedMultiPlaneSegmentation<PointT, PointNT, PointLT>::segment (std::ve
         model.values[2] = plane_params[2];
         model.values[3] = plane_params[3];
         model_coefficients.push_back (model);
-        inlier_indices.push_back (label_indices[i]);
+        inlier_indices.push_back (label_index);
         centroids.push_back (clust_centroid);
         covariances.push_back (clust_cov);
       }
@@ -199,12 +199,12 @@ pcl::OrganizedMultiPlaneSegmentation<PointT, PointNT, PointLT>::segment (std::ve
   regions.resize (model_coefficients.size ());
   boundary_indices.resize (model_coefficients.size ());
   
-  for (size_t i = 0; i < model_coefficients.size (); i++)
+  for (std::size_t i = 0; i < model_coefficients.size (); i++)
   {
     boundary_cloud.resize (0);
     pcl::OrganizedConnectedComponentSegmentation<PointT,PointLT>::findLabeledRegionBoundary (inlier_indices[i].indices[0], labels, boundary_indices[i]);
     boundary_cloud.points.resize (boundary_indices[i].indices.size ());
-    for (unsigned j = 0; j < boundary_indices[i].indices.size (); j++)
+    for (std::size_t j = 0; j < boundary_indices[i].indices.size (); j++)
       boundary_cloud.points[j] = input_->points[boundary_indices[i].indices[j]];
     
     Eigen::Vector3f centroid = Eigen::Vector3f (centroids[i][0],centroids[i][1],centroids[i][2]);
@@ -233,17 +233,17 @@ pcl::OrganizedMultiPlaneSegmentation<PointT, PointNT, PointLT>::segmentAndRefine
   std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > centroids;
   std::vector <Eigen::Matrix3f, Eigen::aligned_allocator<Eigen::Matrix3f> > covariances;
   segment (model_coefficients, inlier_indices, centroids, covariances, *labels, label_indices);
-  refine (model_coefficients, inlier_indices, centroids, covariances, labels, label_indices);
+  refine (model_coefficients, inlier_indices, labels, label_indices);
   regions.resize (model_coefficients.size ());
   boundary_indices.resize (model_coefficients.size ());
 
-  for (size_t i = 0; i < model_coefficients.size (); i++)
+  for (std::size_t i = 0; i < model_coefficients.size (); i++)
   {
     boundary_cloud.resize (0);
     int max_inlier_idx = static_cast<int> (inlier_indices[i].indices.size ()) - 1;
     pcl::OrganizedConnectedComponentSegmentation<PointT,PointLT>::findLabeledRegionBoundary (inlier_indices[i].indices[max_inlier_idx], labels, boundary_indices[i]);
     boundary_cloud.points.resize (boundary_indices[i].indices.size ());
-    for (unsigned j = 0; j < boundary_indices[i].indices.size (); j++)
+    for (std::size_t j = 0; j < boundary_indices[i].indices.size (); j++)
       boundary_cloud.points[j] = input_->points[boundary_indices[i].indices[j]];
     
     Eigen::Vector3f centroid = Eigen::Vector3f (centroids[i][0],centroids[i][1],centroids[i][2]);
@@ -277,17 +277,17 @@ pcl::OrganizedMultiPlaneSegmentation<PointT, PointNT, PointLT>::segmentAndRefine
   std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > centroids;
   std::vector <Eigen::Matrix3f, Eigen::aligned_allocator<Eigen::Matrix3f> > covariances;
   segment (model_coefficients, inlier_indices, centroids, covariances, *labels, label_indices);
-  refine (model_coefficients, inlier_indices, centroids, covariances, labels, label_indices);
+  refine (model_coefficients, inlier_indices, labels, label_indices);
   regions.resize (model_coefficients.size ());
   boundary_indices.resize (model_coefficients.size ());
   
-  for (size_t i = 0; i < model_coefficients.size (); i++)
+  for (std::size_t i = 0; i < model_coefficients.size (); i++)
   {
     boundary_cloud.resize (0);
     int max_inlier_idx = static_cast<int> (inlier_indices[i].indices.size ()) - 1;
     pcl::OrganizedConnectedComponentSegmentation<PointT,PointLT>::findLabeledRegionBoundary (inlier_indices[i].indices[max_inlier_idx], labels, boundary_indices[i]);
     boundary_cloud.points.resize (boundary_indices[i].indices.size ());
-    for (unsigned j = 0; j < boundary_indices[i].indices.size (); j++)
+    for (std::size_t j = 0; j < boundary_indices[i].indices.size (); j++)
       boundary_cloud.points[j] = input_->points[boundary_indices[i].indices[j]];
 
     Eigen::Vector3f centroid = Eigen::Vector3f (centroids[i][0],centroids[i][1],centroids[i][2]);
@@ -297,7 +297,7 @@ pcl::OrganizedMultiPlaneSegmentation<PointT, PointNT, PointLT>::segmentAndRefine
                                              model_coefficients[i].values[3]);
 
     Eigen::Vector3f vp (0.0, 0.0, 0.0);
-    if (project_points_ && boundary_cloud.points.size () > 0)
+    if (project_points_ && !boundary_cloud.points.empty ())
       boundary_cloud = projectToPlaneFromViewpoint (boundary_cloud, model, centroid, vp);
 
     regions[i] = PlanarRegion<PointT> (centroid,
@@ -312,8 +312,6 @@ pcl::OrganizedMultiPlaneSegmentation<PointT, PointNT, PointLT>::segmentAndRefine
 template<typename PointT, typename PointNT, typename PointLT> void
 pcl::OrganizedMultiPlaneSegmentation<PointT, PointNT, PointLT>::refine (std::vector<ModelCoefficients>& model_coefficients, 
                                                                         std::vector<PointIndices>& inlier_indices,
-                                                                        std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> >&,
-                                                                        std::vector <Eigen::Matrix3f, Eigen::aligned_allocator<Eigen::Matrix3f> >&,
                                                                         PointCloudLPtr& labels,
                                                                         std::vector<pcl::PointIndices>& label_indices)
 {
@@ -323,7 +321,7 @@ pcl::OrganizedMultiPlaneSegmentation<PointT, PointNT, PointLT>::refine (std::vec
   grow_labels.resize (label_indices.size (), false);
   label_to_model.resize (label_indices.size (), 0);
 
-  for (size_t i = 0; i < model_coefficients.size (); i++)
+  for (std::size_t i = 0; i < model_coefficients.size (); i++)
   {
     int model_label = (*labels)[inlier_indices[i].indices[0]].label;
     label_to_model[model_label] = static_cast<int> (i);
@@ -340,7 +338,7 @@ pcl::OrganizedMultiPlaneSegmentation<PointT, PointNT, PointLT>::refine (std::vec
   //Do a first pass over the image, top to bottom, left to right
   unsigned int current_row = 0;
   unsigned int next_row = labels->width;
-  for (size_t rowIdx = 0; rowIdx < labels->height - 1; ++rowIdx, current_row = next_row, next_row += labels->width)
+  for (std::size_t rowIdx = 0; rowIdx < labels->height - 1; ++rowIdx, current_row = next_row, next_row += labels->width)
   {
 
     for (unsigned colIdx = 0; colIdx < labels->width - 1; ++colIdx)
@@ -378,7 +376,7 @@ pcl::OrganizedMultiPlaneSegmentation<PointT, PointNT, PointLT>::refine (std::vec
   //Do a second pass over the image
   current_row = labels->width * (labels->height - 1);
   unsigned int prev_row = current_row - labels->width;
-  for (size_t rowIdx = 0; rowIdx < labels->height - 1; ++rowIdx, current_row = prev_row, prev_row -= labels->width)
+  for (std::size_t rowIdx = 0; rowIdx < labels->height - 1; ++rowIdx, current_row = prev_row, prev_row -= labels->width)
   {
     for (int colIdx = labels->width - 1; colIdx >= 0; --colIdx)
     {

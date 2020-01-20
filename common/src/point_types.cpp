@@ -304,7 +304,7 @@ namespace pcl
   {
     for (int i = 0; i < 9; ++i)
     os << (i == 0 ? "(" : "") << p.rf[i] << (i < 8 ? ", " : ")");
-    for (size_t i = 0; i < 1980; ++i)
+    for (std::size_t i = 0; i < 1980; ++i)
       os << (i == 0 ? "(" : "") << p.descriptor[i] << (i < 1979 ? ", " : ")");
     return (os);
   }
@@ -314,7 +314,7 @@ namespace pcl
   {
     for (int i = 0; i < 9; ++i)
     os << (i == 0 ? "(" : "") << p.rf[i] << (i < 8 ? ", " : ")");
-    for (size_t i = 0; i < 1960; ++i)
+    for (std::size_t i = 0; i < 1960; ++i)
       os << (i == 0 ? "(" : "") << p.descriptor[i] << (i < 1959 ? ", " : ")");
     return (os);
   }
@@ -324,7 +324,7 @@ namespace pcl
   {
     for (int i = 0; i < 9; ++i)
     os << (i == 0 ? "(" : "") << p.rf[i] << (i < 8 ? ", " : ")");
-    for (size_t i = 0; i < 352; ++i)
+    for (std::size_t i = 0; i < 352; ++i)
     os << (i == 0 ? "(" : "") << p.descriptor[i] << (i < 351 ? ", " : ")");
     return (os);
   }
@@ -334,7 +334,7 @@ namespace pcl
   {
     for (int i = 0; i < 9; ++i)
     os << (i == 0 ? "(" : "") << p.rf[i] << (i < 8 ? ", " : ")");
-    for (size_t i = 0; i < 1344; ++i)
+    for (std::size_t i = 0; i < 1344; ++i)
     os << (i == 0 ? "(" : "") << p.descriptor[i] << (i < 1343 ? ", " : ")");
     return (os);
   }
@@ -409,8 +409,8 @@ namespace pcl
   std::ostream& 
   operator << (std::ostream& os, const GFPFHSignature16& p)
   {
-    for (int i = 0; i < p.descriptorSize (); ++i)
-    os << (i == 0 ? "(" : "") << p.histogram[i] << (i < (p.descriptorSize () - 1) ? ", " : ")");
+    for (int i = 0; i < pcl::GFPFHSignature16::descriptorSize (); ++i)
+    os << (i == 0 ? "(" : "") << p.histogram[i] << (i < (pcl::GFPFHSignature16::descriptorSize () - 1) ? ", " : ")");
     return (os);
   }
 

@@ -37,15 +37,10 @@
  *
  */
 
-#ifndef PCL_RECOGNITION_BOOST_H_
-#define PCL_RECOGNITION_BOOST_H_
+#pragma once
 
 #if defined __GNUC__
 #  pragma GCC system_header 
 #endif
 
-#include <boost/unordered_map.hpp>
 #include <boost/graph/graph_traits.hpp>
-//#include <boost/graph/adjacency_list.hpp>
-
-#endif    // PCL_RECOGNITION_BOOST_H_

@@ -48,10 +48,10 @@ using namespace pcl;
 using namespace pcl::io;
 using namespace std;
 
-typedef search::KdTree<PointXYZ>::Ptr KdTreePtr;
+using KdTreePtr = search::KdTree<PointXYZ>::Ptr;
 
 PointCloud<PointXYZ> cloud;
-vector<int> indices;
+std::vector<int> indices;
 KdTreePtr tree;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -63,7 +63,7 @@ TEST (PCL, SpinImageEstimation)
   PointCloud<Normal>::Ptr normals (new PointCloud<Normal> ());
   // set parameters
   n.setInputCloud (cloud.makeShared ());
-  boost::shared_ptr<vector<int> > indicesptr (new vector<int> (indices));
+  pcl::IndicesPtr indicesptr (new pcl::Indices (indices));
   n.setIndices (indicesptr);
   n.setSearchMethod (tree);
   n.setRadiusSearch (20 * mr);
@@ -80,7 +80,7 @@ TEST (PCL, SpinImageEstimation)
   EXPECT_NEAR (normals->points[140].normal_y, -0.19499126, 1e-4);
   EXPECT_NEAR (normals->points[140].normal_z, -0.87091631, 1e-4);
 
-  typedef Histogram<153> SpinImage;
+  using SpinImage = Histogram<153>;
   SpinImageEstimation<PointXYZ, Normal, SpinImage> spin_est(8, 0.5, 16);
   // set parameters
   //spin_est.setInputWithNormals (cloud.makeShared (), normals);
@@ -248,16 +248,16 @@ TEST (PCL, IntensitySpinEstimation)
       p.x = x;
       p.y = y;
       p.z = std::sqrt (400.0f - x * x - y * y);
-      p.intensity = expf (-(powf (x - 3.0f, 2.0f) + powf (y + 2.0f, 2.0f)) / (2.0f * 25.0f)) + expf (-(powf (x + 5.0f, 2.0f) + powf (y - 5.0f, 2.0f))
+      p.intensity = std::exp (-(powf (x - 3.0f, 2.0f) + powf (y + 2.0f, 2.0f)) / (2.0f * 25.0f)) + std::exp (-(powf (x + 5.0f, 2.0f) + powf (y - 5.0f, 2.0f))
                                                                                  / (2.0f * 4.0f));
 
       cloud_xyzi.points.push_back (p);
     }
   }
-  cloud_xyzi.width = static_cast<uint32_t> (cloud_xyzi.points.size ());
+  cloud_xyzi.width = static_cast<std::uint32_t> (cloud_xyzi.points.size ());
 
   // Compute the intensity-domain spin features
-  typedef Histogram<20> IntensitySpin;
+  using IntensitySpin = Histogram<20>;
   IntensitySpinEstimation<PointXYZI, IntensitySpin> ispin_est;
   search::KdTree<PointXYZI>::Ptr treept3 (new search::KdTree<PointXYZI> (false));
   ispin_est.setSearchMethod (treept3);
@@ -297,7 +297,7 @@ main (int argc, char** argv)
   }
 
   indices.resize (cloud.points.size ());
-  for (size_t i = 0; i < indices.size (); ++i)
+  for (std::size_t i = 0; i < indices.size (); ++i)
     indices[i] = static_cast<int> (i);
 
   tree.reset (new search::KdTree<PointXYZ> (false));

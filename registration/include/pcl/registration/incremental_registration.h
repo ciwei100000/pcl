@@ -35,8 +35,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PCL_REGISTRATION_INCREMENTAL_REGISTRATION_H_
-#define PCL_REGISTRATION_INCREMENTAL_REGISTRATION_H_
+#pragma once
 
 #include <pcl/point_cloud.h>
 #include <pcl/registration/registration.h>
@@ -73,11 +72,11 @@ namespace pcl {
     template <typename PointT, typename Scalar = float>
     class IncrementalRegistration {
       public:
-        typedef typename pcl::PointCloud<PointT>::Ptr PointCloudPtr;
-        typedef typename pcl::PointCloud<PointT>::ConstPtr PointCloudConstPtr;
+        using PointCloudPtr = typename pcl::PointCloud<PointT>::Ptr;
+        using PointCloudConstPtr = typename pcl::PointCloud<PointT>::ConstPtr;
 
-        typedef typename pcl::Registration<PointT,PointT,Scalar>::Ptr RegistrationPtr;
-        typedef typename pcl::Registration<PointT,PointT,Scalar>::Matrix4 Matrix4;
+        using RegistrationPtr = typename pcl::Registration<PointT,PointT,Scalar>::Ptr;
+        using Matrix4 = typename pcl::Registration<PointT,PointT,Scalar>::Matrix4;
 
         IncrementalRegistration ();
 
@@ -126,5 +125,3 @@ namespace pcl {
 }
 
 #include <pcl/registration/impl/incremental_registration.hpp>
-
-#endif /*PCL_REGISTRATION_INCREMENTAL_REGISTRATION_H_*/

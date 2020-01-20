@@ -61,7 +61,7 @@ using namespace pcl::console;
 using namespace pcl::gpu;
 using namespace std;
 
-typedef pcl::PointXYZRGBA PointT;
+using PointT = pcl::PointXYZRGBA;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -115,7 +115,7 @@ savePNGFile (const std::string& filename, const pcl::PointCloud<T>& cloud)
 class PeoplePCDApp
 {
   public:
-    typedef pcl::gpu::people::PeopleDetector PeopleDetector;
+    using PeopleDetector = pcl::gpu::people::PeopleDetector;
 
     enum { COLS = 640, ROWS = 480 };
 
@@ -187,9 +187,9 @@ class PeoplePCDApp
     void
     convertProbToRGB (pcl::PointCloud<pcl::device::prob_histogram>& histograms, int label, pcl::PointCloud<pcl::RGB>& rgb)
     {
-      for(size_t t = 0; t < histograms.points.size(); t++)
+      for(const auto &point : histograms.points)
       {
-        float value = histograms.points[t].probs[label];
+        float value = point.probs[label];
         float value8 = value * 255;
         char val = static_cast<char> (value8);
         pcl::RGB p;
@@ -286,11 +286,11 @@ int main(int argc, char** argv)
   if(find_switch (argc, argv, "--help") || find_switch (argc, argv, "-h"))
     return print_help(), 0;
 
-  bool saveProb = 1;
+  bool saveProb = true;
   parse_argument (argc, argv, "-prob", saveProb);
 
-  bool debugOutput = 0;
-  parse_argument (argc, argv, "-debug", saveProb);
+  bool debugOutput = false;
+  parse_argument (argc, argv, "-debug", debugOutput);
   if(debugOutput)
     setVerbosityLevel(L_DEBUG);
  
@@ -341,7 +341,7 @@ int main(int argc, char** argv)
   // loading trees
   using pcl::gpu::people::RDFBodyPartsDetector;
 
-  vector<string> names_vector(treeFilenames, treeFilenames + numTrees);
+  std::vector<string> names_vector(treeFilenames, treeFilenames + numTrees);
   PCL_DEBUG("[Main] : (D) : Trees collected\n");
   RDFBodyPartsDetector::Ptr rdf(new RDFBodyPartsDetector(names_vector));
   PCL_DEBUG("[Main] : (D) : Loaded files into rdf\n");

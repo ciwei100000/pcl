@@ -45,15 +45,13 @@
 
 #include <pcl/compression/octree_pointcloud_compression.h>
 
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
-#include <vector>
-#include <stdio.h>
 #include <sstream>
-#include <stdlib.h>
-#include "stdio.h"
-
-#include <iostream>
 #include <string>
+#include <thread>
+#include <vector>
 
 #include <boost/asio.hpp>
 
@@ -63,6 +61,7 @@ using namespace pcl;
 using namespace pcl::io;
 
 using namespace std;
+using namespace std::chrono_literals;
 
 char usage[] = "\n"
   "  PCL octree point cloud compression\n"
@@ -122,7 +121,7 @@ do \
 }while(false)
 
 void
-print_usage (std::string msg)
+print_usage (const std::string &msg)
 {
   std::cerr << msg << std::endl;
   std::cout << usage << std::endl;
@@ -153,25 +152,25 @@ class SimpleOpenNIViewer
     {
 
       // create a new grabber for OpenNI devices
-      pcl::Grabber* interface = new pcl::OpenNIGrabber();
+      pcl::OpenNIGrabber interface {};
 
       // make callback function from member function
-      boost::function<void (const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr&)> f =
-        boost::bind (&SimpleOpenNIViewer::cloud_cb_, this, _1);
+      std::function<void (const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr&)> f =
+        [this] (const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr& cloud) { cloud_cb_ (cloud); };
 
       // connect callback function for desired signal. In this case its a point cloud with color values
-      boost::signals2::connection c = interface->registerCallback (f);
+      boost::signals2::connection c = interface.registerCallback (f);
 
       // start receiving point clouds
-      interface->start ();
+      interface.start ();
 
 
       while (!outputFile_.fail())
       {
-        boost::this_thread::sleep(boost::posix_time::seconds(1));
+        std::this_thread::sleep_for(1s);
       }
 
-      interface->stop ();
+      interface.stop ();
     }
 
     pcl::visualization::CloudViewer viewer;
@@ -208,24 +207,27 @@ struct EventHelper
   run ()
   {
     // create a new grabber for OpenNI devices
-    pcl::Grabber* interface = new pcl::OpenNIGrabber ();
+    pcl::OpenNIGrabber interface {};
 
     // make callback function from member function
-    boost::function<void
-    (const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr&)> f = boost::bind (&EventHelper::cloud_cb_, this, _1);
+    std::function<void
+    (const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr&)> f = [this] (const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr& cloud)
+    {
+      cloud_cb_ (cloud);
+    };
 
     // connect callback function for desired signal. In this case its a point cloud with color values
-    boost::signals2::connection c = interface->registerCallback (f);
+    boost::signals2::connection c = interface.registerCallback (f);
 
     // start receiving point clouds
-    interface->start ();
+    interface.start ();
 
     while (!outputFile_.fail ())
     {
-      boost::this_thread::sleep(boost::posix_time::seconds(1));
+      std::this_thread::sleep_for(1s);
     }
 
-    interface->stop ();
+    interface.stop ();
   }
 
   pcl::PassThrough<PointXYZRGBA> pass_;
@@ -422,20 +424,6 @@ main (int argc, char **argv)
     }
   } else
   {
-    // switch to ONLINE profiles
-    if (compressionProfile == pcl::io::LOW_RES_OFFLINE_COMPRESSION_WITH_COLOR)
-      compressionProfile = pcl::io::LOW_RES_ONLINE_COMPRESSION_WITH_COLOR;
-    else if (compressionProfile == pcl::io::LOW_RES_OFFLINE_COMPRESSION_WITHOUT_COLOR)
-      compressionProfile = pcl::io::LOW_RES_ONLINE_COMPRESSION_WITHOUT_COLOR;
-    else if (compressionProfile == pcl::io::MED_RES_OFFLINE_COMPRESSION_WITH_COLOR)
-      compressionProfile = pcl::io::MED_RES_ONLINE_COMPRESSION_WITH_COLOR;
-    else if (compressionProfile == pcl::io::MED_RES_OFFLINE_COMPRESSION_WITHOUT_COLOR)
-      compressionProfile = pcl::io::MED_RES_ONLINE_COMPRESSION_WITHOUT_COLOR;
-    else if (compressionProfile == pcl::io::HIGH_RES_OFFLINE_COMPRESSION_WITH_COLOR)
-      compressionProfile = pcl::io::HIGH_RES_ONLINE_COMPRESSION_WITH_COLOR;
-    else if (compressionProfile == pcl::io::HIGH_RES_OFFLINE_COMPRESSION_WITHOUT_COLOR)
-      compressionProfile = pcl::io::HIGH_RES_ONLINE_COMPRESSION_WITHOUT_COLOR;
-
     if (bEnDecode)
     {
       // ENCODING
@@ -466,7 +454,7 @@ main (int argc, char **argv)
 
         std::cout << "Disconnected!" << std::endl;
 
-        boost::this_thread::sleep(boost::posix_time::seconds(3));
+        std::this_thread::sleep_for(3s);
 
       }
       catch (std::exception& e)

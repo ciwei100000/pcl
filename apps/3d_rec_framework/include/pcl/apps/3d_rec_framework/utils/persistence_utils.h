@@ -11,7 +11,7 @@ namespace pcl
     {
 
       inline bool
-      writeCentroidToFile (std::string file, Eigen::Vector3f & centroid)
+      writeCentroidToFile (const std::string& file, Eigen::Vector3f & centroid)
       {
         std::ofstream out (file.c_str ());
         if (!out)
@@ -27,7 +27,7 @@ namespace pcl
       }
 
       inline bool
-      getCentroidFromFile (std::string file, Eigen::Vector3f & centroid)
+      getCentroidFromFile (const std::string& file, Eigen::Vector3f & centroid)
       {
         std::ifstream in;
         in.open (file.c_str (), std::ifstream::in);
@@ -45,7 +45,7 @@ namespace pcl
       }
 
       inline bool
-      writeMatrixToFile (std::string file, Eigen::Matrix4f & matrix)
+      writeMatrixToFile (const std::string& file, Eigen::Matrix4f & matrix)
       {
         std::ofstream out (file.c_str ());
         if (!out)
@@ -54,9 +54,9 @@ namespace pcl
           return false;
         }
 
-        for (size_t i = 0; i < 4; i++)
+        for (std::size_t i = 0; i < 4; i++)
         {
-          for (size_t j = 0; j < 4; j++)
+          for (std::size_t j = 0; j < 4; j++)
           {
             out << matrix (i, j);
             if (!(i == 3 && j == 3))
@@ -69,7 +69,7 @@ namespace pcl
       }
 
       inline bool
-      writeFloatToFile (std::string file, float value)
+      writeFloatToFile (const std::string& file, float value)
       {
         std::ofstream out (file.c_str ());
         if (!out)
@@ -100,14 +100,14 @@ namespace pcl
       }
 
       inline bool
-      readFloatFromFile (std::string dir, std::string file, float& value)
+      readFloatFromFile (const std::string& dir, std::string file, float& value)
       {
 
         std::vector < std::string > strs;
         boost::split (strs, file, boost::is_any_of ("/"));
 
         std::string str;
-        for (size_t i = 0; i < (strs.size () - 1); i++)
+        for (std::size_t i = 0; i < (strs.size () - 1); i++)
         {
           str += strs[i] + "/";
         }
@@ -126,7 +126,7 @@ namespace pcl
       }
 
       inline bool
-      readFloatFromFile (std::string file, float& value)
+      readFloatFromFile (const std::string& file, float& value)
       {
 
         std::ifstream in;
@@ -149,7 +149,7 @@ namespace pcl
 
         std::string dname = path[path.size () - 1];
         std::string file_replaced;
-        for (size_t i = 0; i < (path.size () - 1); i++)
+        for (std::size_t i = 0; i < (path.size () - 1); i++)
         {
           file_replaced += path[i] + "/";
         }
@@ -157,7 +157,7 @@ namespace pcl
         boost::split (path, file, boost::is_any_of ("/"));
         std::string id;
 
-        for (size_t i = 0; i < (path.size () - 1); i++)
+        for (std::size_t i = 0; i < (path.size () - 1); i++)
         {
           id += path[i];
           if (i < (path.size () - 1))
@@ -191,7 +191,7 @@ namespace pcl
       }
 
       inline bool
-      readMatrixFromFile (std::string file, Eigen::Matrix4f & matrix)
+      readMatrixFromFile (const std::string& file, Eigen::Matrix4f & matrix)
       {
 
         std::ifstream in;
@@ -212,7 +212,7 @@ namespace pcl
       }
 
       inline bool
-      readMatrixFromFile2 (std::string file, Eigen::Matrix4f & matrix)
+      readMatrixFromFile2 (const std::string& file, Eigen::Matrix4f & matrix)
       {
 
         std::ifstream in;
@@ -244,7 +244,7 @@ namespace pcl
 
           std::string dname = path[path.size () - 1];
           std::string file_replaced;
-          for (size_t i = 0; i < (path.size () - 1); i++)
+          for (std::size_t i = 0; i < (path.size () - 1); i++)
           {
             file_replaced += path[i] + "/";
           }
@@ -252,7 +252,7 @@ namespace pcl
           boost::split (path, file, boost::is_any_of ("/"));
           std::string id;
 
-          for (size_t i = 0; i < (path.size () - 1); i++)
+          for (std::size_t i = 0; i < (path.size () - 1); i++)
           {
             id += path[i];
             if (i < (path.size () - 1))

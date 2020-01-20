@@ -1,5 +1,4 @@
-#ifndef PCL_OUTOFCORE_CAMERA_H_
-#define PCL_OUTOFCORE_CAMERA_H_
+#pragma once
 
 // C++
 #include <iostream>
@@ -8,6 +7,7 @@
 // PCL
 #include <pcl/outofcore/visualization/object.h>
 #include <pcl/common/eigen.h>
+#include <pcl/pcl_macros.h>
 
 // VTK
 #include <vtkActor.h>
@@ -119,8 +119,8 @@ public:
     camera_->SetClippingRange (near_value, far_value);
   }
 
-  virtual void
-  render (vtkRenderer* renderer);
+  void
+  render (vtkRenderer* renderer) override;
 
   // Methods
   // -----------------------------------------------------------------------------
@@ -130,6 +130,9 @@ public:
   //computeFrustum(double aspect);
   void
   printFrustum ();
+
+  // Aligned operator, because of Eigen members
+  PCL_MAKE_ALIGNED_OPERATOR_NEW
 
 private:
 
@@ -149,5 +152,3 @@ private:
   double prevFocal_[3];
   double prevPos_[3];
 };
-
-#endif

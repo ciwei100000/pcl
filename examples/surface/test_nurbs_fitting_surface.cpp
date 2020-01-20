@@ -6,7 +6,7 @@
 #include <pcl/surface/on_nurbs/fitting_surface_tdm.h>
 #include <pcl/surface/on_nurbs/triangulation.h>
 
-typedef pcl::PointXYZ Point;
+using Point = pcl::PointXYZ;
 
 void
 CreateCylinderPoints (pcl::PointCloud<Point>::Ptr cloud, pcl::on_nurbs::vector_vec3d &data, unsigned npoints,
@@ -18,7 +18,7 @@ CreateCylinderPoints (pcl::PointCloud<Point>::Ptr cloud, pcl::on_nurbs::vector_v
     double dh = h * (double (rand ()) / RAND_MAX - 0.5);
 
     Point p;
-    p.x = float (r * cos (da));
+    p.x = float (r * std::cos (da));
     p.y = float (r * sin (da));
     p.z = float (dh);
 

@@ -41,12 +41,15 @@
 #include <pcl/surface/organized_fast_mesh.h>
 #include <pcl/console/parse.h>
 #include <pcl/common/time.h>
-#include <pcl/console/time.h>
 #include <pcl/visualization/cloud_viewer.h>
+
+#include <mutex>
+#include <thread>
 
 using namespace pcl;
 using namespace pcl::visualization;
 using namespace std;
+using namespace std::chrono_literals;
 
 #define FPS_CALC(_WHAT_) \
 do \
@@ -66,12 +69,12 @@ template <typename PointType>
 class OpenNIFastMesh
 {
   public:
-    typedef pcl::PointCloud<PointType> Cloud;
-    typedef typename Cloud::Ptr CloudPtr;
-    typedef typename Cloud::ConstPtr CloudConstPtr;
+    using Cloud = pcl::PointCloud<PointType>;
+    using CloudPtr = typename Cloud::Ptr;
+    using CloudConstPtr = typename Cloud::ConstPtr;
 
     OpenNIFastMesh (const std::string& device_id = "")
-      : device_id_(device_id), vertices_ ()
+      : device_id_(device_id)
     {
       ofm.setTrianglePixelSize (3);
       ofm.setTriangulationType (pcl::OrganizedFastMesh<PointType>::QUAD_MESH);
@@ -87,18 +90,13 @@ class OpenNIFastMesh
       ofm.setInputCloud (cloud);
 
       // Store the results in a temporary object
-      boost::shared_ptr<std::vector<pcl::Vertices> > temp_verts (new std::vector<pcl::Vertices>);
-      ofm.reconstruct (*temp_verts);
+      std::vector<pcl::Vertices> temp_verts;
+      ofm.reconstruct (temp_verts);
 
       // Lock and copy
       {
-        boost::mutex::scoped_lock lock (mtx_);
-        //boost::unique_lock<boost::shared_mutex> lock (mtx_);
-
-//        if (!vertices_)
-//          vertices_.reset (new std::vector<pcl::Vertices>);
-        //vertices_.reset (new std::vector<pcl::Vertices> (*temp_verts));
-        vertices_= temp_verts;
+        std::lock_guard<std::mutex> lock (mtx_);
+        vertices_ = std::move (temp_verts);
         cloud_ = cloud;//reset (new Cloud (*cloud));
       }
     }
@@ -106,40 +104,33 @@ class OpenNIFastMesh
     void
     run (int argc, char **argv)
     {
-      pcl::Grabber* interface = new pcl::OpenNIGrabber (device_id_);
+      pcl::OpenNIGrabber interface {device_id_};
 
-      boost::function<void (const CloudConstPtr&)> f = boost::bind (&OpenNIFastMesh::cloud_cb, this, _1);
-      boost::signals2::connection c = interface->registerCallback (f);
-     
+      std::function<void (const CloudConstPtr&)> f = [this] (const CloudConstPtr& cloud) { cloud_cb (cloud); };
+      boost::signals2::connection c = interface.registerCallback (f);
+
       view.reset (new pcl::visualization::PCLVisualizer (argc, argv, "PCL OpenNI Mesh Viewer"));
 
-      interface->start ();
+      interface.start ();
       
       CloudConstPtr temp_cloud;
-      boost::shared_ptr<std::vector<pcl::Vertices> > temp_verts;
-      pcl::console::TicToc t1;
+      std::vector<pcl::Vertices> temp_verts;
 
       while (!view->wasStopped ())
-      //while (!viewer.wasStopped ())
       {
-        //boost::this_thread::sleep (boost::posix_time::milliseconds (1));
         if (!cloud_ || !mtx_.try_lock ())
         {
-          boost::this_thread::sleep (boost::posix_time::milliseconds (1));
+          std::this_thread::sleep_for(1ms);
           continue;
         }
 
-        //temp_cloud.reset (new Cloud (*cloud_));
-        //temp_cloud.swap (cloud_);
-        //temp_verts.swap (vertices_);//reset (new std::vector<pcl::Vertices> (*vertices_));
         temp_cloud = cloud_;
-        temp_verts = vertices_;//reset (new std::vector<pcl::Vertices> (*vertices_));
+        temp_verts = std::move (vertices_);
         mtx_.unlock ();
 
-        //view->removePolygonMesh ("surface");
-        if (!view->updatePolygonMesh<PointType> (temp_cloud, *temp_verts, "surface"))
+        if (!view->updatePolygonMesh<PointType> (temp_cloud, temp_verts, "surface"))
         {
-          view->addPolygonMesh<PointType> (temp_cloud, *temp_verts, "surface");
+          view->addPolygonMesh<PointType> (temp_cloud, temp_verts, "surface");
           view->resetCameraViewpoint ("surface");
         }
 
@@ -147,19 +138,18 @@ class OpenNIFastMesh
         view->spinOnce (1);
       }
 
-      interface->stop ();
+      interface.stop ();
     }
 
     pcl::OrganizedFastMesh<PointType> ofm;
     std::string device_id_;
-    //boost::shared_mutex mtx_;
-    boost::mutex mtx_;
+    std::mutex mtx_;
     // Data
     CloudConstPtr cloud_;
-    boost::shared_ptr<std::vector<pcl::Vertices> > vertices_;
+    std::vector<pcl::Vertices> vertices_;
     pcl::PolygonMesh::Ptr mesh_;
 
-    boost::shared_ptr<pcl::visualization::PCLVisualizer> view;
+    pcl::visualization::PCLVisualizer::Ptr view;
 };
 
 void
@@ -172,15 +162,15 @@ usage (char ** argv)
   {
     for (unsigned deviceIdx = 0; deviceIdx < driver.getNumberDevices (); ++deviceIdx)
     {
-      cout << "Device: " << deviceIdx + 1 << ", vendor: " << driver.getVendorName (deviceIdx) << ", product: " << driver.getProductName (deviceIdx)
-              << ", connected: " << driver.getBus (deviceIdx) << " @ " << driver.getAddress (deviceIdx) << ", serial number: \'" << driver.getSerialNumber (deviceIdx) << "\'" << endl;
-      cout << "device_id may be #1, #2, ... for the first second etc device in the list or" << endl
-           << "                 bus@address for the device connected to a specific usb-bus / address combination (works only in Linux) or" << endl
-           << "                 <serial-number> (only in Linux and for devices which provide serial numbers)"  << endl;
+      std::cout << "Device: " << deviceIdx + 1 << ", vendor: " << driver.getVendorName (deviceIdx) << ", product: " << driver.getProductName (deviceIdx)
+              << ", connected: " << driver.getBus (deviceIdx) << " @ " << driver.getAddress (deviceIdx) << ", serial number: \'" << driver.getSerialNumber (deviceIdx) << "\'" << std::endl;
+      std::cout << "device_id may be #1, #2, ... for the first second etc device in the list or" << std::endl
+           << "                 bus@address for the device connected to a specific usb-bus / address combination (works only in Linux) or" << std::endl
+           << "                 <serial-number> (only in Linux and for devices which provide serial numbers)"  << std::endl;
     }
   }
   else
-    cout << "No devices connected." << endl;
+    std::cout << "No devices connected." << std::endl;
 }
 
 int

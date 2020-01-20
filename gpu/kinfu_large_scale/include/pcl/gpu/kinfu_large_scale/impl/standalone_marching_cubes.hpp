@@ -39,6 +39,7 @@
 #define PCL_STANDALONE_MARCHING_CUBES_IMPL_HPP_
 
 #include <pcl/gpu/kinfu_large_scale/standalone_marching_cubes.h>
+#include <pcl/make_shared.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 template <typename PointT>
@@ -70,9 +71,7 @@ pcl::gpu::kinfuLS::StandaloneMarchingCubes<PointT>::getMeshFromTSDFCloud (const 
 {
 
   //Clearing TSDF GPU and cPU
-  const Eigen::Vector3f volume_size = Eigen::Vector3f::Constant (volume_size_);
-    std::cout << "VOLUME SIZE IS " << volume_size_ << std::endl;
-  const Eigen::Vector3i volume_resolution (voxels_x_, voxels_y_, voxels_z_);
+  std::cout << "VOLUME SIZE IS " << volume_size_ << std::endl;
 
   //Clear values in TSDF Volume GPU
   tsdf_volume_gpu_->reset (); // This one uses the same tsdf volume but clears it before loading new values. This one is our friend.
@@ -123,7 +122,7 @@ pcl::gpu::kinfuLS::StandaloneMarchingCubes<PointT>::getMeshesFromTSDFVector (con
     //Get mesh
     MeshPtr tmp = getMeshFromTSDFCloud (*tsdf_clouds[i]);
         
-    if(tmp != 0)
+    if(tmp != nullptr)
     {
        meshes_vector.push_back (tmp);
        mesh_counter++;
@@ -189,7 +188,7 @@ pcl::gpu::kinfuLS::StandaloneMarchingCubes<PointT>::loadTsdfCloudToGPU (const Po
 template <typename PointT> void 
 pcl::gpu::kinfuLS::StandaloneMarchingCubes<PointT>::convertTsdfVectors (const PointCloud &cloud, std::vector<int> &output)
 {
-	  const int DIVISOR = 32767;     // SHRT_MAX;
+	constexpr int DIVISOR = std::numeric_limits<short>::max();
 
     ///For every point in the cloud
 #pragma omp parallel for
@@ -227,12 +226,12 @@ pcl::gpu::kinfuLS::StandaloneMarchingCubes<PointT>::convertTrianglesToMesh (cons
   cloud.height = 1;
   triangles.download (cloud.points);
 
-  boost::shared_ptr<pcl::PolygonMesh> mesh_ptr ( new pcl::PolygonMesh () ); 
-  
+  PolygonMesh::Ptr mesh_ptr = make_shared<PolygonMesh> ();
+
   pcl::toPCLPointCloud2 (cloud, mesh_ptr->cloud);
       
   mesh_ptr->polygons.resize (triangles.size () / 3);
-  for (size_t i = 0; i < mesh_ptr->polygons.size (); ++i)
+  for (std::size_t i = 0; i < mesh_ptr->polygons.size (); ++i)
   {
     pcl::Vertices v;
     v.vertices.push_back (i*3+0);
@@ -259,9 +258,9 @@ pcl::gpu::kinfuLS::StandaloneMarchingCubes<PointT>::runMarchingCubes ()
   pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_device = marching_cubes_->run (*tsdf_volume_const_, triangles_buffer_device_); 
 
   //Creating mesh
-  boost::shared_ptr<pcl::PolygonMesh> mesh_ptr_ = convertTrianglesToMesh (triangles_device);
+  pcl::PolygonMesh::Ptr mesh_ptr_ = convertTrianglesToMesh (triangles_device);
 
-  if(mesh_ptr_ != 0)
+  if(mesh_ptr_ != nullptr)
   {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_tmp_ptr (new pcl::PointCloud<pcl::PointXYZ>);
     fromPCLPointCloud2 ( mesh_ptr_->cloud, *cloud_tmp_ptr);

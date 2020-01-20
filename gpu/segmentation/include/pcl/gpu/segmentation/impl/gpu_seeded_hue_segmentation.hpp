@@ -43,12 +43,12 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-seededHueSegmentation (const boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGB> >  &host_cloud_,
-                       const pcl::gpu::Octree::Ptr                                  &tree,
-                       float                                                        tolerance,
-                       PointIndices                                                 &indices_in,
-                       PointIndices                                                 &indices_out,
-                       float                                                        delta_hue)
+seededHueSegmentation (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr  &host_cloud_,
+                       const pcl::gpu::Octree::Ptr                   &tree,
+                       float                                         tolerance,
+                       PointIndices                                  &indices_in,
+                       PointIndices                                  &indices_out,
+                       float                                         delta_hue)
 {
 
   // Create a bool vector of processed point indices, and initialize it to false
@@ -58,7 +58,7 @@ seededHueSegmentation (const boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGB>
   int max_answers = host_cloud_->points.size();
 
   // Process all points in the indices vector
-  for (size_t k = 0; k < indices_in.indices.size (); ++k)
+  for (std::size_t k = 0; k < indices_in.indices.size (); ++k)
   {
     int i = indices_in.indices[k];
     // if we already processed this point continue with the next one
@@ -105,7 +105,7 @@ seededHueSegmentation (const boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGB>
       result_device.sizes.download (sizes);
       result_device.data.download (data);
 
-      for(size_t qp = 0; qp < sizes.size (); qp++)
+      for(std::size_t qp = 0; qp < sizes.size (); qp++)
       {
         for(int qp_r = 0; qp_r < sizes[qp]; qp_r++)
         {
@@ -117,7 +117,7 @@ seededHueSegmentation (const boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGB>
           PointXYZHSV h_l;
           PointXYZRGBtoXYZHSV(p_l, h_l);
 
-          if (fabs(h_l.h - h.h) < delta_hue)
+          if (std::abs(h_l.h - h.h) < delta_hue)
           {
             processed[data[qp_r + qp * max_answers]] = true;
             queries_host.push_back (host_cloud_->points[data[qp_r + qp * max_answers]]);
@@ -126,7 +126,7 @@ seededHueSegmentation (const boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGB>
         }
       }
     }
-    for(size_t qp = 0; qp < sizes.size (); qp++)
+    for(std::size_t qp = 0; qp < sizes.size (); qp++)
     {
       for(int qp_r = 0; qp_r < sizes[qp]; qp_r++)
       {

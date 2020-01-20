@@ -42,9 +42,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/features/rsd.h>
 #include <pcl/features/normal_3d.h>
-#include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/io/pcd_io.h>
-
 
 using namespace pcl;
 using namespace pcl::io;
@@ -52,7 +50,7 @@ using namespace std;
 
 search::KdTree<PointXYZ>::Ptr tree (new search::KdTree<PointXYZ> ());
 PointCloud<PointXYZ>::Ptr cloud (new PointCloud<PointXYZ> ());
-vector<int> indices;
+std::vector<int> indices;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 TEST (PCL, RSDEstimation)
@@ -84,10 +82,7 @@ TEST (PCL, RSDEstimation)
   rsd.setSaveHistograms (true);
   rsd.compute (*rsds);
 
-  typedef std::vector<Eigen::MatrixXf, Eigen::aligned_allocator<Eigen::MatrixXf> > vec_matrixXf;
-  boost::shared_ptr<vec_matrixXf> mat (new vec_matrixXf);
-
-  mat = rsd.getHistograms();
+  auto mat = rsd.getHistograms();
 
   EXPECT_EQ (1, (*mat)[140](0, 0));
   EXPECT_EQ (3, (*mat)[140](0, 1));

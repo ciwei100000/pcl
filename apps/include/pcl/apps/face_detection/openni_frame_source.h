@@ -1,16 +1,17 @@
-#ifndef OPENNI_CAPTURE_H
-#define OPENNI_CAPTURE_H
+#pragma once
 
 #include <pcl/io/openni_grabber.h>
 #include <pcl/visualization/pcl_visualizer.h>
 
+#include <mutex>
+
 namespace OpenNIFrameSource
 {
 
-  typedef pcl::PointXYZRGBA PointT;
-  typedef pcl::PointCloud<PointT> PointCloud;
-  typedef pcl::PointCloud<PointT>::Ptr PointCloudPtr;
-  typedef pcl::PointCloud<PointT>::ConstPtr PointCloudConstPtr;
+  using PointT = pcl::PointXYZRGBA;
+  using PointCloud = pcl::PointCloud<PointT>;
+  using PointCloudPtr = pcl::PointCloud<PointT>::Ptr;
+  using PointCloudConstPtr = pcl::PointCloud<PointT>::ConstPtr;
 
   /* A simple class for capturing data from an OpenNI camera */
   class PCL_EXPORTS OpenNIFrameSource
@@ -33,10 +34,8 @@ namespace OpenNIFrameSource
     pcl::OpenNIGrabber grabber_;
     PointCloudPtr most_recent_frame_;
     int frame_counter_;
-    boost::mutex mutex_;
+    std::mutex mutex_;
     bool active_;
   };
 
 }
-
-#endif

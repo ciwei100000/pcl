@@ -58,25 +58,25 @@ pcl::EarClipping::performProcessing (PolygonMesh& output)
 {
   output.polygons.clear ();
   output.cloud = input_mesh_->cloud;
-  for (int i = 0; i < static_cast<int> (input_mesh_->polygons.size ()); ++i)
-    triangulate (input_mesh_->polygons[i], output);
+  for (const auto &polygon : input_mesh_->polygons)
+    triangulate (polygon, output);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl::EarClipping::triangulate (const Vertices& vertices, PolygonMesh& output)
 {
-  const int n_vertices = static_cast<const int> (vertices.vertices.size ());
+  const int n_vertices = static_cast<int> (vertices.vertices.size ());
 
   if (n_vertices < 3)
     return;
-  else if (n_vertices == 3)
+  if (n_vertices == 3)
   {
     output.polygons.push_back( vertices );
     return;
   }
 
-  std::vector<uint32_t> remaining_vertices (n_vertices);
+  std::vector<std::uint32_t> remaining_vertices (n_vertices);
   if (area (vertices.vertices) > 0) // clockwise?
     remaining_vertices = vertices.vertices;
   else
@@ -112,7 +112,7 @@ pcl::EarClipping::triangulate (const Vertices& vertices, PolygonMesh& output)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 float
-pcl::EarClipping::area (const std::vector<uint32_t>& vertices)
+pcl::EarClipping::area (const std::vector<std::uint32_t>& vertices)
 {
     //if the polygon is projected onto the xy-plane, the area of the polygon is determined
     //by the trapeze formula of Gauss. However this fails, if the projection is one 'line'.
@@ -149,7 +149,7 @@ pcl::EarClipping::area (const std::vector<uint32_t>& vertices)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 bool
-pcl::EarClipping::isEar (int u, int v, int w, const std::vector<uint32_t>& vertices)
+pcl::EarClipping::isEar (int u, int v, int w, const std::vector<std::uint32_t>& vertices)
 {
   Eigen::Vector3f p_u, p_v, p_w;
   p_u = points_->points[vertices[u]].getVector3fMap();

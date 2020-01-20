@@ -37,8 +37,7 @@
  * $Id$
  */
 
-#ifndef PCL_OCTREE_VOXELCENTROID_H
-#define PCL_OCTREE_VOXELCENTROID_H
+#pragma once
 
 #include <pcl/octree/octree_pointcloud.h>
 
@@ -61,7 +60,7 @@ namespace pcl
         }
 
         /** \brief Empty class deconstructor. */
-        virtual ~OctreePointCloudVoxelCentroidContainer ()
+        ~OctreePointCloudVoxelCentroidContainer ()
         {
         }
 
@@ -75,7 +74,7 @@ namespace pcl
         /** \brief Equal comparison operator - set to false
          */
          // param[in] OctreePointCloudVoxelCentroidContainer to compare with
-        virtual bool operator==(const OctreeContainerBase&) const
+        bool operator==(const OctreeContainerBase&) const override
         {
           return ( false );
         }
@@ -113,8 +112,8 @@ namespace pcl
         }
 
         /** \brief Reset leaf container. */
-        virtual void 
-        reset ()
+        void 
+        reset () override
         {
           using namespace pcl::common;
 
@@ -142,12 +141,12 @@ namespace pcl
     class OctreePointCloudVoxelCentroid : public OctreePointCloud<PointT, LeafContainerT, BranchContainerT>
     {
       public:
-        typedef boost::shared_ptr<OctreePointCloudVoxelCentroid<PointT, LeafContainerT> > Ptr;
-        typedef boost::shared_ptr<const OctreePointCloudVoxelCentroid<PointT, LeafContainerT> > ConstPtr;
+        using Ptr = shared_ptr<OctreePointCloudVoxelCentroid<PointT, LeafContainerT> >;
+        using ConstPtr = shared_ptr<const OctreePointCloudVoxelCentroid<PointT, LeafContainerT> >;
 
-        typedef OctreePointCloud<PointT, LeafContainerT, BranchContainerT> OctreeT;
-        typedef typename OctreeT::LeafNode LeafNode;
-        typedef typename OctreeT::BranchNode BranchNode;
+        using OctreeT = OctreePointCloud<PointT, LeafContainerT, BranchContainerT>;
+        using LeafNode = typename OctreeT::LeafNode;
+        using BranchNode = typename OctreeT::BranchNode;
 
         /** \brief OctreePointCloudVoxelCentroids class constructor.
           * \param[in] resolution_arg octree resolution at lowest octree level
@@ -158,7 +157,7 @@ namespace pcl
         }
 
         /** \brief Empty class deconstructor. */
-        virtual
+        
         ~OctreePointCloudVoxelCentroid ()
         {
         }
@@ -166,8 +165,8 @@ namespace pcl
         /** \brief Add DataT object to leaf node at octree key.
           * \param pointIdx_arg
           */
-        virtual void 
-        addPointIdx (const int pointIdx_arg)
+        void 
+        addPointIdx (const int pointIdx_arg) override
         {
           OctreeKey key;
 
@@ -211,7 +210,7 @@ namespace pcl
           * \param[out] voxel_centroid_list_arg results are written to this vector of PointT elements
           * \return number of occupied voxels
           */
-        size_t
+        std::size_t
         getVoxelCentroids (typename OctreePointCloud<PointT, LeafContainerT, BranchContainerT>::AlignedPointTVector &voxel_centroid_list_arg) const;
 
         /** \brief Recursively explore the octree and output a PointT vector of centroids for all occupied voxels.
@@ -230,6 +229,3 @@ namespace pcl
 
 // Note: Don't precompile this octree type to speed up compilation. It's probably rarely used.
 #include <pcl/octree/impl/octree_pointcloud_voxelcentroid.hpp>
-
-#endif
-

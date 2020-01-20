@@ -45,7 +45,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 pcl::modeler::RenderWindowItem::RenderWindowItem(QTreeWidget * parent)
   : QTreeWidgetItem(parent),
-  AbstractItem(),
   render_window_(new RenderWindow(this)),
   background_color_(new ColorParameter("Background Color", "The background color of the render window", QColor(0, 0, 0))),
   show_axes_(new BoolParameter("Show Axes", "Show Axes", true))
@@ -82,7 +81,7 @@ pcl::modeler::RenderWindowItem::openPointCloud(const QString& filename)
 pcl::modeler::CloudMeshItem*
 pcl::modeler::RenderWindowItem::addPointCloud(CloudMesh::PointCloudPtr cloud)
 {
-  CloudMeshItem* cloud_mesh_item = new CloudMeshItem(this, cloud);
+  CloudMeshItem* cloud_mesh_item = new CloudMeshItem(this, std::move(cloud));
   addChild(cloud_mesh_item);
 
   treeWidget()->setCurrentItem(cloud_mesh_item);

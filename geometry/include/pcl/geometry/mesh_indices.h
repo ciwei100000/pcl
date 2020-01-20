@@ -40,8 +40,7 @@
 
 // NOTE: This file has been created with 'pcl_src/geometry/include/pcl/geometry/mesh_indices.py'
 
-#ifndef PCL_GEOMETRY_MESH_INDICES_H
-#define PCL_GEOMETRY_MESH_INDICES_H
+#pragma once
 
 #include <iostream>
 
@@ -67,10 +66,10 @@ namespace pcl
     {
       public:
 
-        typedef boost::totally_ordered <pcl::geometry::VertexIndex,
-                boost::unit_steppable  <pcl::geometry::VertexIndex,
-                boost::additive        <pcl::geometry::VertexIndex> > > Base;
-        typedef pcl::geometry::VertexIndex                              Self;
+        using Base = boost::totally_ordered <pcl::geometry::VertexIndex,
+                     boost::unit_steppable  <pcl::geometry::VertexIndex,
+                     boost::additive        <pcl::geometry::VertexIndex> > >;
+        using Self = pcl::geometry::VertexIndex;
 
         /** \brief Constructor. Initializes with an invalid index. */
         VertexIndex ()
@@ -206,10 +205,10 @@ namespace pcl
     {
       public:
 
-        typedef boost::totally_ordered <pcl::geometry::HalfEdgeIndex,
-                boost::unit_steppable  <pcl::geometry::HalfEdgeIndex,
-                boost::additive        <pcl::geometry::HalfEdgeIndex> > > Base;
-        typedef pcl::geometry::HalfEdgeIndex                              Self;
+        using Base = boost::totally_ordered <pcl::geometry::HalfEdgeIndex,
+                     boost::unit_steppable  <pcl::geometry::HalfEdgeIndex,
+                     boost::additive        <pcl::geometry::HalfEdgeIndex> > >;
+        using Self = pcl::geometry::HalfEdgeIndex;
 
         /** \brief Constructor. Initializes with an invalid index. */
         HalfEdgeIndex ()
@@ -345,10 +344,10 @@ namespace pcl
     {
       public:
 
-        typedef boost::totally_ordered <pcl::geometry::EdgeIndex,
-                boost::unit_steppable  <pcl::geometry::EdgeIndex,
-                boost::additive        <pcl::geometry::EdgeIndex> > > Base;
-        typedef pcl::geometry::EdgeIndex                              Self;
+        using Base = boost::totally_ordered <pcl::geometry::EdgeIndex,
+                     boost::unit_steppable  <pcl::geometry::EdgeIndex,
+                     boost::additive        <pcl::geometry::EdgeIndex> > >;
+        using Self = pcl::geometry::EdgeIndex;
 
         /** \brief Constructor. Initializes with an invalid index. */
         EdgeIndex ()
@@ -484,10 +483,10 @@ namespace pcl
     {
       public:
 
-        typedef boost::totally_ordered <pcl::geometry::FaceIndex,
-                boost::unit_steppable  <pcl::geometry::FaceIndex,
-                boost::additive        <pcl::geometry::FaceIndex> > > Base;
-        typedef pcl::geometry::FaceIndex                              Self;
+        using Base = boost::totally_ordered <pcl::geometry::FaceIndex,
+                     boost::unit_steppable  <pcl::geometry::FaceIndex,
+                     boost::additive        <pcl::geometry::FaceIndex> > >;
+        using Self = pcl::geometry::FaceIndex;
 
         /** \brief Constructor. Initializes with an invalid index. */
         FaceIndex ()
@@ -629,5 +628,3 @@ namespace pcl
     }
   } // End namespace geometry
 } // End namespace pcl
-
-#endif // PCL_GEOMETRY_MESH_INDICES_H

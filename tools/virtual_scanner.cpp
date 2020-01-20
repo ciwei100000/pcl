@@ -43,6 +43,8 @@
   * it noisifies the PCD models, and downsamples them. 
   * The viewpoint can be set to 1 or multiple views on a sphere.
   */
+
+#include <random>
 #include <string>
 #include <pcl/register_point_struct.h>
 #include <pcl/io/pcd_io.h>
@@ -82,18 +84,15 @@ loadDataSet (const char* file_name)
     reader->Update ();
     return (reader->GetOutput ());
   }
-  else if (extension == ".vtk")
+  if (extension == ".vtk")
   {
     vtkPolyDataReader* reader = vtkPolyDataReader::New ();
     reader->SetFileName (file_name);
     reader->Update ();
     return (reader->GetOutput ());
   }
-  else
-  {
-    PCL_ERROR ("Needs a VTK/PLY file to continue.\n");
-    return (NULL);
-  }
+  PCL_ERROR ("Needs a VTK/PLY file to continue.\n");
+  return (nullptr);
 }
 
 int
@@ -192,9 +191,9 @@ main (int argc, char** argv)
   grid.setLeafSize (2.5, 2.5, 2.5);    // @note: this value should be given in mm!
 
   // Reset and set a random seed for the Global Random Number Generator
-  boost::mt19937 rng (static_cast<unsigned int> (std::time (0)));
-  boost::normal_distribution<float> normal_distrib (0.0f, noise_std * noise_std);
-  boost::variate_generator<boost::mt19937&, boost::normal_distribution<float> > gaussian_rng (rng, normal_distrib);
+  std::random_device rd;
+  std::mt19937 rng(rd());
+  std::normal_distribution<float> nd (0.0f, noise_std * noise_std);
 
   std::vector<std::string> st;
   // Virtual camera parameters
@@ -247,9 +246,9 @@ main (int argc, char** argv)
   for (int i = 0; i < number_of_points; i++)
   {
     sphere->GetPoint (i, eye);
-    if (fabs(eye[0]) < EPS) eye[0] = 0;
-    if (fabs(eye[1]) < EPS) eye[1] = 0;
-    if (fabs(eye[2]) < EPS) eye[2] = 0;
+    if (std::abs(eye[0]) < EPS) eye[0] = 0;
+    if (std::abs(eye[1]) < EPS) eye[1] = 0;
+    if (std::abs(eye[2]) < EPS) eye[2] = 0;
 
     viewray[0] = -eye[0];
     viewray[1] = -eye[1];
@@ -281,14 +280,14 @@ main (int argc, char** argv)
       vtkMath::Cross (viewray, x_axis, right);
     else
       vtkMath::Cross (viewray, z_axis, right);
-    if (fabs(right[0]) < EPS) right[0] = 0;
-    if (fabs(right[1]) < EPS) right[1] = 0;
-    if (fabs(right[2]) < EPS) right[2] = 0;
+    if (std::abs(right[0]) < EPS) right[0] = 0;
+    if (std::abs(right[1]) < EPS) right[1] = 0;
+    if (std::abs(right[2]) < EPS) right[2] = 0;
 
     vtkMath::Cross (viewray, right, up);
-    if (fabs(up[0]) < EPS) up[0] = 0;
-    if (fabs(up[1]) < EPS) up[1] = 0;
-    if (fabs(up[2]) < EPS) up[2] = 0;
+    if (std::abs(up[0]) < EPS) up[0] = 0;
+    if (std::abs(up[1]) < EPS) up[1] = 0;
+    if (std::abs(up[2]) < EPS) up[2] = 0;
 
     if (!object_coordinates)
     {
@@ -303,10 +302,10 @@ main (int argc, char** argv)
       up[2] /= up_len;
     
       // Output resulting vectors
-      cerr << "Viewray Right Up:" << endl;
-      cerr << viewray[0] << " " << viewray[1] << " " << viewray[2] << " " << endl;
-      cerr << right[0] << " " << right[1] << " " << right[2] << " " << endl;
-      cerr << up[0] << " " << up[1] << " " << up[2] << " " << endl;
+      std::cerr << "Viewray Right Up:" << std::endl;
+      std::cerr << viewray[0] << " " << viewray[1] << " " << viewray[2] << " " << std::endl;
+      std::cerr << right[0] << " " << right[1] << " " << right[2] << " " << std::endl;
+      std::cerr << up[0] << " " << up[1] << " " << up[2] << " " << std::endl;
     }
 
     // Create a transformation
@@ -382,13 +381,13 @@ main (int argc, char** argv)
 
     // Noisify each point in the dataset
     // \note: we might decide to noisify along the ray later
-    for (size_t cp = 0; cp < cloud.points.size (); ++cp)
+    for (auto &point : cloud.points)
     {
       // Add noise ?
       switch (noise_model)
       {
         // Gaussian
-        case 1: { cloud.points[cp].x += gaussian_rng (); cloud.points[cp].y += gaussian_rng (); cloud.points[cp].z += gaussian_rng (); break; }
+        case 1: { point.x += nd (rng); point.y += nd (rng); point.z += nd (rng); break; }
       }
     }
 
@@ -421,18 +420,18 @@ main (int argc, char** argv)
 
     if (organized)
     {
-      cloud.height = 1 + static_cast<uint32_t> ((vert_end - vert_start) / sp.vert_res);
-      cloud.width = 1 + static_cast<uint32_t> ((hor_end - hor_start) / sp.hor_res);
+      cloud.height = 1 + static_cast<std::uint32_t> ((vert_end - vert_start) / sp.vert_res);
+      cloud.width = 1 + static_cast<std::uint32_t> ((hor_end - hor_start) / sp.hor_res);
     }
     else
     {
-      cloud.width = static_cast<uint32_t> (cloud.points.size ());
+      cloud.width = static_cast<std::uint32_t> (cloud.points.size ());
       cloud.height = 1;
     }
 
     pcl::PCDWriter writer;
     PCL_INFO ("Wrote %lu points (%d x %d) to %s\n", cloud.points.size (), cloud.width, cloud.height, fname.c_str ());
-    writer.writeBinaryCompressed (fname.c_str (), cloud);
+    writer.writeBinaryCompressed (fname, cloud);
   } // sphere
   return (0);
 }

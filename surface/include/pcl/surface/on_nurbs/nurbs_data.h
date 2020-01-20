@@ -35,15 +35,16 @@
  *
  */
 
-#ifndef NURBS_DATA_H
-#define NURBS_DATA_H
+#pragma once
 
 #include <vector>
 #include <list>
-#include <stdio.h>
+#include <cstdio>
 
 #undef Success
 #include <Eigen/StdVector>
+
+#include <pcl/pcl_macros.h>
 
 namespace pcl
 {
@@ -129,7 +130,7 @@ namespace pcl
         common_boundary_param.clear ();
       }
 
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      PCL_MAKE_ALIGNED_OPERATOR_NEW
     };
 
     /** \brief Data structure for 3D NURBS curve fitting
@@ -158,7 +159,7 @@ namespace pcl
         interior_normals.clear ();
       }
 
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      PCL_MAKE_ALIGNED_OPERATOR_NEW
     };
 
     /** \brief Data structure for 2D NURBS curve fitting
@@ -204,11 +205,8 @@ namespace pcl
         interior_normals.clear ();
       }
 
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+      PCL_MAKE_ALIGNED_OPERATOR_NEW
     };
 
   }
 }
-
-#endif
-

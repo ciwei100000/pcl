@@ -88,7 +88,7 @@ and save the results to disk.
     float
     G (float x, float sigma)
     {
-      return exp (- (x*x)/(2*sigma*sigma));
+      return std::exp (- (x*x)/(2*sigma*sigma));
     }
 
     int
@@ -124,11 +124,11 @@ and save the results to disk.
         tree->radiusSearch (point_id, 2 * sigma_s, k_indices, k_distances);
 
         // For each neighbor
-        for (size_t n_id = 0; n_id < k_indices.size (); ++n_id)
+        for (std::size_t n_id = 0; n_id < k_indices.size (); ++n_id)
         {
           float id = k_indices.at (n_id);
           float dist = sqrt (k_distances.at (n_id));
-          float intensity_dist = abs (cloud->points[point_id].intensity - cloud->points[id].intensity);
+          float intensity_dist = std::abs (cloud->points[point_id].intensity - cloud->points[id].intensity);
 
           float w_a = G (dist, sigma_s);
           float w_b = G (intensity_dist, sigma_r);
@@ -575,7 +575,7 @@ header file becomes:
           inline double
           kernel (double x, double sigma)
           {
-            return (exp (- (x*x)/(2*sigma*sigma)));
+            return (std::exp (- (x*x)/(2*sigma*sigma)));
           }
 
           double sigma_s_;
@@ -603,11 +603,11 @@ There're two methods that we need to implement here, namely `applyFilter` and
       double BF = 0, W = 0;
 
       // For each neighbor
-      for (size_t n_id = 0; n_id < indices.size (); ++n_id)
+      for (std::size_t n_id = 0; n_id < indices.size (); ++n_id)
       {
         double id = indices[n_id];
         double dist = std::sqrt (distances[n_id]);
-        double intensity_dist = abs (input_->points[pid].intensity - input_->points[id].intensity);
+        double intensity_dist = std::abs (input_->points[pid].intensity - input_->points[id].intensity);
 
         double weight = kernel (dist, sigma_s_) * kernel (intensity_dist, sigma_r_);
 
@@ -627,7 +627,7 @@ There're two methods that we need to implement here, namely `applyFilter` and
 
       output = *input_;
 
-      for (size_t point_id = 0; point_id < input_->points.size (); ++point_id)
+      for (std::size_t point_id = 0; point_id < input_->points.size (); ++point_id)
       {
         tree_->radiusSearch (point_id, sigma_s_ * 2, k_indices, k_distances);
 
@@ -724,11 +724,11 @@ The implementation file header thus becomes:
       double BF = 0, W = 0;
 
       // For each neighbor
-      for (size_t n_id = 0; n_id < indices.size (); ++n_id)
+      for (std::size_t n_id = 0; n_id < indices.size (); ++n_id)
       {
         double id = indices[n_id];
         double dist = std::sqrt (distances[n_id]);
-        double intensity_dist = abs (input_->points[pid].intensity - input_->points[id].intensity);
+        double intensity_dist = std::abs (input_->points[pid].intensity - input_->points[id].intensity);
 
         double weight = kernel (dist, sigma_s_) * kernel (intensity_dist, sigma_r_);
 
@@ -760,7 +760,7 @@ The implementation file header thus becomes:
 
       output = *input_;
 
-      for (size_t point_id = 0; point_id < input_->points.size (); ++point_id)
+      for (std::size_t point_id = 0; point_id < input_->points.size (); ++point_id)
       {
         tree_->radiusSearch (point_id, sigma_s_ * 2, k_indices, k_distances);
 
@@ -839,11 +839,11 @@ The implementation file header thus becomes:
       double BF = 0, W = 0;
 
       // For each neighbor
-      for (size_t n_id = 0; n_id < indices.size (); ++n_id)
+      for (std::size_t n_id = 0; n_id < indices.size (); ++n_id)
       {
         double id = indices[n_id];
         double dist = std::sqrt (distances[n_id]);
-        double intensity_dist = abs (input_->points[pid].intensity - input_->points[id].intensity);
+        double intensity_dist = std::abs (input_->points[pid].intensity - input_->points[id].intensity);
 
         double weight = kernel (dist, sigma_s_) * kernel (intensity_dist, sigma_r_);
 
@@ -875,7 +875,7 @@ The implementation file header thus becomes:
 
       output = *input_;
 
-      for (size_t i = 0; i < indices_->size (); ++i)
+      for (std::size_t i = 0; i < indices_->size (); ++i)
       {
         tree_->radiusSearch ((*indices_)[i], sigma_s_ * 2, k_indices, k_distances);
 
@@ -1118,7 +1118,7 @@ class look like:
           inline double
           kernel (double x, double sigma)
           {
-            return (exp (- (x*x)/(2*sigma*sigma)));
+            return (std::exp (- (x*x)/(2*sigma*sigma)));
           }
 
           /** \brief The half size of the Gaussian bilateral filter window (e.g., spatial extents in Euclidean). */
@@ -1191,11 +1191,11 @@ And the *bilateral.hpp* likes:
       double BF = 0, W = 0;
 
       // For each neighbor
-      for (size_t n_id = 0; n_id < indices.size (); ++n_id)
+      for (std::size_t n_id = 0; n_id < indices.size (); ++n_id)
       {
         double id = indices[n_id];
         // Compute the difference in intensity
-        double intensity_dist = abs (input_->points[pid].intensity - input_->points[id].intensity);
+        double intensity_dist = std::abs (input_->points[pid].intensity - input_->points[id].intensity);
 
         // Compute the Gaussian intensity weights both in Euclidean and in intensity space
         double dist = std::sqrt (distances[n_id]);
@@ -1237,7 +1237,7 @@ And the *bilateral.hpp* likes:
       output = *input_;
 
       // For all the indices given (equal to the entire cloud if none given)
-      for (size_t i = 0; i < indices_->size (); ++i)
+      for (std::size_t i = 0; i < indices_->size (); ++i)
       {
         // Perform a radius search to find the nearest neighbors
         tree_->radiusSearch ((*indices_)[i], sigma_s_ * 2, k_indices, k_distances);

@@ -35,8 +35,7 @@
  *
  */
 
-#ifndef PCL_PPFRGB_H_
-#define PCL_PPFRGB_H_
+#pragma once
 
 #include <pcl/features/feature.h>
 #include <pcl/features/boost.h>
@@ -53,7 +52,7 @@ namespace pcl
       using Feature<PointInT, PointOutT>::getClassName;
       using FeatureFromNormals<PointInT, PointNT, PointOutT>::normals_;
 
-      typedef pcl::PointCloud<PointOutT> PointCloudOut;
+      using PointCloudOut = pcl::PointCloud<PointOutT>;
 
       /**
         * \brief Empty Constructor
@@ -73,8 +72,8 @@ namespace pcl
   class PPFRGBRegionEstimation : public FeatureFromNormals<PointInT, PointNT, PointOutT>
   {
     public:
-      typedef boost::shared_ptr<PPFRGBRegionEstimation<PointInT, PointNT, PointOutT> > Ptr;
-      typedef boost::shared_ptr<const PPFRGBRegionEstimation<PointInT, PointNT, PointOutT> > ConstPtr;
+      using Ptr = shared_ptr<PPFRGBRegionEstimation<PointInT, PointNT, PointOutT> >;
+      using ConstPtr = shared_ptr<const PPFRGBRegionEstimation<PointInT, PointNT, PointOutT> >;
       using PCLBase<PointInT>::indices_;
       using Feature<PointInT, PointOutT>::input_;
       using Feature<PointInT, PointOutT>::feature_name_;
@@ -83,18 +82,16 @@ namespace pcl
       using Feature<PointInT, PointOutT>::getClassName;
       using FeatureFromNormals<PointInT, PointNT, PointOutT>::normals_;
 
-      typedef pcl::PointCloud<PointOutT> PointCloudOut;
+      using PointCloudOut = pcl::PointCloud<PointOutT>;
 
       PPFRGBRegionEstimation ();
 
     private:
       void
-      computeFeature (PointCloudOut &output);
+      computeFeature (PointCloudOut &output) override;
   };
 }
 
 #ifdef PCL_NO_PRECOMPILE
 #include <pcl/features/impl/ppfrgb.hpp>
 #endif
-
-#endif // PCL_PPFRGB_H_

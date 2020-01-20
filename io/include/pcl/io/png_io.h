@@ -37,8 +37,7 @@
  * Authors: Anatoly Baksheev
  */
 
-#ifndef PCL_IO_PNG_IO_H_
-#define PCL_IO_PNG_IO_H_
+#pragma once
 
 #include <pcl/pcl_macros.h>
 #include <pcl/point_cloud.h>
@@ -118,7 +117,7 @@ namespace pcl
     template <typename PointT> void
     savePNGFile (const std::string& file_name, const pcl::PointCloud<PointT>& cloud, const std::string& field_name)
     {
-      typedef typename PointCloudImageExtractor<PointT>::Ptr PointCloudImageExtractorPtr;
+      using PointCloudImageExtractorPtr = typename PointCloudImageExtractor<PointT>::Ptr;
       PointCloudImageExtractorPtr pcie;
       if (field_name == "normal")
       {
@@ -162,5 +161,3 @@ namespace pcl
 
   }
 }
-
-#endif  //#ifndef PCL_IO_PNG_IO_H_
