@@ -45,26 +45,26 @@ Depends: libboost-all-dev,
 	 libvtk7-qt-dev,
 	 libopenni-dev [!s390x !alpha !hppa !hurd-i386 !ia64 !kfreebsd-any !m68k !riscv64 !sh4 !sparc64],
 	 libopenni2-dev [!hurd-i386 !hppa !kfreebsd-any],
-	 libpcl-apps1.9 (= ${binary:Version}),
-	 libpcl-common1.9 (= ${binary:Version}),
-	 libpcl-features1.9 (= ${binary:Version}),
-	 libpcl-filters1.9 (= ${binary:Version}),
-	 libpcl-io1.9 (= ${binary:Version}),
-	 libpcl-kdtree1.9 (= ${binary:Version}),
-	 libpcl-keypoints1.9 (= ${binary:Version}),
-	 libpcl-ml1.9 (= ${binary:Version}),
-	 libpcl-octree1.9 (= ${binary:Version}),
-	 libpcl-outofcore1.9 (= ${binary:Version}),
-	 libpcl-people1.9 (= ${binary:Version}),
-	 libpcl-recognition1.9 (= ${binary:Version}),
-	 libpcl-registration1.9 (= ${binary:Version}),
-	 libpcl-sample-consensus1.9 (= ${binary:Version}),
-	 libpcl-search1.9 (= ${binary:Version}),
-	 libpcl-segmentation1.9 (= ${binary:Version}),
-	 libpcl-stereo1.9 (= ${binary:Version}),
-	 libpcl-surface1.9 (= ${binary:Version}),
-	 libpcl-tracking1.9 (= ${binary:Version}),
-	 libpcl-visualization1.9 (= ${binary:Version}),
+	 libpcl-apps1.10 (= ${binary:Version}),
+	 libpcl-common1.10 (= ${binary:Version}),
+	 libpcl-features1.10 (= ${binary:Version}),
+	 libpcl-filters1.10 (= ${binary:Version}),
+	 libpcl-io1.10 (= ${binary:Version}),
+	 libpcl-kdtree1.10 (= ${binary:Version}),
+	 libpcl-keypoints1.10 (= ${binary:Version}),
+	 libpcl-ml1.10 (= ${binary:Version}),
+	 libpcl-octree1.10 (= ${binary:Version}),
+	 libpcl-outofcore1.10 (= ${binary:Version}),
+	 libpcl-people1.10 (= ${binary:Version}),
+	 libpcl-recognition1.10 (= ${binary:Version}),
+	 libpcl-registration1.10 (= ${binary:Version}),
+	 libpcl-sample-consensus1.10 (= ${binary:Version}),
+	 libpcl-search1.10 (= ${binary:Version}),
+	 libpcl-segmentation1.10 (= ${binary:Version}),
+	 libpcl-stereo1.10 (= ${binary:Version}),
+	 libpcl-surface1.10 (= ${binary:Version}),
+	 libpcl-tracking1.10 (= ${binary:Version}),
+	 libpcl-visualization1.10 (= ${binary:Version}),
 	 ${misc:Depends}
 Suggests: libpcl-doc
 Breaks: libvtk6-dev,
@@ -82,7 +82,7 @@ Description: Point Cloud Library - development files
  This package contains development files (headers and shared library
  symbolic link).
 
-Package: libpcl-apps1.9
+Package: libpcl-apps1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -96,7 +96,7 @@ Description: Point Cloud Library - apps library
  This package contains the libraries needed to run applications depending 
  on PCL apps.
 
-Package: libpcl-common1.9
+Package: libpcl-common1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -112,7 +112,7 @@ Description: Point Cloud Library - common library
  .
  This package contains the PCL common library.
 
-Package: libpcl-features1.9
+Package: libpcl-features1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -128,7 +128,7 @@ Description: Point Cloud Library - features library
  .
  This package contains the PCL features library.
 
-Package: libpcl-filters1.9
+Package: libpcl-filters1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -144,7 +144,7 @@ Description: Point Cloud Library - filters library
  .
  This package contains the PCL filters library.
 
-Package: libpcl-io1.9
+Package: libpcl-io1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -161,7 +161,7 @@ Description: Point Cloud Library - I/O library
  This package contains the libraries needed to run applications 
  depending on PCL io.
 
-Package: libpcl-kdtree1.9
+Package: libpcl-kdtree1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -177,7 +177,7 @@ Description: Point Cloud Library - kdtree library
  .
  This package contains the PCL kdtree library.
 
-Package: libpcl-keypoints1.9
+Package: libpcl-keypoints1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -193,7 +193,7 @@ Description: Point Cloud Library - keypoints library
  .
  This package contains the PCL keypoints library.
 
-Package: libpcl-ml1.9
+Package: libpcl-ml1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -209,7 +209,7 @@ Description: Point Cloud Library - ml library
  .
  This package contains the PCL ml library.
 
-Package: libpcl-octree1.9
+Package: libpcl-octree1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -225,7 +225,7 @@ Description: Point Cloud Library - octree library
  .
  This package contains the PCL octree library.
 
-Package: libpcl-outofcore1.9
+Package: libpcl-outofcore1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -239,7 +239,7 @@ Description: Point Cloud Library - outofcore library
  This package contains the libraries needed to run applications 
  depending on PCL outofcore.
 
-Package: libpcl-people1.9
+Package: libpcl-people1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -253,7 +253,7 @@ Description: Point Cloud Library - people library
  This package contains the libraries needed to run applications 
  depending on PCL people.
 
-Package: libpcl-recognition1.9
+Package: libpcl-recognition1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -267,7 +267,7 @@ Description: Point Cloud Library - recognition library
  This package contains the libraries needed to run applications 
  depending on PCL recognition.
 
-Package: libpcl-registration1.9
+Package: libpcl-registration1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -283,7 +283,7 @@ Description: Point Cloud Library - registration library
  .
  This package contains the PCL registration library.
 
-Package: libpcl-sample-consensus1.9
+Package: libpcl-sample-consensus1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -299,7 +299,7 @@ Description: Point Cloud Library - sample consensus library
  .
  This package contains the PCL sample consensus library.
 
-Package: libpcl-search1.9
+Package: libpcl-search1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -315,7 +315,7 @@ Description: Point Cloud Library - search library
  .
  This package contains the PCL search library.
 
-Package: libpcl-segmentation1.9
+Package: libpcl-segmentation1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -331,7 +331,7 @@ Description: Point Cloud Library - segmentation library
  .
  This package contains the PCL segmentation library.
 
-Package: libpcl-stereo1.9
+Package: libpcl-stereo1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -347,7 +347,7 @@ Description: Point Cloud Library - stereo library
  .
  This package contains the PCL stereo library.
 
-Package: libpcl-surface1.9
+Package: libpcl-surface1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -363,7 +363,7 @@ Description: Point Cloud Library - surface library
  .
  This package contains the PCL surface library.
 
-Package: libpcl-tracking1.9
+Package: libpcl-tracking1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -379,7 +379,7 @@ Description: Point Cloud Library - tracking library
  .
  This package contains the PCL tracking library.
 
-Package: libpcl-visualization1.9
+Package: libpcl-visualization1.10
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
