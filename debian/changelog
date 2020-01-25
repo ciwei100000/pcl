@@ -1,3 +1,14 @@
+pcl (1.10.0+dfsg-1) experimental; urgency=medium
+
+  * Update watch and copyright
+  * New upstream version 1.10.0+dfsg
+  * Update d/copyright
+  * update patch
+  * Rename packages due to soVersion bump
+  * switch to debhelper-compat and debhelper 12
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 25 Jan 2020 09:53:21 +0100
+
 pcl (1.9.1+dfsg1-10) unstable; urgency=medium
 
   [ Andreas Beckmann ]
