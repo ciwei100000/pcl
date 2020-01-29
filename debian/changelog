@@ -1,3 +1,9 @@
+pcl (1.10.0+dfsg-2) experimental; urgency=medium
+
+  * Reduce parallel jobs on armhf/el
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Wed, 29 Jan 2020 23:50:58 +0100
+
 pcl (1.10.0+dfsg-1) experimental; urgency=medium
 
   * Update watch and copyright
