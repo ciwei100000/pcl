@@ -1,3 +1,9 @@
+pcl (1.10.0+dfsg-3) unstable; urgency=medium
+
+  * Upload to unstable
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Thu, 30 Jan 2020 22:08:04 +0100
+
 pcl (1.10.0+dfsg-2) experimental; urgency=medium
 
   * Reduce parallel jobs on armhf/el
