@@ -13,8 +13,10 @@ CXXFLAGS+=$(CPPFLAGS)
 
 BUILD_DOC = $(if $(shell dh_listpackages | grep libpcl-doc),-DWITH_DOCS=ON)
 
-ifneq (,$(filter $(DEB_BUILD_ARCH),mips mipsel armhf armel))
+ifneq (,$(filter $(DEB_BUILD_ARCH),mipsel armhf armel))
   PARALLEL=--max-parallel=2
+  export CC=/usr/bin/clang
+  export CXX=/usr/bin/clang++
 else
   PARALLEL=
 endif
