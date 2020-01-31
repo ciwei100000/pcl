@@ -1,3 +1,9 @@
+pcl (1.10.0+dfsg-4) unstable; urgency=medium
+
+  * Use clang where gcc fails due to virtual memory exhaustion
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Fri, 31 Jan 2020 23:12:44 +0100
+
 pcl (1.10.0+dfsg-3) unstable; urgency=medium
 
   * Upload to unstable
