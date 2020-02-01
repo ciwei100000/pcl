@@ -1,3 +1,9 @@
+pcl (1.10.0+dfsg-5) unstable; urgency=medium
+
+  * Add patch to link against atomic (for armel)
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sun, 02 Feb 2020 00:35:04 +0100
+
 pcl (1.10.0+dfsg-4) unstable; urgency=medium
 
   * Use clang where gcc fails due to virtual memory exhaustion
