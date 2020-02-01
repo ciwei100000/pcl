@@ -1,1 +1,2 @@
 0001-Fix-PCL_ROOT-path.patch
+0002-Link-against-atomic-if-needed-found-on-armel.patch

@@ -1,0 +1,47 @@
+From: Jochen Sprickerhof <git@jochen.sprickerhof.de>
+Date: Sun, 2 Feb 2020 00:22:36 +0100
+Subject: Link against atomic if needed (found on armel)
+
+---
+ CMakeLists.txt          | 14 ++++++++++++++
+ cmake/pcl_targets.cmake |  2 +-
+ 2 files changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 93a6448..5df1051 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -82,6 +82,20 @@ elseif(MSVC)
+   set(CMAKE_COMPILER_IS_MSVC 1)
+ endif()
+ 
++# https://github.com/fish-shell/fish-shell/issues/5865
++include(CheckCXXSourceCompiles)
++CHECK_CXX_SOURCE_COMPILES("
++#include <atomic>
++struct big { int foo[64]; };
++std::atomic<big> x;
++int main() {
++   return x.load().foo[13];
++}"
++LIBATOMIC_NOT_NEEDED)
++IF (NOT LIBATOMIC_NOT_NEEDED)
++    SET(ATOMIC_LIBRARY "atomic")
++ENDIF()
++
+ # Create a variable with expected default CXX flags
+ # This will be used further down the road to check if the user explicitly provided CXX flags
+ if(CMAKE_COMPILER_IS_MSVC)
+diff --git a/cmake/pcl_targets.cmake b/cmake/pcl_targets.cmake
+index a50d0d0..e829f09 100644
+--- a/cmake/pcl_targets.cmake
++++ b/cmake/pcl_targets.cmake
+@@ -225,7 +225,7 @@ function(PCL_ADD_LIBRARY _name)
+   # must link explicitly against boost.
+   target_link_libraries(${_name} ${Boost_LIBRARIES} Threads::Threads)
+   if((UNIX AND NOT ANDROID) OR MINGW)
+-    target_link_libraries(${_name} m)
++    target_link_libraries(${_name} m ${ATOMIC_LIBRARY})
+   endif()
+ 
+   if(MINGW)
