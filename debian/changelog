@@ -1,3 +1,9 @@
+pcl (1.10.0+dfsg-5+vtk8) unstable; urgency=medium
+
+  * Build with Vtk8
+
+ -- ciwei100000 <ciwei100000@gmail.com>  Mon, 02 Mar 2020 18:07:22 -0800
+
 pcl (1.10.0+dfsg-5) unstable; urgency=medium
 
   * Add patch to link against atomic (for armel)
