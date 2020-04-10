@@ -1,3 +1,12 @@
+pcl (1.10.1+dfsg-1) unstable; urgency=medium
+
+  * Simplify flags, drop as-needed
+  * New upstream version 1.10.1+dfsg
+  * update copyright
+  * rebase patches
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 11 Apr 2020 01:10:57 +0200
+
 pcl (1.10.0+dfsg-5) unstable; urgency=medium
 
   * Add patch to link against atomic (for armel)
