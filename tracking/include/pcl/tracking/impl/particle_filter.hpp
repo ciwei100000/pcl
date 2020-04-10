@@ -78,7 +78,7 @@ pcl::tracking::ParticleFilterTracker<PointInT, StateT>::genAliasTable (std::vect
     int k = *(H - 1);
     a[j] = k;
     q[k] += q[j] - 1;
-    L++;
+    ++L;
     if ( q[k] < 1.0 )
     {
       *L-- = k;
@@ -91,7 +91,6 @@ template <typename PointInT, typename StateT> void
 pcl::tracking::ParticleFilterTracker<PointInT, StateT>::initParticles (bool reset)
 {
   particles_.reset (new PointCloudState ());
-  std::vector<double> initial_noise_mean;
   if (reset)
   {
     representative_state_.zero ();

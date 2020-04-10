@@ -5,7 +5,7 @@
 [![Release][release-image]][releases]
 [![License][license-image]][license]
 
-[release-image]: https://img.shields.io/badge/release-1.10.0-green.svg?style=flat
+[release-image]: https://img.shields.io/badge/release-1.10.1-green.svg?style=flat
 [releases]: https://github.com/PointCloudLibrary/pcl/releases
 
 [license-image]: https://img.shields.io/badge/license-BSD-green.svg?style=flat
@@ -63,7 +63,7 @@ Please refer to the platform specific tutorials:
 Documentation
 -------------
 - [Tutorials](http://www.pointclouds.org/documentation/tutorials/)
-- [PCL trunk documentation](http://docs.pointclouds.org/trunk/) (updated daily)
+- [PCL trunk documentation](https://pointcloudlibrary.github.io/documentation/) (updated nightly)
 
 Contributing
 ------------
