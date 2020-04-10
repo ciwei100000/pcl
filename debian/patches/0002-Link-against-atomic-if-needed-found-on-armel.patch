@@ -8,11 +8,11 @@ Subject: Link against atomic if needed (found on armel)
  2 files changed, 15 insertions(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 93a6448..5df1051 100644
+index f0bc239..a94cddf 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -82,6 +82,20 @@ elseif(MSVC)
-   set(CMAKE_COMPILER_IS_MSVC 1)
+@@ -80,6 +80,20 @@ elseif(MINGW)
+   set(CMAKE_COMPILER_IS_MINGW 1)
  endif()
  
 +# https://github.com/fish-shell/fish-shell/issues/5865
@@ -33,7 +33,7 @@ index 93a6448..5df1051 100644
  # This will be used further down the road to check if the user explicitly provided CXX flags
  if(CMAKE_COMPILER_IS_MSVC)
 diff --git a/cmake/pcl_targets.cmake b/cmake/pcl_targets.cmake
-index a50d0d0..e829f09 100644
+index 23fa758..7374f7c 100644
 --- a/cmake/pcl_targets.cmake
 +++ b/cmake/pcl_targets.cmake
 @@ -225,7 +225,7 @@ function(PCL_ADD_LIBRARY _name)
