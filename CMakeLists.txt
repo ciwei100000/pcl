@@ -26,7 +26,7 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "")
   set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "build type default to RelWithDebInfo, set to Release to improve performance" FORCE)
 endif()
 
-project(PCL VERSION 1.10.0)
+project(PCL VERSION 1.10.1)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 ### ---[ Find universal dependencies
@@ -35,10 +35,6 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODUL
 # ---[ Include pkgconfig
 include(FindPkgConfig)
 
-# ---[ Release/Debug specific flags
-if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-  add_definitions("-DBOOST_DISABLE_ASSERTS -DEIGEN_NO_DEBUG")
-endif()
 if(WIN32 AND NOT MINGW)
   set(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Add postfix to target for Debug build.")
   set(CMAKE_RELEASE_POSTFIX "" CACHE STRING "Add postfix to target for Release build.")
@@ -80,6 +76,8 @@ elseif(__COMPILER_PATHSCALE)
   set(CMAKE_COMPILER_IS_PATHSCALE 1)
 elseif(MSVC)
   set(CMAKE_COMPILER_IS_MSVC 1)
+elseif(MINGW)
+  set(CMAKE_COMPILER_IS_MINGW 1)
 endif()
 
 # Create a variable with expected default CXX flags
@@ -144,10 +142,12 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 if(CMAKE_COMPILER_IS_MSVC)
-  add_definitions("-DBOOST_ALL_NO_LIB -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX -DPCL_ONLY_CORE_POINT_TYPES /bigobj ${SSE_DEFINITIONS}")
-
+  add_definitions("-DBOOST_ALL_NO_LIB -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX -DPCL_ONLY_CORE_POINT_TYPES ${SSE_DEFINITIONS}")
+  
+  add_compile_options(/bigobj)
+  
   if("${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj /fp:precise /wd4800 /wd4521 /wd4251 /wd4275 /wd4305 /wd4355 ${SSE_FLAGS_STR}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:precise /wd4800 /wd4521 /wd4251 /wd4275 /wd4305 /wd4355 ${SSE_FLAGS_STR}")
 
     # Add extra code generation/link optimizations
     if(CMAKE_MSVC_CODE_LINK_OPTIMIZATION)
@@ -211,6 +211,10 @@ if(CMAKE_COMPILER_IS_CLANG)
     endif()
   endif()
   set(CLANG_LIBRARIES "stdc++")
+endif()
+
+if(CMAKE_COMPILER_IS_MINGW)
+  add_definitions(-DPCL_ONLY_CORE_POINT_TYPES)
 endif()
 
 include("${PCL_SOURCE_DIR}/cmake/pcl_utils.cmake")
@@ -435,17 +439,14 @@ if(WITH_VTK AND NOT ANDROID)
       elseif(${VTK_RENDERING_BACKEND} STREQUAL "OpenGL2")
         set(VTK_RENDERING_BACKEND_OPENGL_VERSION "2")
       endif()
-      set(HAVE_VTK ON)
     else()
       set(VTK_FOUND OFF)
-      set(HAVE_VTK OFF)
       message("Warning: You are to build PCL in STATIC but VTK is SHARED!")
       message("Warning: VTK disabled!")
     endif()
   endif()
 else()
   set(VTK_FOUND OFF)
-  set(HAVE_VTK OFF)
 endif()
 
 

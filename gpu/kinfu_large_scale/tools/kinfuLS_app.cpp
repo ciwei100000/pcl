@@ -771,16 +771,15 @@ struct KinFuLSApp
   void
   initRegistration ()
   {
-    registration_ = 
-      #ifdef HAVE_OPENNI
-      capture_.providesCallback<pcl::ONIGrabber::sig_cb_openni_image_depth_image> ()
-      #endif
-      #if defined(HAVE_OPENNI) && defined(HAVE_OPENNI2)
-      ||
-      #endif
-      #ifdef HAVE_OPENNI2
-      capture_.providesCallback<pcl::io::OpenNI2Grabber::sig_cb_openni_image_depth_image> ();
-      #endif
+    registration_ =
+    #if defined(HAVE_OPENNI) && !defined(HAVE_OPENNI2)
+    capture_.providesCallback<pcl::ONIGrabber::sig_cb_openni_image_depth_image> ();
+    #elif !defined(HAVE_OPENNI) && defined(HAVE_OPENNI2)
+    capture_.providesCallback<pcl::io::OpenNI2Grabber::sig_cb_openni_image_depth_image> ();
+    #elif defined(HAVE_OPENNI) && defined(HAVE_OPENNI2)
+    capture_.providesCallback<pcl::ONIGrabber::sig_cb_openni_image_depth_image> () ||
+    capture_.providesCallback<pcl::io::OpenNI2Grabber::sig_cb_openni_image_depth_image> ();
+    #endif
     std::cout << "Registration mode: " << (registration_ ? "On" : "Off (not supported by source)") << std::endl;
   }
 
@@ -1010,8 +1009,8 @@ struct KinFuLSApp
     {
       #ifdef HAVE_OPENNI2
       using namespace pcl::io;
-      using DepthImagePtr = shared_ptr<DepthImage>;
-      using ImagePtr = shared_ptr<Image>;
+      using DepthImagePtr = pcl::shared_ptr<DepthImage>;
+      using ImagePtr = pcl::shared_ptr<Image>;
 
       std::function<void (const ImagePtr&, const DepthImagePtr&, float)> func1 =
           [this] (const ImagePtr& img, const DepthImagePtr& depth, float constant)
@@ -1041,8 +1040,8 @@ struct KinFuLSApp
     {
       #ifdef HAVE_OPENNI
       using namespace openni_wrapper;
-      using DepthImagePtr = shared_ptr<DepthImage>;
-      using ImagePtr = shared_ptr<Image>;
+      using DepthImagePtr = pcl::shared_ptr<DepthImage>;
+      using ImagePtr = pcl::shared_ptr<Image>;
 
       std::function<void (const ImagePtr&, const DepthImagePtr&, float)> func1 =
           [this] (const ImagePtr& img, const DepthImagePtr& depth, float constant)
@@ -1177,7 +1176,7 @@ struct KinFuLSApp
 
   SceneCloudView scene_cloud_view_;
   ImageView image_view_;
-  shared_ptr<CurrentFrameCloudView> current_frame_cloud_view_;
+  pcl::shared_ptr<CurrentFrameCloudView> current_frame_cloud_view_;
 
   KinfuTracker::DepthMap depth_device_;
 
@@ -1332,7 +1331,7 @@ main (int argc, char* argv[])
   //  if (checkIfPreFermiGPU(device))
   //    return std::cout << std::endl << "Kinfu is supported only for Fermi and Kepler arhitectures. It is not even compiled for pre-Fermi by default. Exiting..." << std::endl, 1;
 
-  shared_ptr<pcl::Grabber> capture;
+  pcl::shared_ptr<pcl::Grabber> capture;
   bool triggered_capture = false;
   bool pcd_input = false;
   bool oni2_interface = false;

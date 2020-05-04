@@ -1,9 +1,14 @@
 jobs:
   - job: osx
-    displayName: macOS High Sierra
+    strategy:
+      matrix:
+        macOS Catalina:
+          VMIMAGE: 'macOS-10.15'
+        macOS Mojave:
+          VMIMAGE: 'macOS-10.14'
     timeoutInMinutes: 0
     pool:
-      vmImage: 'macOS-10.13'
+      vmImage: '$(VMIMAGE)'
     variables:
       BUILD_DIR: '$(Agent.WorkFolder)/build'
       GOOGLE_TEST_DIR: '$(Agent.WorkFolder)/googletest'
@@ -19,6 +24,7 @@ jobs:
       - script: |
           mkdir $BUILD_DIR && cd $BUILD_DIR
           cmake $(Build.SourcesDirectory) \
+            -DCMAKE_OSX_SYSROOT="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk" \
             -DCMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS" \
             -DGTEST_SRC_DIR="$GOOGLE_TEST_DIR/googletest" \
             -DGTEST_INCLUDE_DIR="$GOOGLE_TEST_DIR/googletest/include" \
@@ -46,7 +52,7 @@ jobs:
           cmake --build . -- test_filters test_registration test_registration_api
           cmake --build . -- -j2
         displayName: 'Build Library'
-      - script: cd $BUILD_DIR/test && ctest -V -T Test
+      - script: cd $BUILD_DIR && cmake --build . -- tests
         displayName: 'Run Unit Tests'
       - task: PublishTestResults@2
         inputs:

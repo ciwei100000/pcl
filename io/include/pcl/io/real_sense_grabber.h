@@ -43,8 +43,12 @@
 #include <pcl/point_types.h>
 #include <pcl/common/time.h>
 
+#include <cstddef>
 #include <memory>
+#include <mutex>
+#include <string>
 #include <thread>
+#include <vector>
 
 namespace pcl
 {
@@ -140,7 +144,7 @@ namespace pcl
       RealSenseGrabber (const std::string& device_id = "", const Mode& mode = Mode (), bool strict = false);
 
       virtual
-      ~RealSenseGrabber () throw ();
+      ~RealSenseGrabber () noexcept;
 
       virtual void
       start ();
@@ -269,7 +273,5 @@ namespace pcl
 
       /// Depth buffer to perform temporal filtering of the depth images
       std::shared_ptr<pcl::io::Buffer<unsigned short> > depth_buffer_;
-
   };
-
 }

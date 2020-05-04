@@ -39,6 +39,7 @@
 #ifndef PCL_IMPL_POINT_TYPES_HPP_
 #define PCL_IMPL_POINT_TYPES_HPP_
 
+#include <cstdint>
 #if defined __GNUC__
 #  pragma GCC system_header
 #endif
@@ -290,16 +291,9 @@ namespace pcl
     */
   struct EIGEN_ALIGN16 PointXYZ : public _PointXYZ
   {
-    inline PointXYZ (const _PointXYZ &p)
-    {
-      x = p.x; y = p.y; z = p.z; data[3] = 1.0f;
-    }
+    inline PointXYZ (const _PointXYZ &p): PointXYZ(p.x, p.y, p.z) {}
 
-    inline PointXYZ ()
-    {
-      x = y = z = 0.0f;
-      data[3] = 1.0f;
-    }
+    inline PointXYZ (): PointXYZ(0.f, 0.f, 0.f) {}
 
     inline PointXYZ (float _x, float _y, float _z)
     {
@@ -344,20 +338,14 @@ namespace pcl
   {
     inline RGB (const _RGB &p)
     {
-      rgba = p.rgba;
+        rgba = p.rgba;
     }
 
-    inline RGB ()
-    {
-      r = g = b = 0;
-      a = 255;
-    }
+    inline RGB (): RGB(0, 0, 0) {}
 
     inline RGB (std::uint8_t _r, std::uint8_t _g, std::uint8_t _b)
     {
-      r = _r;
-      g = _g;
-      b = _b;
+      r = _r; g = _g; b = _b;
       a = 255;
     }
 
@@ -381,14 +369,14 @@ namespace pcl
       intensity = p.intensity;
     }
 
-    inline Intensity ()
+    inline Intensity (float _intensity = 0.f)
     {
-      intensity = 0.0f;
+        intensity = _intensity;
     }
-  
+
     friend std::ostream& operator << (std::ostream& os, const Intensity& p);
   };
-  
+
 
   struct _Intensity8u
   {
@@ -407,11 +395,11 @@ namespace pcl
       intensity = p.intensity;
     }
 
-    inline Intensity8u ()
+    inline Intensity8u (std::uint8_t _intensity = 0)
     {
-      intensity = 0;
+      intensity = _intensity;
     }
-  
+
 #if defined(_LIBCPP_VERSION) && _LIBCPP_VERSION <= 1101
     operator unsigned char() const
     {
@@ -439,9 +427,9 @@ namespace pcl
       intensity = p.intensity;
     }
 
-    inline Intensity32u ()
+    inline Intensity32u (std::uint32_t _intensity = 0)
     {
-      intensity = 0;
+      intensity = _intensity;
     }
 
     friend std::ostream& operator << (std::ostream& os, const Intensity32u& p);
@@ -473,21 +461,18 @@ namespace pcl
       intensity = p.intensity;
     }
 
-    inline PointXYZI ()
+    inline PointXYZI (float _intensity = 0.f): PointXYZI(0.f, 0.f, 0.f, _intensity) {}
+
+    inline PointXYZI (float _x, float _y, float _z, float _intensity = 0.f)
     {
-      x = y = z = 0.0f;
-      data[3] = 1.0f;
-      intensity = 0.0f;
-    }
-    inline PointXYZI (float _intensity)
-    {
-      x = y = z = 0.0f;
+      x = _x; y = _y; z = _z;
       data[3] = 1.0f;
       intensity = _intensity;
     }
+
     friend std::ostream& operator << (std::ostream& os, const PointXYZI& p);
   };
-  
+
 
   struct EIGEN_ALIGN16 _PointXYZL
   {
@@ -505,13 +490,15 @@ namespace pcl
       label = p.label;
     }
 
-    inline PointXYZL ()
+    inline PointXYZL (std::uint32_t _label = 0): PointXYZL(0.f, 0.f, 0.f, _label) {}
+
+    inline PointXYZL (float _x, float _y, float _z, std::uint32_t _label = 0)
     {
-      x = y = z = 0.0f;
+      x = _x; y = _y; z = _z;
       data[3] = 1.0f;
-      label = 0;
+      label = _label;
     }
-  
+
     friend std::ostream& operator << (std::ostream& os, const PointXYZL& p);
   };
 
@@ -519,8 +506,10 @@ namespace pcl
   PCL_EXPORTS std::ostream& operator << (std::ostream& os, const Label& p);
   struct Label
   {
-    std::uint32_t label;
-  
+    std::uint32_t label = 0;
+
+    Label (std::uint32_t _label = 0): label(_label) {}
+
     friend std::ostream& operator << (std::ostream& os, const Label& p);
   };
 
@@ -561,12 +550,20 @@ namespace pcl
       rgba = p.rgba;
     }
 
-    inline PointXYZRGBA ()
+    inline PointXYZRGBA (): PointXYZRGBA (0, 0, 0, 0) {}
+
+    inline PointXYZRGBA (std::uint8_t _r, std::uint8_t _g, std::uint8_t _b, std::uint8_t _a):
+      PointXYZRGBA (0.f, 0.f, 0.f, _r, _g, _b, _a) {}
+
+    inline PointXYZRGBA (float _x, float _y, float _z):
+      PointXYZRGBA (_x, _y, _z, 0, 0, 0, 0) {}
+
+    inline PointXYZRGBA (float _x, float _y, float _z, std::uint8_t _r,
+                         std::uint8_t _g, std::uint8_t _b, std::uint8_t _a)
     {
-      x = y = z = 0.0f;
+      x = _x; y = _y; z = _z;
       data[3] = 1.0f;
-      r = g = b = 0;
-      a = 255;
+      r = _r; g = _g; b = _b; a = _a;
     }
 
     friend std::ostream& operator << (std::ostream& os, const PointXYZRGBA& p);
@@ -628,20 +625,20 @@ namespace pcl
       rgb = p.rgb;
     }
 
-    inline PointXYZRGB ()
+    inline PointXYZRGB (): PointXYZRGB (0.f, 0.f, 0.f) {}
+
+    inline PointXYZRGB (std::uint8_t _r, std::uint8_t _g, std::uint8_t _b):
+      PointXYZRGB (0.f, 0.f, 0.f, _r, _g, _b) {}
+
+    inline PointXYZRGB (float _x, float _y, float _z):
+      PointXYZRGB (_x, _y, _z, 0, 0, 0) {}
+
+    inline PointXYZRGB (float _x, float _y, float _z,
+                         std::uint8_t _r, std::uint8_t _g, std::uint8_t _b)
     {
-      x = y = z = 0.0f;
+      x = _x; y = _y; z = _z;
       data[3] = 1.0f;
-      r = g = b = 0;
-      a = 255;
-    }
-    inline PointXYZRGB (std::uint8_t _r, std::uint8_t _g, std::uint8_t _b)
-    {
-      x = y = z = 0.0f;
-      data[3] = 1.0f;
-      r = _r;
-      g = _g;
-      b = _b;
+      r = _r; g = _g; b = _b;
       a = 255;
     }
 
@@ -660,25 +657,26 @@ namespace pcl
       label = p.label;
     }
 
-    inline PointXYZRGBL ()
+    inline PointXYZRGBL (std::uint32_t _label = 0):
+      PointXYZRGBL (0.f, 0.f, 0.f, 0, 0, 0, _label) {}
+
+    inline PointXYZRGBL (std::uint8_t _r, std::uint8_t _g, std::uint8_t _b):
+      PointXYZRGBL (0.f, 0.f, 0.f, _r, _g, _b) {}
+
+    inline PointXYZRGBL (float _x, float _y, float _z):
+      PointXYZRGBL (_x, _y, _z, 0, 0, 0) {}
+
+    inline PointXYZRGBL (float _x, float _y, float _z,
+                         std::uint8_t _r, std::uint8_t _g, std::uint8_t _b,
+                         std::uint32_t _label = 0)
     {
-      x = y = z = 0.0f;
+      x = _x; y = _y; z = _z;
       data[3] = 1.0f;
-      r = g = b = 0;
-      a = 255;
-      label = 0;
-    }
-    inline PointXYZRGBL (std::uint8_t _r, std::uint8_t _g, std::uint8_t _b, std::uint32_t _label)
-    {
-      x = y = z = 0.0f;
-      data[3] = 1.0f;
-      r = _r;
-      g = _g;
-      b = _b;
+      r = _r; g = _g; b = _b;
       a = 255;
       label = _label;
     }
-  
+
     friend std::ostream& operator << (std::ostream& os, const PointXYZRGBL& p);
     PCL_MAKE_ALIGNED_OPERATOR_NEW
   };
@@ -709,20 +707,22 @@ namespace pcl
       h = p.h; s = p.s; v = p.v;
     }
 
-    inline PointXYZHSV ()
+    inline PointXYZHSV (): PointXYZHSV (0.f, 0.f, 0.f) {}
+
+    // @TODO: Use strong types??
+    // This is a dangerous type, doesn't behave like others
+    inline PointXYZHSV (float _h, float _s, float _v):
+      PointXYZHSV (0.f, 0.f, 0.f, _h, _s, _v) {}
+
+    inline PointXYZHSV (float _x, float _y, float _z,
+                        float _h, float _s, float _v)
     {
-      x = y = z = 0.0f;
+      x = _x; y = _y; z = _z;
       data[3] = 1.0f;
-      h = s = v = data_c[3] = 0;
-    }
-    inline PointXYZHSV (float _h, float _v, float _s)
-    {
-      x = y = z = 0.0f;
-      data[3] = 1.0f;
-      h = _h; v = _v; s = _s;
+      h = _h; s = _s; v = _v;
       data_c[3] = 0;
     }
-  
+
     friend std::ostream& operator << (std::ostream& os, const PointXYZHSV& p);
     PCL_MAKE_ALIGNED_OPERATOR_NEW
   };
@@ -735,9 +735,13 @@ namespace pcl
     */
   struct PointXY
   {
-    float x;
-    float y;
-  
+    float x = 0.f;
+    float y = 0.f;
+
+    inline PointXY() = default;
+
+    inline PointXY(float _x, float _y): x(_x), y(_y) {}
+
     friend std::ostream& operator << (std::ostream& os, const PointXY& p);
   };
 
@@ -748,9 +752,13 @@ namespace pcl
     */
   struct PointUV
   {
-    float u;
-    float v;
-  
+    float u = 0.f;
+    float v = 0.f;
+
+    inline PointUV() = default;
+
+    inline PointUV(float _u, float _v): u(_u), v(_v) {}
+
     friend std::ostream& operator << (std::ostream& os, const PointUV& p);
   };
 
@@ -758,6 +766,7 @@ namespace pcl
   /** \brief A point structure representing an interest point with Euclidean xyz coordinates, and an interest value.
     * \ingroup common
     */
+  // @TODO: inheritance trick like on other PointTypes
   struct EIGEN_ALIGN16 InterestPoint
   {
     PCL_ADD_POINT4D; // This adds the members x,y,z which can also be accessed using the point (which is float[4])
@@ -770,7 +779,7 @@ namespace pcl
       float data_c[4];
     };
     PCL_MAKE_ALIGNED_OPERATOR_NEW
-  
+
     friend std::ostream& operator << (std::ostream& os, const InterestPoint& p);
   };
 
@@ -801,17 +810,13 @@ namespace pcl
       curvature = p.curvature;
     }
 
-    inline Normal ()
-    {
-      normal_x = normal_y = normal_z = data_n[3] = 0.0f;
-      curvature = 0;
-    }
+    inline Normal (float _curvature = 0.f): Normal (0.f, 0.f, 0.f, _curvature) {}
 
-    inline Normal (float n_x, float n_y, float n_z)
+    inline Normal (float n_x, float n_y, float n_z, float _curvature = 0.f)
     {
       normal_x = n_x; normal_y = n_y; normal_z = n_z;
-      curvature = 0;
       data_n[3] = 0.0f;
+      curvature = _curvature;
     }
 
     friend std::ostream& operator << (std::ostream& os, const Normal& p);
@@ -837,10 +842,7 @@ namespace pcl
       data_n[3] = 0.0f;
     }
 
-    inline Axis ()
-    {
-      normal_x = normal_y = normal_z = data_n[3] = 0.0f;
-    }
+    inline Axis (): Axis (0.f, 0.f, 0.f) {}
 
     inline Axis (float n_x, float n_y, float n_z)
     {
@@ -881,14 +883,20 @@ namespace pcl
       curvature = p.curvature;
     }
 
-    inline PointNormal ()
+    inline PointNormal (float _curvature = 0.f): PointNormal (0.f, 0.f, 0.f, 0.f, 0.f, 0.f, _curvature) {}
+
+    inline PointNormal (float _x, float _y, float _z):
+      PointNormal (_x, _y, _z, 0.f, 0.f, 0.f, 0.f) {}
+
+    inline PointNormal (float _x, float _y, float _z, float n_x, float n_y, float n_z, float _curvature = 0.f)
     {
-      x = y = z = 0.0f;
+      x = _x; y = _y; z = _z;
       data[3] = 1.0f;
-      normal_x = normal_y = normal_z = data_n[3] = 0.0f;
-      curvature = 0.f;
+      normal_x = n_x; normal_y = n_y; normal_z = n_z;
+      data_n[3] = 0.0f;
+      curvature = _curvature;
     }
-  
+
     friend std::ostream& operator << (std::ostream& os, const PointNormal& p);
   };
 
@@ -950,14 +958,28 @@ namespace pcl
       rgba = p.rgba;
     }
 
-    inline PointXYZRGBNormal ()
+    inline PointXYZRGBNormal (float _curvature = 0.f):
+        PointXYZRGBNormal (0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, _curvature) {}
+
+    inline PointXYZRGBNormal (float _x, float _y, float _z):
+      PointXYZRGBNormal (_x, _y, _z, 0, 0, 0) {}
+
+    inline PointXYZRGBNormal (std::uint8_t _r, std::uint8_t _g, std::uint8_t _b):
+      PointXYZRGBNormal (0.f, 0.f, 0.f, _r, _g, _b) {}
+
+    inline PointXYZRGBNormal (float _x, float _y, float _z, std::uint8_t _r, std::uint8_t _g, std::uint8_t _b):
+      PointXYZRGBNormal (_x, _y, _z, _r, _g, _b, 0.f, 0.f, 0.f) {}
+
+    inline PointXYZRGBNormal (float _x, float _y, float _z, std::uint8_t _r, std::uint8_t _g, std::uint8_t _b,
+                              float n_x, float n_y, float n_z, float _curvature = 0.f)
     {
-      x = y = z = 0.0f;
+      x = _x; y = _y; z = _z;
       data[3] = 1.0f;
-      r = g = b = 0;
+      r = _r; g = _g; b = _b;
       a = 255;
-      normal_x = normal_y = normal_z = data_n[3] = 0.0f;
-      curvature = 0;
+      normal_x = n_x; normal_y = n_y; normal_z = n_z;
+      data_n[3] = 0.f;
+      curvature = _curvature;
     }
 
     friend std::ostream& operator << (std::ostream& os, const PointXYZRGBNormal& p);
@@ -978,7 +1000,7 @@ namespace pcl
     };
     PCL_MAKE_ALIGNED_OPERATOR_NEW
   };
-  
+
   PCL_EXPORTS std::ostream& operator << (std::ostream& os, const PointXYZINormal& p);
   /** \brief A point structure representing Euclidean xyz coordinates, intensity, together with normal coordinates and the surface curvature estimate.
     * \ingroup common
@@ -992,16 +1014,23 @@ namespace pcl
       curvature = p.curvature;
       intensity = p.intensity;
     }
+    
+    inline PointXYZINormal (float _intensity = 0.f): PointXYZINormal (0.f, 0.f, 0.f, _intensity) {}
+    
+    inline PointXYZINormal (float _x, float _y, float _z, float _intensity = 0.f):
+      PointXYZINormal (_x, _y, _z, _intensity, 0.f, 0.f, 0.f) {}
 
-    inline PointXYZINormal ()
+    inline PointXYZINormal (float _x, float _y, float _z, float _intensity,
+                            float n_x, float n_y, float n_z, float _curvature = 0.f)
     {
-      x = y = z = 0.0f;
+      x = _x; y = _y; z = _z;
       data[3] = 1.0f;
-      normal_x = normal_y = normal_z = data_n[3] = 0.0f;
-      intensity = 0.0f;
-      curvature = 0;
+      intensity = _intensity;
+      normal_x = n_x; normal_y = n_y; normal_z = n_z;
+      data_n[3] = 0.f;
+      curvature = _curvature;
     }
-  
+
     friend std::ostream& operator << (std::ostream& os, const PointXYZINormal& p);
   };
 
@@ -1036,13 +1065,20 @@ namespace pcl
       label = p.label;
     }
 
-    inline PointXYZLNormal ()
+    inline PointXYZLNormal (std::uint32_t _label = 0): PointXYZLNormal (0.f, 0.f, 0.f, _label) {}
+    
+    inline PointXYZLNormal (float _x, float _y, float _z, std::uint32_t _label = 0.f):
+      PointXYZLNormal (_x, _y, _z, _label, 0.f, 0.f, 0.f) {}
+
+    inline PointXYZLNormal (float _x, float _y, float _z, std::uint32_t _label,
+                            float n_x, float n_y, float n_z, float _curvature = 0.f)
     {
-      x = y = z = 0.0f;
+      x = _x; y = _y; z = _z;
       data[3] = 1.0f;
-      normal_x = normal_y = normal_z = data_n[3] = 0.0f;
-      label = 0;
-      curvature = 0;
+      label = _label;
+      normal_x = n_x; normal_y = n_y; normal_z = n_z;
+      data_n[3] = 0.f;
+      curvature = _curvature;
     }
 
     friend std::ostream& operator << (std::ostream& os, const PointXYZLNormal& p);
@@ -1077,13 +1113,15 @@ namespace pcl
       range = p.range;
     }
 
-    inline PointWithRange ()
+    inline PointWithRange (float _range = 0.f): PointWithRange (0.f, 0.f, 0.f, _range) {}
+
+    inline PointWithRange (float _x, float _y, float _z, float _range = 0.f)
     {
-      x = y = z = 0.0f;
+      x = _x; y = _y; z = _z;
       data[3] = 1.0f;
-      range = 0.0f;
+      range = _range;
     }
-  
+
     friend std::ostream& operator << (std::ostream& os, const PointWithRange& p);
   };
 
@@ -1116,14 +1154,25 @@ namespace pcl
       vp_x = p.vp_x; vp_y = p.vp_y; vp_z = p.vp_z;
     }
 
-    inline PointWithViewpoint (float _x = 0.0f, float _y = 0.0f, float _z = 0.0f,
-                               float _vp_x = 0.0f, float _vp_y = 0.0f, float _vp_z = 0.0f)
+    inline PointWithViewpoint (): PointWithViewpoint (0.f, 0.f, 0.f) {}
+
+    PCL_DEPRECATED("Use ctor accepting all position (x, y, z) data")
+    inline PointWithViewpoint (float _x, float _y = 0.f):
+      PointWithViewpoint (_x, _y, 0.f) {}
+
+    PCL_DEPRECATED("Use ctor accepting all viewpoint (vp_x, vp_y, vp_z) data")
+    inline PointWithViewpoint (float _x, float _y, float _z, float _vp_x, float _vp_y = 0.f):
+      PointWithViewpoint (_x, _y, _z, _vp_x, _vp_y, 0.f) {}
+    
+    inline PointWithViewpoint (float _x, float _y, float _z): PointWithViewpoint (_x, _y, _z, 0.f, 0.f, 0.f) {}
+
+    inline PointWithViewpoint (float _x, float _y, float _z, float _vp_x, float _vp_y, float _vp_z)
     {
       x = _x; y = _y; z = _z;
       data[3] = 1.0f;
       vp_x = _vp_x; vp_y = _vp_y; vp_z = _vp_z;
     }
-  
+
     friend std::ostream& operator << (std::ostream& os, const PointWithViewpoint& p);
   };
 
@@ -1133,8 +1182,12 @@ namespace pcl
     */
   struct MomentInvariants
   {
-    float j1, j2, j3;
-  
+    float j1 = 0.f, j2 = 0.f, j3 = 0.f;
+
+    inline MomentInvariants () = default;
+
+    inline MomentInvariants (float _j1, float _j2, float _j3): j1 (_j1), j2 (_j2), j3 (_j3) {}
+
     friend std::ostream& operator << (std::ostream& os, const MomentInvariants& p);
   };
 
@@ -1144,8 +1197,12 @@ namespace pcl
     */
   struct PrincipalRadiiRSD
   {
-    float r_min, r_max;
-  
+    float r_min = 0.f, r_max = 0.f;
+
+    inline PrincipalRadiiRSD () = default;
+
+    inline PrincipalRadiiRSD (float _r_min, float _r_max): r_min (_r_min), r_max (_r_max) {}
+    
     friend std::ostream& operator << (std::ostream& os, const PrincipalRadiiRSD& p);
   };
 
@@ -1155,7 +1212,7 @@ namespace pcl
     */
   struct Boundary
   {
-    std::uint8_t boundary_point;
+    std::uint8_t boundary_point = 0;
 
 #if defined(_LIBCPP_VERSION) && _LIBCPP_VERSION <= 1101
     operator unsigned char() const
@@ -1163,7 +1220,9 @@ namespace pcl
       return boundary_point;
     }
 #endif
-  
+
+    inline Boundary (std::uint8_t _boundary = 0): boundary_point (_boundary) {}
+
     friend std::ostream& operator << (std::ostream& os, const Boundary& p);
   };
 
@@ -1183,9 +1242,18 @@ namespace pcl
         float principal_curvature_z;
       };
     };
-    float pc1;
-    float pc2;
-  
+    float pc1 = 0.f;
+    float pc2 = 0.f;
+
+    inline PrincipalCurvatures (): PrincipalCurvatures (0.f, 0.f) {}
+
+    inline PrincipalCurvatures (float _pc1, float _pc2): PrincipalCurvatures (0.f, 0.f, 0.f, _pc1, _pc2) {}
+
+    inline PrincipalCurvatures (float _x, float _y, float _z): PrincipalCurvatures (_x, _y, _z, 0.f, 0.f) {}
+
+    inline PrincipalCurvatures (float _x, float _y, float _z, float _pc1, float _pc2):
+      principal_curvature_x (_x), principal_curvature_y (_y), principal_curvature_z (_z), pc1 (_pc1), pc2 (_pc2) {}
+
     friend std::ostream& operator << (std::ostream& os, const PrincipalCurvatures& p);
   };
 
@@ -1195,9 +1263,11 @@ namespace pcl
     */
   struct PFHSignature125
   {
-    float histogram[125];
+    float histogram[125] = {0.f};
     static int descriptorSize () { return 125; }
-  
+
+    inline PFHSignature125 () = default;
+
     friend std::ostream& operator << (std::ostream& os, const PFHSignature125& p);
   };
 
@@ -1207,8 +1277,10 @@ namespace pcl
     */
   struct PFHRGBSignature250
   {
-    float histogram[250];
+    float histogram[250] = {0.f};
     static int descriptorSize () { return 250; }
+
+    inline PFHRGBSignature250 () = default;
 
     friend std::ostream& operator << (std::ostream& os, const PFHRGBSignature250& p);
   };
@@ -1219,9 +1291,14 @@ namespace pcl
     */
   struct PPFSignature
   {
-    float f1, f2, f3, f4;
-    float alpha_m;
-  
+    float f1 = 0.f, f2 = 0.f, f3 = 0.f, f4 = 0.f;
+    float alpha_m = 0.f;
+
+    inline PPFSignature (float _alpha = 0.f): PPFSignature (0.f, 0.f, 0.f, 0.f, _alpha) {}
+
+    inline PPFSignature (float _f1, float _f2, float _f3, float _f4, float _alpha = 0.f):
+      f1 (_f1), f2 (_f2), f3 (_f3), f4 (_f4), alpha_m (_alpha) {}
+
     friend std::ostream& operator << (std::ostream& os, const PPFSignature& p);
   };
 
@@ -1233,7 +1310,15 @@ namespace pcl
   {
     float f1, f2, f3, f4, f5, f6, f7, f8, f9, f10;
     float alpha_m;
-  
+
+    inline CPPFSignature (float _alpha = 0.f):
+      CPPFSignature (0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, _alpha) {}
+
+    inline CPPFSignature (float _f1, float _f2, float _f3, float _f4, float _f5, float _f6,
+                          float _f7, float _f8, float _f9, float _f10, float _alpha = 0.f):
+      f1 (_f1), f2 (_f2), f3 (_f3), f4 (_f4), f5 (_f5), f6 (_f6),
+      f7 (_f7), f8 (_f8), f9 (_f9), f10 (_f10), alpha_m (_alpha) {}
+
     friend std::ostream& operator << (std::ostream& os, const CPPFSignature& p);
   };
 
@@ -1243,10 +1328,18 @@ namespace pcl
     */
   struct PPFRGBSignature
   {
-    float f1, f2, f3, f4;
-    float r_ratio, g_ratio, b_ratio;
-    float alpha_m;
-  
+    float f1 = 0.f, f2 = 0.f, f3 = 0.f, f4 = 0.f;
+    float r_ratio = 0.f, g_ratio = 0.f, b_ratio = 0.f;
+    float alpha_m = 0.f;
+
+    inline PPFRGBSignature (float _alpha = 0.f): PPFRGBSignature (0.f, 0.f, 0.f, 0.f, _alpha) {}
+
+    inline PPFRGBSignature (float _f1, float _f2, float _f3, float _f4, float _alpha = 0.f):
+      PPFRGBSignature (_f1, _f2, _f3, _f4, _alpha, 0.f, 0.f, 0.f) {}
+
+    inline PPFRGBSignature (float _f1, float _f2, float _f3, float _f4, float _alpha, float _r, float _g, float _b):
+      f1 (_f1), f2 (_f2), f3 (_f3), f4 (_f4), r_ratio (_r), g_ratio (_g), b_ratio (_b), alpha_m (_alpha) {}
+
     friend std::ostream& operator << (std::ostream& os, const PPFRGBSignature& p);
   };
 
@@ -1257,8 +1350,10 @@ namespace pcl
     */
   struct NormalBasedSignature12
   {
-    float values[12];
-  
+    float values[12] = {0.f};
+
+    inline NormalBasedSignature12 () = default;
+
     friend std::ostream& operator << (std::ostream& os, const NormalBasedSignature12& p);
   };
 
@@ -1268,9 +1363,11 @@ namespace pcl
     */
   struct ShapeContext1980
   {
-    float descriptor[1980];
-    float rf[9];
+    float descriptor[1980] = {0.f};
+    float rf[9] = {0.f};
     static int descriptorSize () { return 1980; }
+
+    inline ShapeContext1980 () = default;
 
     friend std::ostream& operator << (std::ostream& os, const ShapeContext1980& p);
   };
@@ -1281,9 +1378,11 @@ namespace pcl
     */
   struct UniqueShapeContext1960
   {
-    float descriptor[1960];
-    float rf[9];
+    float descriptor[1960] = {0.f};
+    float rf[9] = {0.f};
     static int descriptorSize () { return 1960; }
+
+    inline UniqueShapeContext1960 () = default;
 
     friend std::ostream& operator << (std::ostream& os, const UniqueShapeContext1960& p);
   };
@@ -1294,9 +1393,11 @@ namespace pcl
     */
   struct SHOT352
   {
-    float descriptor[352];
-    float rf[9];
+    float descriptor[352] = {0.f};
+    float rf[9] = {0.f};
     static int descriptorSize () { return 352; }
+
+    inline SHOT352 () = default;
 
     friend std::ostream& operator << (std::ostream& os, const SHOT352& p);
   };
@@ -1308,9 +1409,11 @@ namespace pcl
     */
   struct SHOT1344
   {
-    float descriptor[1344];
-    float rf[9];
+    float descriptor[1344] = {0.f};
+    float rf[9] = {0.f};
     static int descriptorSize () { return 1344; }
+
+    inline SHOT1344 () = default;
 
     friend std::ostream& operator << (std::ostream& os, const SHOT1344& p);
   };
@@ -1359,6 +1462,8 @@ namespace pcl
       std::fill_n(z_axis, 3, 0);
     }
 
+    // @TODO: add other ctors
+
     friend std::ostream& operator << (std::ostream& os, const ReferenceFrame& p);
     PCL_MAKE_ALIGNED_OPERATOR_NEW
   };
@@ -1370,8 +1475,10 @@ namespace pcl
     */
   struct FPFHSignature33
   {
-    float histogram[33];
+    float histogram[33] = {0.f};
     static int descriptorSize () { return 33; }
+
+    inline FPFHSignature33 () = default;
 
     friend std::ostream& operator << (std::ostream& os, const FPFHSignature33& p);
   };
@@ -1382,20 +1489,24 @@ namespace pcl
     */
   struct VFHSignature308
   {
-    float histogram[308];
+    float histogram[308] = {0.f};
     static int descriptorSize () { return 308; }
+
+    inline VFHSignature308 () = default;
 
     friend std::ostream& operator << (std::ostream& os, const VFHSignature308& p);
   };
-  
+
   PCL_EXPORTS std::ostream& operator << (std::ostream& os, const GRSDSignature21& p);
   /** \brief A point structure representing the Global Radius-based Surface Descriptor (GRSD).
     * \ingroup common
     */
   struct GRSDSignature21
   {
-    float histogram[21];
+    float histogram[21] = {0.f};
     static int descriptorSize () { return 21; }
+
+    inline GRSDSignature21 () = default;
 
     friend std::ostream& operator << (std::ostream& os, const GRSDSignature21& p);
   };
@@ -1406,10 +1517,14 @@ namespace pcl
     */
   struct BRISKSignature512
   {
-    float scale;
-    float orientation;
-    unsigned char descriptor[64];
+    float scale = 0.f;
+    float orientation = 0.f;
+    unsigned char descriptor[64] = {0};
     static int descriptorSize () { return 64; }
+
+    inline BRISKSignature512 () = default;
+
+    inline BRISKSignature512 (float _scale, float _orientation): scale (_scale), orientation (_orientation) {}
 
     friend std::ostream& operator << (std::ostream& os, const BRISKSignature512& p);
   };
@@ -1420,8 +1535,10 @@ namespace pcl
     */
   struct ESFSignature640
   {
-    float histogram[640];
+    float histogram[640] = {0.f};
     static int descriptorSize () { return 640; }
+
+    inline ESFSignature640 () = default;
 
     friend std::ostream& operator << (std::ostream& os, const ESFSignature640& p);
   };
@@ -1432,8 +1549,10 @@ namespace pcl
   */
   struct GASDSignature512
   {
-    float histogram[512];
+    float histogram[512] = {0.f};
     static int descriptorSize() { return 512; }
+
+    inline GASDSignature512 () = default;
 
     friend std::ostream& operator << (std::ostream& os, const GASDSignature512& p);
   };
@@ -1444,8 +1563,10 @@ namespace pcl
   */
   struct GASDSignature984
   {
-    float histogram[984];
+    float histogram[984] = {0.f};
     static int descriptorSize() { return 984; }
+
+    inline GASDSignature984 () = default;
 
     friend std::ostream& operator << (std::ostream& os, const GASDSignature984& p);
   };
@@ -1456,8 +1577,10 @@ namespace pcl
   */
   struct GASDSignature7992
   {
-    float histogram[7992];
+    float histogram[7992] = {0.f};
     static int descriptorSize() { return 7992; }
+
+    inline GASDSignature7992 () = default;
 
     friend std::ostream& operator << (std::ostream& os, const GASDSignature7992& p);
   };
@@ -1468,9 +1591,11 @@ namespace pcl
     */
   struct GFPFHSignature16
   {
-    float histogram[16];
+    float histogram[16] = {0.f};
     static int descriptorSize () { return 16; }
-    
+
+    inline GFPFHSignature16 () = default;
+
     friend std::ostream& operator << (std::ostream& os, const GFPFHSignature16& p);
   };
 
@@ -1480,9 +1605,16 @@ namespace pcl
     */
   struct Narf36
   {
-    float x, y, z, roll, pitch, yaw;
-    float descriptor[36];
+    float x = 0.f, y = 0.f, z = 0.f, roll = 0.f, pitch = 0.f, yaw = 0.f;
+    float descriptor[36] = {0.f};
     static int descriptorSize () { return 36; }
+
+    inline Narf36 () = default;
+
+    inline Narf36 (float _x, float _y, float _z): Narf36 (_x, _y, _z, 0.f, 0.f, 0.f) {}
+
+    inline Narf36 (float _x, float _y, float _z, float _roll, float _pitch, float _yaw):
+      x (_x), y (_y), z (_z), roll (_roll), pitch (_pitch), yaw (_yaw) {}
 
     friend std::ostream& operator << (std::ostream& os, const Narf36& p);
   };
@@ -1493,10 +1625,14 @@ namespace pcl
     */
   struct BorderDescription
   {
-    int x, y;
+    int x = 0.f, y = 0.f;
     BorderTraits traits;
     //std::vector<const BorderDescription*> neighbors;
-  
+
+    inline BorderDescription () = default;
+
+    // TODO: provide other ctors
+
     friend std::ostream& operator << (std::ostream& os, const BorderDescription& p);
   };
 
@@ -1517,10 +1653,15 @@ namespace pcl
         float gradient_z;
       };
     };
-  
+
+    inline IntensityGradient (): IntensityGradient (0.f, 0.f, 0.f) {}
+
+    inline IntensityGradient (float _x, float _y, float _z): gradient_x (_x), gradient_y (_y), gradient_z (_z) {}
+
     friend std::ostream& operator << (std::ostream& os, const IntensityGradient& p);
   };
 
+  // TODO: Maybe make other histogram based structs an alias for this
   /** \brief A point structure representing an N-D histogram.
     * \ingroup common
     */
@@ -1567,40 +1708,19 @@ namespace pcl
       octave = p.octave;
     }
 
-    inline PointWithScale ()
-    {
-      x = y = z = 0.0f;
-      scale = 1.0f;
-      angle = -1.0f;
-      response = 0.0f;
-      octave = 0;
-      data[3] = 1.0f;
-    }
+    inline PointWithScale (): PointWithScale (0.f, 0.f, 0.f) {}
 
-    inline PointWithScale (float _x, float _y, float _z, float _scale)
+    inline PointWithScale (float _x, float _y, float _z, float _scale = 1.f, 
+                           float _angle = -1.f, float _response = 0.f, int _octave = 0)
     {
-      x = _x;
-      y = _y;
-      z = _z;
-      scale = _scale;
-      angle = -1.0f;
-      response = 0.0f;
-      octave = 0;
+      x = _x; y = _y; z = _z;
       data[3] = 1.0f;
-    }
-
-    inline PointWithScale (float _x, float _y, float _z, float _scale, float _angle, float _response, int _octave)
-    {
-      x = _x;
-      y = _y;
-      z = _z;
       scale = _scale;
       angle = _angle;
       response = _response;
       octave = _octave;
-      data[3] = 1.0f;
     }
-  
+
     friend std::ostream& operator << (std::ostream& os, const PointWithScale& p);
   };
 
@@ -1648,7 +1768,9 @@ namespace pcl
       a = 255;
       radius = confidence = curvature = 0.0f;
     }
-  
+
+    // TODO: add other ctor to PointSurfel
+
     friend std::ostream& operator << (std::ostream& os, const PointSurfel& p);
   };
 
@@ -1675,11 +1797,18 @@ namespace pcl
       height_variance = p.height_variance;
     }
 
-    inline PointDEM ()
+    inline PointDEM (): PointDEM (0.f, 0.f, 0.f) {}
+
+    inline PointDEM (float _x, float _y, float _z): PointDEM (_x, _y, _z, 0.f, 0.f, 0.f) {}
+
+    inline PointDEM (float _x, float _y, float _z, float _intensity,
+                     float _intensity_variance, float _height_variance)
     {
-      x = y = z = 0.0f; data[3] = 1.0f;
-      intensity = 0.0f;
-      intensity_variance = height_variance = 0.0f;
+      x = _x; y = _y; z = _z;
+      data[3] = 1.0f;
+      intensity = _intensity;
+      intensity_variance = _intensity_variance;
+      height_variance = _height_variance;
     }
 
     friend std::ostream& operator << (std::ostream& os, const PointDEM& p);
