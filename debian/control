@@ -5,7 +5,7 @@ Uploaders: Thomas Moulard <thomas.moulard@gmail.com>,
 	   Leopold Palomo-Avellaneda <leo@alaxarxa.net>
 Section: libs
 Priority: optional
-Build-Depends: debhelper-compat (= 12), dh-exec,
+Build-Depends: debhelper-compat (= 13),
                cmake,
 	       clang [mipsel armel armhf],
 	       python3-sphinx,
