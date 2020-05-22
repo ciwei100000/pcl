@@ -21,7 +21,6 @@ debian/manpages/pcl_marching_cubes_reconstruction.1
 debian/manpages/pcl_mesh2pcd.1
 debian/manpages/pcl_mesh_sampling.1
 debian/manpages/pcl_mls_smoothing.1
-debian/manpages/pcl_modeler.1
 debian/manpages/pcl_normal_estimation.1
 debian/manpages/pcl_obj2vtk.1
 debian/manpages/pcl_obj_rec_ransac_accepted_hypotheses.1
