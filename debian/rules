@@ -71,16 +71,16 @@ override_dh_install:
 #	dh_shlibdeps -v -Xusr/bin/pcl_* -Lpcl-tools -l:$(CURDIR)/debian/usr/lib/${DEB_HOST_MULTIARCH}/cloud_composer_plugins: -ppcl --- -xpcl-tools -v
 
 override_dh_installchangelogs:
-	dh_installchangelogs -plibpcl-common1.10 CHANGES.md
+	dh_installchangelogs -plibpcl-common1.11 CHANGES.md
 	# Creating dh_links to share the same file
-	@for i in libpcl-dev libpcl1.10 libpcl-apps1.10 \
-		libpcl-features1.10 libpcl-filters1.10 libpcl-io1.10 libpcl-kdtree1.10 \
-		libpcl-keypoints1.10 libpcl-octree1.10 libpcl-outofcore1.10 libpcl-people1.10 \
-		libpcl-recognition1.10 libpcl-registration1.10 libpcl-sample-consensus1.10 \
-		libpcl-search1.10 libpcl-segmentation1.10 libpcl-stereo1.10 \
-		libpcl-surface1.10 libpcl-tracking1.10 libpcl-visualization1.10 \
+	@for i in libpcl-dev libpcl1.11 libpcl-apps1.11 \
+		libpcl-features1.11 libpcl-filters1.11 libpcl-io1.11 libpcl-kdtree1.11 \
+		libpcl-keypoints1.11 libpcl-octree1.11 libpcl-outofcore1.11 libpcl-people1.11 \
+		libpcl-recognition1.11 libpcl-registration1.11 libpcl-sample-consensus1.11 \
+		libpcl-search1.11 libpcl-segmentation1.11 libpcl-stereo1.11 \
+		libpcl-surface1.11 libpcl-tracking1.11 libpcl-visualization1.11 \
 		pcl-tools libpcl-doc; do \
-	cmd="dh_link -p$$i usr/share/doc/libpcl-common1.10/changelog.gz usr/share/doc/$$i/changelog.gz"; \
+	cmd="dh_link -p$$i usr/share/doc/libpcl-common1.11/changelog.gz usr/share/doc/$$i/changelog.gz"; \
 	echo $$cmd; $$cmd; \
 	done
 	dh_installchangelogs
