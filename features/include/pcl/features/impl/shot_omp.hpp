@@ -37,12 +37,14 @@
  *
  */
 
-#ifndef PCL_FEATURES_IMPL_SHOT_OMP_H_
-#define PCL_FEATURES_IMPL_SHOT_OMP_H_
+#pragma once
 
 #include <pcl/features/shot_omp.h>
+
+#include <pcl/common/point_tests.h> // for pcl::isFinite
 #include <pcl/common/time.h>
 #include <pcl/features/shot_lrf_omp.h>
+
 
 template<typename PointInT, typename PointNT, typename PointOutT, typename PointRFT> bool
 pcl::SHOTEstimationOMP<PointInT, PointNT, PointOutT, PointRFT>::initCompute ()
@@ -148,9 +150,10 @@ pcl::SHOTEstimationOMP<PointInT, PointNT, PointOutT, PointRFT>::computeFeature (
 
   output.is_dense = true;
   // Iterating over the entire index vector
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(threads_)
-#endif
+#pragma omp parallel for \
+  default(none) \
+  shared(output) \
+  num_threads(threads_)
   for (std::ptrdiff_t idx = 0; idx < static_cast<std::ptrdiff_t> (indices_->size ()); ++idx)
   {
 
@@ -234,9 +237,10 @@ pcl::SHOTColorEstimationOMP<PointInT, PointNT, PointOutT, PointRFT>::computeFeat
 
   output.is_dense = true;
   // Iterating over the entire index vector
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(threads_)
-#endif
+#pragma omp parallel for \
+  default(none) \
+  shared(output) \
+  num_threads(threads_)
   for (std::ptrdiff_t idx = 0; idx < static_cast<std::ptrdiff_t> (indices_->size ()); ++idx)
   {
     Eigen::VectorXf shot;
@@ -290,4 +294,3 @@ pcl::SHOTColorEstimationOMP<PointInT, PointNT, PointOutT, PointRFT>::computeFeat
 #define PCL_INSTANTIATE_SHOTEstimationOMP(T,NT,OutT,RFT) template class PCL_EXPORTS pcl::SHOTEstimationOMP<T,NT,OutT,RFT>;
 #define PCL_INSTANTIATE_SHOTColorEstimationOMP(T,NT,OutT,RFT) template class PCL_EXPORTS pcl::SHOTColorEstimationOMP<T,NT,OutT,RFT>;
 
-#endif    // PCL_FEATURES_IMPL_SHOT_OMP_H_
