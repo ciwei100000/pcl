@@ -26,6 +26,7 @@ Build-Depends: debhelper-compat (= 12), dh-exec,
 	       libxmu-dev,
 	       libxi-dev,
 	       libpcap-dev,
+               libpng-dev,
 	       libvtk8-qt-dev,
 Build-Depends-Indep: doxygen,
 		     doxygen-latex
@@ -154,7 +155,10 @@ Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends},
-         ${misc:Depends}
+         ${misc:Depends},
+         libpcap-dev,
+         libpng-dev,
+         libusb-1.0-0-dev
 Description: Point Cloud Library - I/O library
  The Point Cloud Library (PCL) is a standalone, large scale, open
  project for 2D/3D image and point cloud processing.
