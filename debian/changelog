@@ -1,3 +1,10 @@
+pcl (1.10.1+dfsg-1+vtk8) unstable; urgency=medium
+
+  * Build with Vtk8
+  * Resolve dependencies issues related to libpng libpcap and libusb
+
+ -- ciwei100000 <ciwei100000@gmail.com>  Fri, 05 Jun 2020 08:30:48 -0700
+
 pcl (1.10.1+dfsg-1) unstable; urgency=medium
 
   * Simplify flags, drop as-needed
