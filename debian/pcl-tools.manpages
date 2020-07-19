@@ -38,11 +38,8 @@ debian/manpages/pcl_openni_boundary_estimation.1
 debian/manpages/pcl_openni_change_viewer.1
 debian/manpages/pcl_openni_fast_mesh.1
 debian/manpages/pcl_openni_feature_persistence.1
-debian/manpages/pcl_openni_floodfill_planar_segmentation.1
-debian/manpages/pcl_openni_grab_frame.1
 debian/manpages/pcl_openni_ii_normal_estimation.1
 debian/manpages/pcl_openni_image.1
-debian/manpages/pcl_openni_io.1
 debian/manpages/pcl_openni_mls_smoothing.1
 debian/manpages/pcl_openni_octree_compression.1
 debian/manpages/pcl_openni_organized_compression.1
@@ -50,7 +47,6 @@ debian/manpages/pcl_openni_pcd_recorder.1
 debian/manpages/pcl_openni_planar_convex_hull.1
 debian/manpages/pcl_openni_planar_segmentation.1
 debian/manpages/pcl_openni_save_image.1
-debian/manpages/pcl_openni_stream_compression.1
 debian/manpages/pcl_openni_tracking.1
 debian/manpages/pcl_openni_uniform_sampling.1
 debian/manpages/pcl_openni_viewer.1
@@ -64,7 +60,6 @@ debian/manpages/pcl_pcd_change_viewpoint.1
 debian/manpages/pcl_pcd_convert_NaN_nan.1
 debian/manpages/pcl_pcd_select_object_plane.1
 debian/manpages/pcl_pcd_grabber_viewer.1
-debian/manpages/pcl_pcd_viewer.1
 debian/manpages/pcl_pclzf2pcd.1
 debian/manpages/pcl_plane_projection.1
 debian/manpages/pcl_ply2obj.1
