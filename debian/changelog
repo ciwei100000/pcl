@@ -1,3 +1,12 @@
+pcl (1.11.0+dfsg-2) unstable; urgency=medium
+
+  * Remove Thomas from Uploaders, thanks for working on this
+  * Drop old manpages
+  * Remove trailing whitespaces
+  * Upload to unstable
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sun, 19 Jul 2020 07:11:54 +0200
+
 pcl (1.11.0+dfsg-1) experimental; urgency=medium
 
   * New upstream version 1.11.0+dfsg
