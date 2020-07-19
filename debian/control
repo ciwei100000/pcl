@@ -10,7 +10,7 @@ Build-Depends: debhelper-compat (= 13),
 	       python3-sphinx,
 	       libboost-system-dev,
 	       libboost-filesystem-dev,
-	       libboost-thread-dev, 
+	       libboost-thread-dev,
 	       libboost-date-time-dev,
 	       libboost-iostreams-dev,
 	       libeigen3-dev,
@@ -21,7 +21,7 @@ Build-Depends: debhelper-compat (= 13),
 	       libopenni2-dev [!hurd-i386 !hppa !kfreebsd-any],
 	       libqt5opengl5-dev,
 	       libusb-1.0-0-dev,
-	       freeglut3-dev, 
+	       freeglut3-dev,
 	       libxmu-dev,
 	       libxi-dev,
 	       libpcap-dev,
@@ -93,7 +93,7 @@ Description: Point Cloud Library - apps library
  filtering, feature estimation, surface reconstruction, registration, model
  fitting and segmentation.
  .
- This package contains the libraries needed to run applications depending 
+ This package contains the libraries needed to run applications depending
  on PCL apps.
 
 Package: libpcl-common1.11
@@ -158,7 +158,7 @@ Description: Point Cloud Library - I/O library
  including filtering, feature estimation, surface reconstruction,
  registration, model fitting and segmentation.
  .
- This package contains the libraries needed to run applications 
+ This package contains the libraries needed to run applications
  depending on PCL io.
 
 Package: libpcl-kdtree1.11
@@ -229,42 +229,42 @@ Package: libpcl-outofcore1.11
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
-Depends: ${shlibs:Depends}, 
+Depends: ${shlibs:Depends},
 	 ${misc:Depends}
 Description: Point Cloud Library - outofcore library
  The PCL framework contains numerous state-of-the art algorithms including
  filtering, feature estimation, surface reconstruction, registration, model
  fitting and segmentation.
  .
- This package contains the libraries needed to run applications 
+ This package contains the libraries needed to run applications
  depending on PCL outofcore.
 
 Package: libpcl-people1.11
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
-Depends: ${shlibs:Depends}, 
+Depends: ${shlibs:Depends},
 	 ${misc:Depends}
 Description: Point Cloud Library - people library
  The PCL framework contains numerous state-of-the art algorithms including
  filtering, feature estimation, surface reconstruction, registration, model
  fitting and segmentation.
  .
- This package contains the libraries needed to run applications 
+ This package contains the libraries needed to run applications
  depending on PCL people.
 
 Package: libpcl-recognition1.11
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
-Depends: ${shlibs:Depends}, 
+Depends: ${shlibs:Depends},
     	 ${misc:Depends}
 Description: Point Cloud Library - recognition library
  The PCL framework contains numerous state-of-the art algorithms including
  filtering, feature estimation, surface reconstruction, registration, model
  fitting and segmentation.
  .
- This package contains the libraries needed to run applications 
+ This package contains the libraries needed to run applications
  depending on PCL recognition.
 
 Package: libpcl-registration1.11
