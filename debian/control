@@ -1,7 +1,6 @@
 Source: pcl
 Maintainer: Debian Science Maintainers <debian-science-maintainers@lists.alioth.debian.org>
-Uploaders: Thomas Moulard <thomas.moulard@gmail.com>,
-	   Jochen Sprickerhof <jspricke@debian.org>,
+Uploaders: Jochen Sprickerhof <jspricke@debian.org>,
 	   Leopold Palomo-Avellaneda <leo@alaxarxa.net>
 Section: libs
 Priority: optional
