@@ -8,10 +8,10 @@ Subject: Link against atomic if needed (found on armel)
  2 files changed, 15 insertions(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f0bc239..a94cddf 100644
+index aa59b76..8ae6cc9 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -80,6 +80,20 @@ elseif(MINGW)
+@@ -60,6 +60,20 @@ elseif(MINGW)
    set(CMAKE_COMPILER_IS_MINGW 1)
  endif()
  
@@ -33,12 +33,12 @@ index f0bc239..a94cddf 100644
  # This will be used further down the road to check if the user explicitly provided CXX flags
  if(CMAKE_COMPILER_IS_MSVC)
 diff --git a/cmake/pcl_targets.cmake b/cmake/pcl_targets.cmake
-index 23fa758..7374f7c 100644
+index 9dc6956..1a9947c 100644
 --- a/cmake/pcl_targets.cmake
 +++ b/cmake/pcl_targets.cmake
-@@ -225,7 +225,7 @@ function(PCL_ADD_LIBRARY _name)
-   # must link explicitly against boost.
-   target_link_libraries(${_name} ${Boost_LIBRARIES} Threads::Threads)
+@@ -229,7 +229,7 @@ function(PCL_ADD_LIBRARY _name)
+   endif()
+ 
    if((UNIX AND NOT ANDROID) OR MINGW)
 -    target_link_libraries(${_name} m)
 +    target_link_libraries(${_name} m ${ATOMIC_LIBRARY})

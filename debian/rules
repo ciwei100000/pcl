@@ -36,16 +36,16 @@ override_dh_auto_configure:
 override_dh_install:
 	@for i in pcl_concatenate_points_pcd pcl_grabcut_2d \
 		pcl_elch pcl_dinast_grabber pcl_hdl_grabber \
-		pcl_icp pcl_icp2d pcl_lum pcl_manual_registration pcl_match_linemod_template \
+		pcl_icp pcl_icp2d pcl_lum pcl_match_linemod_template \
 		pcl_multiscale_feature_persistence_example pcl_ndt2d pcl_ndt3d pcl_ni_agast \
 		pcl_ni_linemod pcl_ni_susan pcl_nn_classification_example \
 		pcl_obj_rec_ransac_hash_table pcl_openni_grabber_depth_example \
 		pcl_openni_grabber_example pcl_openni_mobile_server \
 		pcl_openni_organized_multi_plane_segmentation \
-		pcl_openni_passthrough pcl_openni_shift_to_depth_conversion \
-		pcl_openni_voxel_grid pcl_organized_segmentation_demo pcl_outofcore_print \
+		pcl_openni_shift_to_depth_conversion \
+		pcl_openni_voxel_grid pcl_outofcore_print \
 		pcl_outofcore_process pcl_pcd_image_viewer \
-		pcl_pcd_organized_multi_plane_segmentation pcl_pcd_video_player \
+		pcl_pcd_organized_multi_plane_segmentation \
 		pcl_point_cloud_editor pcl_pyramid_surface_matching pcl_radius_filter \
 		pcl_statistical_multiscale_interest_region_extraction_example \
 		pcl_registration_visualizer pcl_surfel_smoothing_test \
@@ -71,16 +71,16 @@ override_dh_install:
 #	dh_shlibdeps -v -Xusr/bin/pcl_* -Lpcl-tools -l:$(CURDIR)/debian/usr/lib/${DEB_HOST_MULTIARCH}/cloud_composer_plugins: -ppcl --- -xpcl-tools -v
 
 override_dh_installchangelogs:
-	dh_installchangelogs -plibpcl-common1.10 CHANGES.md
+	dh_installchangelogs -plibpcl-common1.11 CHANGES.md
 	# Creating dh_links to share the same file
-	@for i in libpcl-dev libpcl1.10 libpcl-apps1.10 \
-		libpcl-features1.10 libpcl-filters1.10 libpcl-io1.10 libpcl-kdtree1.10 \
-		libpcl-keypoints1.10 libpcl-octree1.10 libpcl-outofcore1.10 libpcl-people1.10 \
-		libpcl-recognition1.10 libpcl-registration1.10 libpcl-sample-consensus1.10 \
-		libpcl-search1.10 libpcl-segmentation1.10 libpcl-stereo1.10 \
-		libpcl-surface1.10 libpcl-tracking1.10 libpcl-visualization1.10 \
+	@for i in libpcl-dev libpcl1.11 libpcl-apps1.11 \
+		libpcl-features1.11 libpcl-filters1.11 libpcl-io1.11 libpcl-kdtree1.11 \
+		libpcl-keypoints1.11 libpcl-octree1.11 libpcl-outofcore1.11 libpcl-people1.11 \
+		libpcl-recognition1.11 libpcl-registration1.11 libpcl-sample-consensus1.11 \
+		libpcl-search1.11 libpcl-segmentation1.11 libpcl-stereo1.11 \
+		libpcl-surface1.11 libpcl-tracking1.11 libpcl-visualization1.11 \
 		pcl-tools libpcl-doc; do \
-	cmd="dh_link -p$$i usr/share/doc/libpcl-common1.10/changelog.gz usr/share/doc/$$i/changelog.gz"; \
+	cmd="dh_link -p$$i usr/share/doc/libpcl-common1.11/changelog.gz usr/share/doc/$$i/changelog.gz"; \
 	echo $$cmd; $$cmd; \
 	done
 	dh_installchangelogs
