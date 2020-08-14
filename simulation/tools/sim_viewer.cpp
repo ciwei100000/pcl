@@ -38,6 +38,7 @@
  */
 
 #include <pcl/common/common.h>
+#include <pcl/common/time.h> // for getTime
 #include <pcl/common/transforms.h>
 #include <pcl/console/parse.h>
 #include <pcl/console/print.h>
@@ -87,8 +88,6 @@ using namespace pcl;
 using namespace pcl::console;
 using namespace pcl::io;
 using namespace pcl::simulation;
-
-using namespace std;
 
 using ColorHandler = pcl::visualization::PointCloudColorHandler<pcl::PCLPointCloud2>;
 using ColorHandlerPtr = ColorHandler::Ptr;
