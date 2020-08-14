@@ -40,12 +40,10 @@
 #include <pcl/recognition/ransac_based/orr_octree.h>
 #include <pcl/common/common.h>
 #include <pcl/common/random.h>
-#include <cstdlib>
 #include <cmath>
 #include <algorithm>
 #include <list>
 
-using namespace std;
 using namespace pcl::recognition;
 
 pcl::recognition::ORROctree::ORROctree ()
@@ -286,7 +284,7 @@ pcl::recognition::ORROctree::Node::createChildren()
 void
 pcl::recognition::ORROctree::getFullLeavesIntersectedBySphere (const float* p, float radius, std::list<ORROctree::Node*>& out) const
 {
-  list<ORROctree::Node*> nodes;
+  std::list<ORROctree::Node*> nodes;
   nodes.push_back (root_);
 
   ORROctree::Node *node, *child;
@@ -332,7 +330,7 @@ pcl::recognition::ORROctree::getRandomFullLeafOnSphere (const float* p, float ra
 
   pcl::common::UniformGenerator<int> randgen (0, 1, static_cast<std::uint32_t> (time (nullptr)));
 
-  list<ORROctree::Node*> nodes;
+  std::list<ORROctree::Node*> nodes;
   nodes.push_back (root_);
 
   while ( !nodes.empty () )
