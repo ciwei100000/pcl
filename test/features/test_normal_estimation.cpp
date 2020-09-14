@@ -39,6 +39,7 @@
 
 #include <pcl/test/gtest.h>
 #include <pcl/point_cloud.h>
+#include <pcl/common/utils.h> // pcl::utils::ignore
 #include <pcl/features/normal_3d.h>
 #include <pcl/features/normal_3d_omp.h>
 #include <pcl/features/integral_image_normal.h>
@@ -46,7 +47,6 @@
 
 using namespace pcl;
 using namespace pcl::io;
-using namespace std;
 
 using KdTreePtr = search::KdTree<PointXYZ>::Ptr;
 
@@ -124,14 +124,14 @@ TEST (PCL, NormalEstimation)
   EXPECT_NEAR (curvature,            0.0693136, 1e-4);
 
   // flipNormalTowardsViewpoint (Vector)
-  flipNormalTowardsViewpoint (cloud.points[0], 0, 0, 0, plane_parameters);
+  flipNormalTowardsViewpoint (cloud[0], 0, 0, 0, plane_parameters);
   EXPECT_NEAR (plane_parameters[0], -0.035592,  1e-4);
   EXPECT_NEAR (plane_parameters[1], -0.369596,  1e-4);
   EXPECT_NEAR (plane_parameters[2], -0.928511,  1e-4);
   EXPECT_NEAR (plane_parameters[3],  0.0799743, 1e-4);
 
   // flipNormalTowardsViewpoint
-  flipNormalTowardsViewpoint (cloud.points[0], 0, 0, 0, nx, ny, nz);
+  flipNormalTowardsViewpoint (cloud[0], 0, 0, 0, nx, ny, nz);
   EXPECT_NEAR (nx, -0.035592, 1e-4);
   EXPECT_NEAR (ny, -0.369596, 1e-4);
   EXPECT_NEAR (nz, -0.928511, 1e-4);
@@ -152,7 +152,7 @@ TEST (PCL, NormalEstimation)
 
   // estimate
   n.compute (*normals);
-  EXPECT_EQ (normals->points.size (), indices.size ());
+  EXPECT_EQ (normals->size (), indices.size ());
 
   for (const auto &point : normals->points)
   {
@@ -172,14 +172,14 @@ TEST (PCL, NormalEstimation)
   surfaceptr->points.resize (640 * 480);
   surfaceptr->width = 640;
   surfaceptr->height = 480;
-  EXPECT_EQ (surfaceptr->points.size (), surfaceptr->width * surfaceptr->height);
+  EXPECT_EQ (surfaceptr->size (), surfaceptr->width * surfaceptr->height);
   n.setSearchSurface (surfaceptr);
   tree.reset ();
   n.setSearchMethod (tree);
 
   // estimate
   n.compute (*normals);
-  EXPECT_EQ (normals->points.size (), indices.size ());
+  EXPECT_EQ (normals->size (), indices.size ());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -195,7 +195,7 @@ class DummySearch : public pcl::search::Search<PointT>
     virtual int nearestKSearch (const PointT &point, int k, std::vector<int> &k_indices,
                                 std::vector<float> &k_sqr_distances ) const
     {
-      (void)point;
+      pcl::utils::ignore(point);
 
       EXPECT_GE (k_indices.size(), k);
       EXPECT_GE (k_sqr_distances.size(), k);
@@ -206,10 +206,7 @@ class DummySearch : public pcl::search::Search<PointT>
     virtual int radiusSearch (const PointT& point, double radius, std::vector<int>& k_indices,
                               std::vector<float>& k_sqr_distances, unsigned int max_nn = 0 ) const
     {
-      (void)point;
-      (void)radius;
-      (void)k_indices;
-      (void)k_sqr_distances;
+      pcl::utils::ignore(point, radius, k_indices, k_sqr_distances);
 
       return max_nn;
     }
@@ -263,7 +260,7 @@ TEST (PCL, NormalEstimationOpenMP)
 
   // estimate
   n.compute (*normals);
-  EXPECT_EQ (normals->points.size (), indices.size ());
+  EXPECT_EQ (normals->size (), indices.size ());
 
   for (const auto &point : normals->points)
   {
@@ -302,7 +299,7 @@ TEST (PCL, IntegralImageNormalEstimationIndexingIssue)
       double y = ypos;
       double x = xpos;
 
-      cloudptr->points[idx++] = PointXYZ(float(x), float(y), float(z));
+      (*cloudptr)[idx++] = PointXYZ(float(x), float(y), float(z));
     }
   }
 
@@ -330,9 +327,9 @@ TEST (PCL, IntegralImageNormalEstimationIndexingIssue)
   normalsVec.resize(normals->size());
   for(std::size_t i = 0; i < normals->size(); ++i )
   {
-    normalsVec[i].x = normals->points[i].normal_x;
-    normalsVec[i].y = normals->points[i].normal_y;
-    normalsVec[i].z = normals->points[i].normal_z;
+    normalsVec[i].x = (*normals)[i].normal_x;
+    normalsVec[i].y = (*normals)[i].normal_y;
+    normalsVec[i].z = (*normals)[i].normal_z;
   }
 
   for (const auto &point : normals->points)
@@ -367,7 +364,7 @@ main (int argc, char** argv)
     return (-1);
   }
 
-  indices.resize (cloud.points.size ());
+  indices.resize (cloud.size ());
   for (int i = 0; i < static_cast<int> (indices.size ()); ++i)
     indices[i] = i;
 

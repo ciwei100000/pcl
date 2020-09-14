@@ -416,12 +416,12 @@ pcl::getEigenAsPointCloud (Eigen::MatrixXf &in, pcl::PCLPointCloud2 &out)
 void 
 pcl::copyPointCloud (
     const pcl::PCLPointCloud2 &cloud_in,
-    const std::vector<int> &indices, 
+    const Indices &indices,
     pcl::PCLPointCloud2 &cloud_out)
 {
   cloud_out.header       = cloud_in.header;
   cloud_out.height       = 1;
-  cloud_out.width        = static_cast<std::uint32_t> (indices.size ()); 
+  cloud_out.width        = indices.size (); 
   cloud_out.fields       = cloud_in.fields;
   cloud_out.is_bigendian = cloud_in.is_bigendian;
   cloud_out.point_step   = cloud_in.point_step;
@@ -439,12 +439,12 @@ pcl::copyPointCloud (
 void 
 pcl::copyPointCloud (
     const pcl::PCLPointCloud2 &cloud_in,
-    const std::vector<int, Eigen::aligned_allocator<int> > &indices, 
+    const IndicesAllocator< Eigen::aligned_allocator<int> > &indices,
     pcl::PCLPointCloud2 &cloud_out)
 {
   cloud_out.header       = cloud_in.header;
   cloud_out.height       = 1;
-  cloud_out.width        = static_cast<std::uint32_t> (indices.size ()); 
+  cloud_out.width        = indices.size (); 
   cloud_out.fields       = cloud_in.fields;
   cloud_out.is_bigendian = cloud_in.is_bigendian;
   cloud_out.point_step   = cloud_in.point_step;

@@ -59,8 +59,6 @@
 #include "data_source.hpp"
 
 using namespace pcl::gpu;
-using namespace std;
-
 
 struct PriorityPair
 {    
@@ -118,8 +116,8 @@ TEST(PCL_OctreeGPU, exactNeighbourSearch)
     pcl::gpu::NeighborIndices result_device(data.tests_num, k);    
 
     //prepare output buffers on host
-    std::vector<vector<  int> > result_host(data.tests_num);   
-    std::vector<vector<float> >  dists_host(data.tests_num);    
+    std::vector<std::vector<  int> > result_host(data.tests_num);   
+    std::vector<std::vector<float> >  dists_host(data.tests_num);
     for(std::size_t i = 0; i < data.tests_num; ++i)
     {
         result_host[i].reserve(k);
@@ -183,3 +181,13 @@ TEST(PCL_OctreeGPU, exactNeighbourSearch)
         }             
     }     
 }
+
+/* ---[ */
+int
+main (int argc, char** argv)
+{
+  testing::InitGoogleTest (&argc, argv);
+  return (RUN_ALL_TESTS ());
+}
+/* ]--- */
+

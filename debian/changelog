@@ -1,3 +1,10 @@
+pcl (1.11.1+dfsg-1) unstable; urgency=medium
+
+  * New upstream version 1.11.1+dfsg
+  * Drop dev link (transition is done)
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Tue, 18 Aug 2020 20:22:29 +0200
+
 pcl (1.11.0+dfsg-5-vtk8) unstable; urgency=medium
 
   * Merge tag 'debian/1.11.0+dfsg-5' into vtk8    
@@ -42,13 +49,6 @@ pcl (1.11.0+dfsg-1) experimental; urgency=medium
 
  -- Jochen Sprickerhof <jspricke@debian.org>  Fri, 22 May 2020 19:49:38 +0200
 
-pcl (1.10.1+dfsg-1+vtk8) unstable; urgency=medium
-
-  * Build with Vtk8
-  * Resolve dependencies issues related to libpng libpcap and libusb
-
- -- ciwei100000 <ciwei100000@gmail.com>  Fri, 05 Jun 2020 08:30:48 -0700
-
 pcl (1.10.1+dfsg-1) unstable; urgency=medium
 
   * Simplify flags, drop as-needed
@@ -57,12 +57,6 @@ pcl (1.10.1+dfsg-1) unstable; urgency=medium
   * rebase patches
 
  -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 11 Apr 2020 01:10:57 +0200
-
-pcl (1.10.0+dfsg-5+vtk8) unstable; urgency=medium
-
-  * Build with Vtk8
-
- -- ciwei100000 <ciwei100000@gmail.com>  Mon, 02 Mar 2020 18:07:22 -0800
 
 pcl (1.10.0+dfsg-5) unstable; urgency=medium
 
