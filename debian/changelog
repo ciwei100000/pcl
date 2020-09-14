@@ -1,3 +1,9 @@
+pcl (1.11.1+dfsg-1-vtk8) unstable; urgency=medium
+
+  * Merge tag 'debian/1.11.1+dfsg-1' into vtk8 
+
+ -- ciwei100000 <ciwei100000@gmail.com>  Sun, 13 Sep 2020 18:46:12 -0700
+
 pcl (1.11.1+dfsg-1) unstable; urgency=medium
 
   * New upstream version 1.11.1+dfsg
