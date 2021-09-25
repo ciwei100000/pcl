@@ -38,7 +38,6 @@
 #include <pcl/point_types.h>
 #include <pcl/common/io.h>
 #include <pcl/io/ply_io.h>
-#include <pcl/io/boost.h>
 
 #include <cstdlib>
 #include <fstream>
@@ -49,6 +48,7 @@
 // https://www.boost.org/doc/libs/1_70_0/libs/filesystem/doc/index.htm#Coding-guidelines
 #define BOOST_FILESYSTEM_NO_DEPRECATED
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp> // for split
 
 namespace fs = boost::filesystem;
 
@@ -543,6 +543,7 @@ pcl::PLYReader::parse (const std::string& istream_filename)
 
   pcl::io::ply::ply_parser::list_property_definition_callbacks_type list_property_definition_callbacks;
   pcl::io::ply::ply_parser::at<pcl::io::ply::uint8, pcl::io::ply::int32> (list_property_definition_callbacks) = [this] (const std::string& element_name, const std::string& property_name) { return listPropertyDefinitionCallback<pcl::io::ply::uint8, pcl::io::ply::int32> (element_name, property_name); };
+  pcl::io::ply::ply_parser::at<pcl::io::ply::uint8, pcl::io::ply::uint32> (list_property_definition_callbacks) = [this] (const std::string& element_name, const std::string& property_name) { return listPropertyDefinitionCallback<pcl::io::ply::uint8, pcl::io::ply::int32> (element_name, property_name); };
   pcl::io::ply::ply_parser::at<pcl::io::ply::uint32, pcl::io::ply::float64> (list_property_definition_callbacks) = [this] (const std::string& element_name, const std::string& property_name) { return listPropertyDefinitionCallback<pcl::io::ply::uint32, pcl::io::ply::float64> (element_name, property_name); };
   pcl::io::ply::ply_parser::at<pcl::io::ply::uint32, pcl::io::ply::float32> (list_property_definition_callbacks) = [this] (const std::string& element_name, const std::string& property_name) { return listPropertyDefinitionCallback<pcl::io::ply::uint32, pcl::io::ply::float32> (element_name, property_name); };
   pcl::io::ply::ply_parser::at<pcl::io::ply::uint32, pcl::io::ply::uint32> (list_property_definition_callbacks) = [this] (const std::string& element_name, const std::string& property_name) { return listPropertyDefinitionCallback<pcl::io::ply::uint32, pcl::io::ply::uint32> (element_name, property_name); };
@@ -807,13 +808,16 @@ pcl::PLYWriter::generateHeader (const pcl::PCLPointCloud2 &cloud,
         case pcl::PCLPointField::FLOAT64 : oss << " double "; break;
         default :
         {
-          PCL_ERROR ("[pcl::PLYWriter::generateHeader] unknown data field type!");
+          PCL_ERROR ("[pcl::PLYWriter::generateHeader] unknown data field type!\n");
           return ("");
         }
       }
       oss << field.name;
     }
   }
+
+  // vtk requires face entry to load PLY
+  oss << "\nelement face 0";
 
   if (use_camera)
   {

@@ -38,8 +38,11 @@
 #ifndef PCL_SURFACE_IMPL_SURFEL_SMOOTHING_H_
 #define PCL_SURFACE_IMPL_SURFEL_SMOOTHING_H_
 
+#include <pcl/search/organized.h> // for OrganizedNeighbor
+#include <pcl/search/kdtree.h> // for KdTree
 #include <pcl/surface/surfel_smoothing.h>
 #include <pcl/common/distances.h>
+#include <pcl/console/print.h> // for PCL_ERROR, PCL_DEBUG
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT, typename PointNT> bool
@@ -89,7 +92,7 @@ pcl::SurfelSmoothing<PointT, PointNT>::smoothCloudIteration (PointCloudInPtr &ou
   output_normals = NormalCloudPtr (new NormalCloud);
   output_normals->points.resize (interm_cloud_->size ());
 
-  std::vector<int> nn_indices;
+  pcl::Indices nn_indices;
   std::vector<float> nn_distances;
 
   std::vector<float> diffs (interm_cloud_->size ());
@@ -168,7 +171,7 @@ pcl::SurfelSmoothing<PointT, PointNT>::smoothPoint (std::size_t &point_index,
   float error_residual = error_residual_threshold_ + 1;
   float last_error_residual = error_residual + 100.0f;
 
-  std::vector<int> nn_indices;
+  pcl::Indices nn_indices;
   std::vector<float> nn_distances;
 
   int big_iterations = 0;
@@ -286,7 +289,7 @@ pcl::SurfelSmoothing<PointT, PointNT>::extractSalientFeaturesBetweenScales (Poin
     diffs[i] = (*cloud2_normals)[i].getNormalVector4fMap ().dot ((*cloud2)[i].getVector4fMap () - 
                                                                       (*interm_cloud_)[i].getVector4fMap ());
 
-  std::vector<int> nn_indices;
+  pcl::Indices nn_indices;
   std::vector<float> nn_distances;
 
   output_features->resize (cloud2->size ());
@@ -297,7 +300,7 @@ pcl::SurfelSmoothing<PointT, PointNT>::extractSalientFeaturesBetweenScales (Poin
 
     bool largest = true;
     bool smallest = true;
-    for (const int &nn_index : nn_indices)
+    for (const auto &nn_index : nn_indices)
     {
       if (diffs[point_i] < diffs[nn_index])
         largest = false;

@@ -62,7 +62,7 @@ TEST (SampleConsensusModelSphere, RANSAC)
 
   // Use a custom point cloud for these tests until we need something better
   PointCloud<PointXYZ> cloud;
-  cloud.points.resize (10);
+  cloud.resize (10);
   cloud[0].getVector3fMap () << 1.7068f, 1.0684f, 2.2147f;
   cloud[1].getVector3fMap () << 2.4708f, 2.3081f, 1.1736f;
   cloud[2].getVector3fMap () << 2.7609f, 1.9095f, 1.3574f;
@@ -84,11 +84,11 @@ TEST (SampleConsensusModelSphere, RANSAC)
   bool result = sac.computeModel ();
   ASSERT_TRUE (result);
 
-  std::vector<int> sample;
+  pcl::Indices sample;
   sac.getModel (sample);
   EXPECT_EQ (4, sample.size ());
 
-  std::vector<int> inliers;
+  pcl::Indices inliers;
   sac.getInliers (inliers);
   EXPECT_EQ (9, inliers.size ());
 
@@ -107,6 +107,67 @@ TEST (SampleConsensusModelSphere, RANSAC)
   EXPECT_NEAR (2, coeff_refined[2] / coeff_refined[3], 1e-2);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointT>
+class SampleConsensusModelSphereTest : private SampleConsensusModelSphere<PointT>
+{
+  public:
+    using SampleConsensusModelSphere<PointT>::SampleConsensusModelSphere;
+    using SampleConsensusModelSphere<PointT>::countWithinDistanceStandard;
+#if defined (__SSE__) && defined (__SSE2__) && defined (__SSE4_1__)
+    using SampleConsensusModelSphere<PointT>::countWithinDistanceSSE;
+#endif
+#if defined (__AVX__) && defined (__AVX2__)
+    using SampleConsensusModelSphere<PointT>::countWithinDistanceAVX;
+#endif
+};
+
+TEST (SampleConsensusModelSphere, SIMD_countWithinDistance) // Test if all countWithinDistance implementations return the same value
+{
+  const auto seed = static_cast<unsigned> (std::time (nullptr));
+  srand (seed);
+  for (size_t i=0; i<100; i++) // Run as often as you like
+  {
+    // Generate a cloud with 1000 random points
+    PointCloud<PointXYZ> cloud;
+    pcl::Indices indices;
+    cloud.resize (1000);
+    for (std::size_t idx = 0; idx < cloud.size (); ++idx)
+    {
+      cloud[idx].x = 2.0 * static_cast<float> (rand ()) / RAND_MAX - 1.0;
+      cloud[idx].y = 2.0 * static_cast<float> (rand ()) / RAND_MAX - 1.0;
+      cloud[idx].z = 2.0 * static_cast<float> (rand ()) / RAND_MAX - 1.0;
+      if (rand () % 3 != 0)
+      {
+        indices.push_back (static_cast<int> (idx));
+      }
+    }
+    SampleConsensusModelSphereTest<PointXYZ> model (cloud.makeShared (), indices, true);
+
+    // Generate random sphere model parameters
+    Eigen::VectorXf model_coefficients(4);
+    model_coefficients << 2.0 * static_cast<float> (rand ()) / RAND_MAX - 1.0,
+                          2.0 * static_cast<float> (rand ()) / RAND_MAX - 1.0,
+                          2.0 * static_cast<float> (rand ()) / RAND_MAX - 1.0,
+                          0.15 * static_cast<float> (rand ()) / RAND_MAX; // center and radius
+
+    const double threshold = 0.15 * static_cast<double> (rand ()) / RAND_MAX; // threshold in [0; 0.1]
+
+    // The number of inliers is usually somewhere between 0 and 10
+    const auto res_standard = model.countWithinDistanceStandard (model_coefficients, threshold); // Standard
+    PCL_DEBUG ("seed=%lu, i=%lu, model=(%f, %f, %f, %f), threshold=%f, res_standard=%lu\n", seed, i,
+               model_coefficients(0), model_coefficients(1), model_coefficients(2), model_coefficients(3), threshold, res_standard);
+#if defined (__SSE__) && defined (__SSE2__) && defined (__SSE4_1__)
+    const auto res_sse      = model.countWithinDistanceSSE (model_coefficients, threshold); // SSE
+    ASSERT_EQ (res_standard, res_sse);
+#endif
+#if defined (__AVX__) && defined (__AVX2__)
+    const auto res_avx      = model.countWithinDistanceAVX (model_coefficients, threshold); // AVX
+    ASSERT_EQ (res_standard, res_avx);
+#endif
+  }
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 TEST (SampleConsensusModelNormalSphere, RANSAC)
 {
@@ -115,7 +176,7 @@ TEST (SampleConsensusModelNormalSphere, RANSAC)
   // Use a custom point cloud for these tests until we need something better
   PointCloud<PointXYZ> cloud;
   PointCloud<Normal> normals;
-  cloud.points.resize (27); normals.points.resize (27);
+  cloud.resize (27); normals.resize (27);
   cloud[ 0].getVector3fMap () << -0.014695f,  0.009549f, 0.954775f;
   cloud[ 1].getVector3fMap () <<  0.014695f,  0.009549f, 0.954775f;
   cloud[ 2].getVector3fMap () << -0.014695f,  0.040451f, 0.954775f;
@@ -183,11 +244,11 @@ TEST (SampleConsensusModelNormalSphere, RANSAC)
   bool result = sac.computeModel ();
   ASSERT_TRUE (result);
 
-  std::vector<int> sample;
+  pcl::Indices sample;
   sac.getModel (sample);
   EXPECT_EQ (4, sample.size ());
 
-  std::vector<int> inliers;
+  pcl::Indices inliers;
   sac.getInliers (inliers);
   EXPECT_EQ (27, inliers.size ());
 
@@ -215,7 +276,7 @@ TEST (SampleConsensusModelCone, RANSAC)
   // Use a custom point cloud for these tests until we need something better
   PointCloud<PointXYZ> cloud;
   PointCloud<Normal> normals;
-  cloud.points.resize (31); normals.points.resize (31);
+  cloud.resize (31); normals.resize (31);
 
   cloud[ 0].getVector3fMap () << -0.011247f, 0.200000f, 0.965384f;
   cloud[ 1].getVector3fMap () <<  0.000000f, 0.200000f, 0.963603f;
@@ -292,11 +353,11 @@ TEST (SampleConsensusModelCone, RANSAC)
   bool result = sac.computeModel ();
   ASSERT_TRUE (result);
 
-  std::vector<int> sample;
+  pcl::Indices sample;
   sac.getModel (sample);
   EXPECT_EQ (3, sample.size ());
 
-  std::vector<int> inliers;
+  pcl::Indices inliers;
   sac.getInliers (inliers);
   EXPECT_EQ (31, inliers.size ());
 
@@ -321,7 +382,7 @@ TEST (SampleConsensusModelCylinder, RANSAC)
   // Use a custom point cloud for these tests until we need something better
   PointCloud<PointXYZ> cloud;
   PointCloud<Normal> normals;
-  cloud.points.resize (20); normals.points.resize (20);
+  cloud.resize (20); normals.resize (20);
 
   cloud[ 0].getVector3fMap () << -0.499902f, 2.199701f, 0.000008f;
   cloud[ 1].getVector3fMap () << -0.875397f, 2.030177f, 0.050104f;
@@ -376,11 +437,11 @@ TEST (SampleConsensusModelCylinder, RANSAC)
   bool result = sac.computeModel ();
   ASSERT_TRUE (result);
 
-  std::vector<int> sample;
+  pcl::Indices sample;
   sac.getModel (sample);
   EXPECT_EQ (2, sample.size ());
 
-  std::vector<int> inliers;
+  pcl::Indices inliers;
   sac.getInliers (inliers);
   EXPECT_EQ (20, inliers.size ());
 
@@ -404,7 +465,7 @@ TEST (SampleConsensusModelCircle2D, RANSAC)
 
   // Use a custom point cloud for these tests until we need something better
   PointCloud<PointXYZ> cloud;
-  cloud.points.resize (18);
+  cloud.resize (18);
 
   cloud[ 0].getVector3fMap () << 3.587751f, -4.190982f, 0.0f;
   cloud[ 1].getVector3fMap () << 3.808883f, -4.412265f, 0.0f;
@@ -435,11 +496,11 @@ TEST (SampleConsensusModelCircle2D, RANSAC)
   bool result = sac.computeModel ();
   ASSERT_TRUE (result);
 
-  std::vector<int> sample;
+  pcl::Indices sample;
   sac.getModel (sample);
   EXPECT_EQ (3, sample.size ());
 
-  std::vector<int> inliers;
+  pcl::Indices inliers;
   sac.getInliers (inliers);
   EXPECT_EQ (17, inliers.size ());
 
@@ -458,6 +519,66 @@ TEST (SampleConsensusModelCircle2D, RANSAC)
   EXPECT_NEAR ( 1, coeff_refined[2], 1e-3);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointT>
+class SampleConsensusModelCircle2DTest : private SampleConsensusModelCircle2D<PointT>
+{
+  public:
+    using SampleConsensusModelCircle2D<PointT>::SampleConsensusModelCircle2D;
+    using SampleConsensusModelCircle2D<PointT>::countWithinDistanceStandard;
+#if defined (__SSE__) && defined (__SSE2__) && defined (__SSE4_1__)
+    using SampleConsensusModelCircle2D<PointT>::countWithinDistanceSSE;
+#endif
+#if defined (__AVX__) && defined (__AVX2__)
+    using SampleConsensusModelCircle2D<PointT>::countWithinDistanceAVX;
+#endif
+};
+
+TEST (SampleConsensusModelCircle2D, SIMD_countWithinDistance) // Test if all countWithinDistance implementations return the same value
+{
+  const auto seed = static_cast<unsigned> (std::time (nullptr));
+  srand (seed);
+  for (size_t i=0; i<100; i++) // Run as often as you like
+  {
+    // Generate a cloud with 1000 random points
+    PointCloud<PointXYZ> cloud;
+    pcl::Indices indices;
+    cloud.resize (1000);
+    for (std::size_t idx = 0; idx < cloud.size (); ++idx)
+    {
+      cloud[idx].x = 2.0 * static_cast<float> (rand ()) / RAND_MAX - 1.0;
+      cloud[idx].y = 2.0 * static_cast<float> (rand ()) / RAND_MAX - 1.0;
+      cloud[idx].z = 2.0 * static_cast<float> (rand ()) / RAND_MAX - 1.0;
+      if (rand () % 2 == 0)
+      {
+        indices.push_back (static_cast<int> (idx));
+      }
+    }
+    SampleConsensusModelCircle2DTest<PointXYZ> model (cloud.makeShared (), indices, true);
+
+    // Generate random circle model parameters
+    Eigen::VectorXf model_coefficients(3);
+    model_coefficients << 2.0 * static_cast<float> (rand ()) / RAND_MAX - 1.0,
+                          2.0 * static_cast<float> (rand ()) / RAND_MAX - 1.0,
+                          0.1 * static_cast<float> (rand ()) / RAND_MAX; // center and radius
+
+    const double threshold = 0.1 * static_cast<double> (rand ()) / RAND_MAX; // threshold in [0; 0.1]
+
+    // The number of inliers is usually somewhere between 0 and 20
+    const auto res_standard = model.countWithinDistanceStandard (model_coefficients, threshold); // Standard
+    PCL_DEBUG ("seed=%lu, i=%lu, model=(%f, %f, %f), threshold=%f, res_standard=%lu\n", seed, i,
+               model_coefficients(0), model_coefficients(1), model_coefficients(2), threshold, res_standard);
+#if defined (__SSE__) && defined (__SSE2__) && defined (__SSE4_1__)
+    const auto res_sse      = model.countWithinDistanceSSE (model_coefficients, threshold); // SSE
+    ASSERT_EQ (res_standard, res_sse);
+#endif
+#if defined (__AVX__) && defined (__AVX2__)
+    const auto res_avx      = model.countWithinDistanceAVX (model_coefficients, threshold); // AVX
+    ASSERT_EQ (res_standard, res_avx);
+#endif
+  }
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 TEST (SampleConsensusModelCircle3D, RANSAC)
 {
@@ -465,7 +586,7 @@ TEST (SampleConsensusModelCircle3D, RANSAC)
 
   // Use a custom point cloud for these tests until we need something better
   PointCloud<PointXYZ> cloud;
-  cloud.points.resize (20);
+  cloud.resize (20);
 
   cloud[ 0].getVector3fMap () << 1.00000000f, 5.0000000f, -2.9000001f;
   cloud[ 1].getVector3fMap () << 1.03420200f, 5.0000000f, -2.9060307f;
@@ -498,11 +619,11 @@ TEST (SampleConsensusModelCircle3D, RANSAC)
   bool result = sac.computeModel ();
   ASSERT_TRUE (result);
 
-  std::vector<int> sample;
+  pcl::Indices sample;
   sac.getModel (sample);
   EXPECT_EQ (3, sample.size ());
 
-  std::vector<int> inliers;
+  pcl::Indices inliers;
   sac.getInliers (inliers);
   EXPECT_EQ (18, inliers.size ());
 

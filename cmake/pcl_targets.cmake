@@ -114,7 +114,8 @@ macro(PCL_SUBSYS_DEPEND _var _name)
     if(SUBSYS_EXT_DEPS)
       foreach(_dep ${SUBSYS_EXT_DEPS})
         string(TOUPPER "${_dep}_found" EXT_DEP_FOUND)
-        if(NOT EXT_DEP_FOUND)
+        #Variable EXT_DEP_FOUND expands to ie. QHULL_FOUND which in turn is then used to see if the EXT_DEPS is found.
+        if(NOT ${EXT_DEP_FOUND})
           set(${_var} FALSE)
           PCL_SET_SUBSYS_STATUS(${_name} FALSE "Requires external library ${_dep}.")
         endif()
@@ -169,7 +170,7 @@ macro(PCL_SUBSUBSYS_DEPEND _var _parent _name)
     if(SUBSUBSYS_EXT_DEPS)
       foreach(_dep ${SUBSUBSYS_EXT_DEPS})
         string(TOUPPER "${_dep}_found" EXT_DEP_FOUND)
-        if(NOT EXT_DEP_FOUND)
+        if(NOT ${EXT_DEP_FOUND})
           set(${_var} FALSE)
           PCL_SET_SUBSYS_STATUS(${_parent}_${_name} FALSE "Requires external library ${_dep}.")
         endif()
@@ -411,6 +412,46 @@ macro(PCL_ADD_TEST _name _exename)
 endmacro()
 
 ###############################################################################
+# Add a benchmark target.
+# _name The benchmark name.
+# ARGN :
+#    FILES the source files for the benchmark
+#    ARGUMENTS Arguments for benchmark executable
+#    LINK_WITH link benchmark executable with libraries
+function(PCL_ADD_BENCHMARK _name)
+  set(options)
+  set(oneValueArgs)
+  set(multiValueArgs FILES ARGUMENTS LINK_WITH)
+  cmake_parse_arguments(PCL_ADD_BENCHMARK "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+  add_executable(benchmark_${_name} ${PCL_ADD_BENCHMARK_FILES})
+  set_target_properties(benchmark_${_name} PROPERTIES FOLDER "Benchmarks")
+  target_link_libraries(benchmark_${_name} benchmark::benchmark ${PCL_ADD_BENCHMARK_LINK_WITH})
+  set_target_properties(benchmark_${_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+  
+  #Only applies to MSVC
+  if(MSVC)
+    #Requires CMAKE version 3.13.0
+    get_target_property(BenchmarkArgumentWarningShown run_benchmarks PCL_BENCHMARK_ARGUMENTS_WARNING_SHOWN)
+    if(CMAKE_VERSION VERSION_LESS "3.13.0" AND (NOT BenchmarkArgumentWarningShown))
+      message(WARNING "Arguments for benchmark projects are not added - this requires at least CMake 3.13. Can be added manually in \"Project settings -> Debugging -> Command arguments\"")
+      set_target_properties(run_benchmarks PROPERTIES PCL_BENCHMARK_ARGUMENTS_WARNING_SHOWN TRUE)
+    else()
+      #Only add if there are arguments to test
+      if(PCL_ADD_BENCHMARK_ARGUMENTS)
+        string (REPLACE ";" " " PCL_ADD_BENCHMARK_ARGUMENTS_STR "${PCL_ADD_BENCHMARK_ARGUMENTS}")
+        set_target_properties(benchmark_${_name} PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS ${PCL_ADD_BENCHMARK_ARGUMENTS_STR})
+      endif()
+    endif()
+  endif()
+  
+  add_custom_target(run_benchmark_${_name} benchmark_${_name} ${PCL_ADD_BENCHMARK_ARGUMENTS})
+  set_target_properties(run_benchmark_${_name} PROPERTIES FOLDER "Benchmarks")
+  
+  add_dependencies(run_benchmarks run_benchmark_${_name})
+endfunction()
+
+###############################################################################
 # Add an example target.
 # _name The example name.
 # ARGN :
@@ -486,11 +527,11 @@ function(PCL_MAKE_PKGCONFIG _name)
   set(PKG_LIBFLAGS ${PKGCONFIG_LIB_FLAGS})
   LIST_TO_STRING(PKG_EXTERNAL_DEPS "${PKGCONFIG_EXT_DEPS}")
   foreach(_dep ${PKGCONFIG_PCL_DEPS})
-    set(PKG_EXTERNAL_DEPS "${PKG_EXTERNAL_DEPS} pcl_${_dep}-${PCL_VERSION_MAJOR}.${PCL_VERSION_MINOR}")
+    string(APPEND PKG_EXTERNAL_DEPS " pcl_${_dep}-${PCL_VERSION_MAJOR}.${PCL_VERSION_MINOR}")
   endforeach()
   set(PKG_INTERNAL_DEPS "")
   foreach(_dep ${PKGCONFIG_INT_DEPS})
-    set(PKG_INTERNAL_DEPS "${PKG_INTERNAL_DEPS} -l${_dep}")
+    string(APPEND PKG_INTERNAL_DEPS " -l${_dep}")
   endforeach()
 
   set(_pc_file ${CMAKE_CURRENT_BINARY_DIR}/${_name}-${PCL_VERSION_MAJOR}.${PCL_VERSION_MINOR}.pc)
@@ -661,6 +702,8 @@ endmacro()
 ###############################################################################
 # Write a report on the build/not-build status of the subsystems
 macro(PCL_WRITE_STATUS_REPORT)
+  message(STATUS "PCL build with following flags:")
+  message(STATUS "${CMAKE_CXX_FLAGS}")
   message(STATUS "The following subsystems will be built:")
   foreach(_ss ${PCL_SUBSYSTEMS})
     PCL_GET_SUBSYS_STATUS(_status ${_ss})
@@ -672,11 +715,11 @@ macro(PCL_WRITE_STATUS_REPORT)
         foreach(_sub ${${PCL_SUBSYS_SUBSYS}})
           PCL_GET_SUBSYS_STATUS(_sub_status ${_ss}_${_sub})
           if(_sub_status)
-            set(will_build "${will_build}\n       |_ ${_sub}")
+            string(APPEND will_build "\n       |_ ${_sub}")
           endif()
         endforeach()
         if(NOT ("${will_build}" STREQUAL ""))
-          set(message_text  "${message_text}\n       building: ${will_build}")
+          string(APPEND message_text "\n       building: ${will_build}")
         endif()
         set(wont_build)
         foreach(_sub ${${PCL_SUBSYS_SUBSYS}})
@@ -684,11 +727,11 @@ macro(PCL_WRITE_STATUS_REPORT)
           PCL_GET_SUBSYS_HYPERSTATUS(_sub_hyper_status ${_ss}_${sub})
           if(NOT _sub_status OR ("${_sub_hyper_status}" STREQUAL "AUTO_OFF"))
             GET_IN_MAP(_reason PCL_SUBSYS_REASONS ${_ss}_${_sub})
-            set(wont_build "${wont_build}\n       |_ ${_sub}: ${_reason}")
+            string(APPEND wont_build "\n       |_ ${_sub}: ${_reason}")
           endif()
         endforeach()
         if(NOT ("${wont_build}" STREQUAL ""))
-          set(message_text  "${message_text}\n       not building: ${wont_build}")
+          string(APPEND message_text "\n       not building: ${wont_build}")
         endif()
       endif()
       message(STATUS "${message_text}")
@@ -809,8 +852,7 @@ macro (PCL_ADD_DOC _subsys)
     endif()
     set(DOC_SOURCE_DIR "\"${CMAKE_CURRENT_SOURCE_DIR}\"\\")
     foreach(dep ${dependencies})
-      set(DOC_SOURCE_DIR
-          "${DOC_SOURCE_DIR}\n\t\t\t\t\t\t\t\t\t\t\t\t \"${PCL_SOURCE_DIR}/${dep}\"\\")
+      string(APPEND DOC_SOURCE_DIR "\n\t\t\t\t\t\t\t\t\t\t\t\t \"${PCL_SOURCE_DIR}/${dep}\"\\")
     endforeach()
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/html")
     set(doxyfile "${CMAKE_CURRENT_BINARY_DIR}/doxyfile")

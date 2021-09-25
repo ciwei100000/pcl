@@ -40,6 +40,7 @@
 
 #include <pcl/common/io.h>
 #include <pcl/filters/approximate_voxel_grid.h>
+#include <boost/mpl/size.hpp> // for size
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT> void
@@ -86,7 +87,7 @@ pcl::ApproximateVoxelGrid<PointT>::applyFilter (PointCloud &output)
   }
   Eigen::VectorXf scratch = Eigen::VectorXf::Zero (centroid_size);
 
-  output.points.resize (input_->size ());   // size output for worst case
+  output.resize (input_->size ());   // size output for worst case
   std::size_t op = 0;    // output pointer
   for (const auto& point: *input_)
   {
@@ -126,7 +127,7 @@ pcl::ApproximateVoxelGrid<PointT>::applyFilter (PointCloud &output)
     if (hhe->count)
       flush (output, op++, hhe, rgba_index, centroid_size);
   }
-  output.points.resize (op);
+  output.resize (op);
   output.width = output.size ();
   output.height       = 1;                    // downsampling breaks the organized structure
   output.is_dense     = false;                 // we filter out invalid points

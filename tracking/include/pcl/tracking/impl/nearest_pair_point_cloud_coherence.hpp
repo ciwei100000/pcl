@@ -2,7 +2,6 @@
 #define PCL_TRACKING_IMPL_NEAREST_PAIR_POINT_CLOUD_COHERENCE_H_
 
 #include <pcl/search/kdtree.h>
-#include <pcl/search/organized.h>
 #include <pcl/tracking/nearest_pair_point_cloud_coherence.h>
 
 namespace pcl {
@@ -16,7 +15,7 @@ NearestPairPointCloudCoherence<PointInT>::computeCoherence(
   // for (std::size_t i = 0; i < indices->size (); i++)
   for (std::size_t i = 0; i < cloud->size(); i++) {
     PointInT input_point = (*cloud)[i];
-    std::vector<int> k_indices(1);
+    pcl::Indices k_indices(1);
     std::vector<float> k_distances(1);
     search_->nearestKSearch(input_point, 1, k_indices, k_distances);
     int k_index = k_indices[0];

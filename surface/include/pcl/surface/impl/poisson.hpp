@@ -81,6 +81,7 @@ pcl::Poisson<PointNT>::Poisson ()
   , show_residual_ (false)
   , min_iterations_ (8)
   , solver_accuracy_ (1e-3f)
+  , threads_(1)
 {
 }
 
@@ -91,6 +92,20 @@ pcl::Poisson<PointNT>::~Poisson ()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointNT> void
+pcl::Poisson<PointNT>::setThreads (int threads)
+{
+  if (threads == 0)
+#ifdef _OPENMP
+    threads_ = omp_get_num_procs();
+#else
+    threads_ = 1;
+#endif
+  else
+    threads_ = threads;
+}
+      
+//////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointNT> template <int Degree> void
 pcl::Poisson<PointNT>::execute (poisson::CoredVectorMeshData &mesh,
                                 poisson::Point3D<float> &center,
@@ -100,8 +115,8 @@ pcl::Poisson<PointNT>::execute (poisson::CoredVectorMeshData &mesh,
   poisson::TreeNodeData::UseIndex = 1;
   poisson::Octree<Degree> tree;
 
-  /// TODO OPENMP stuff
-  //    tree.threads = Threads.value;
+  
+  tree.threads = threads_;
   center.coords[0] = center.coords[1] = center.coords[2] = 0;
 
 
@@ -190,7 +205,7 @@ pcl::Poisson<PointNT>::performReconstruction (PolygonMesh &output)
 
   // Write output PolygonMesh
   pcl::PointCloud<pcl::PointXYZ> cloud;
-  cloud.points.resize (int (mesh.outOfCorePointCount () + mesh.inCorePoints.size ()));
+  cloud.resize (int (mesh.outOfCorePointCount () + mesh.inCorePoints.size ()));
   poisson::Point3D<float> p;
   for (int i = 0; i < int (mesh.inCorePoints.size ()); i++)
   {

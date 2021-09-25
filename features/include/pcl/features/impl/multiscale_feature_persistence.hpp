@@ -202,7 +202,7 @@ pcl::MultiscaleFeaturePersistence<PointSource, PointFeature>::extractUniqueFeatu
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointSource, typename PointFeature> void
 pcl::MultiscaleFeaturePersistence<PointSource, PointFeature>::determinePersistentFeatures (FeatureCloud &output_features,
-                                                                                           shared_ptr<std::vector<int> > &output_indices)
+                                                                                           pcl::IndicesPtr &output_indices)
 {
   if (!initCompute ())
     return;
@@ -229,7 +229,7 @@ pcl::MultiscaleFeaturePersistence<PointSource, PointFeature>::determinePersisten
     {
       if (unique_features_table_[scale_i][*feature_it] == true)
       {
-        output_features.points.push_back ((*features_at_scale_[scale_i])[*feature_it]);
+        output_features.push_back ((*features_at_scale_[scale_i])[*feature_it]);
         output_indices->push_back (feature_estimator_->getIndices ()->at (*feature_it));
       }
     }
@@ -243,7 +243,7 @@ pcl::MultiscaleFeaturePersistence<PointSource, PointFeature>::determinePersisten
 
     if (present_in_all)
     {
-      output_features.points.emplace_back ((*features_at_scale_.front ())[feature]);
+      output_features.emplace_back ((*features_at_scale_.front ())[feature]);
       output_indices->emplace_back (feature_estimator_->getIndices ()->at (feature));
     }
   }

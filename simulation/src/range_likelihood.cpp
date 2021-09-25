@@ -1,4 +1,5 @@
 #include <pcl/common/time.h>
+#include <pcl/common/transforms.h> // for transformPointCloud
 #include <pcl/simulation/range_likelihood.h>
 #include <pcl/pcl_config.h>
 
@@ -13,7 +14,6 @@
 #include <GL/glu.h>
 #endif
 
-#include <ctime>
 #include <random>
 
 // For adding noise:

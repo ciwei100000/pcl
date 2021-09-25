@@ -53,7 +53,7 @@ pcl::OrganizedEdgeBase<PointT, PointLT>::compute (pcl::PointCloud<PointLT>& labe
 {
   pcl::Label invalid_pt;
   invalid_pt.label = unsigned (0);
-  labels.points.resize (input_->size (), invalid_pt);
+  labels.resize (input_->size (), invalid_pt);
   labels.width = input_->width;
   labels.height = input_->height;
   
@@ -115,7 +115,7 @@ pcl::OrganizedEdgeBase<PointT, PointLT>::extractEdges (pcl::PointCloud<PointLT>&
         for (int d_idx = 0; d_idx < num_of_ngbr; d_idx++)
         {
           int nghr_idx = curr_idx + directions[d_idx].d_index;
-          assert (nghr_idx >= 0 && nghr_idx < input_->size ());
+          assert (nghr_idx >= 0 && static_cast<std::size_t>(nghr_idx) < input_->size ());
           if (!std::isfinite ((*input_)[nghr_idx].z))
           {
             found_invalid_neighbor = true;
@@ -158,7 +158,7 @@ pcl::OrganizedEdgeBase<PointT, PointLT>::extractEdges (pcl::PointCloud<PointLT>&
           for (const auto &direction : directions)
           {
             int nghr_idx = curr_idx + direction.d_index;
-            assert (nghr_idx >= 0 && nghr_idx < input_->size ());
+            assert (nghr_idx >= 0 && static_cast<std::size_t>(nghr_idx) < input_->size ());
             if (!std::isfinite ((*input_)[nghr_idx].z))
             {
               dx += direction.d_x;
@@ -227,7 +227,7 @@ pcl::OrganizedEdgeFromRGB<PointT, PointLT>::compute (pcl::PointCloud<PointLT>& l
 {
   pcl::Label invalid_pt;
   invalid_pt.label = unsigned (0);
-  labels.points.resize (input_->size (), invalid_pt);
+  labels.resize (input_->size (), invalid_pt);
   labels.width = input_->width;
   labels.height = input_->height;
 
@@ -275,7 +275,7 @@ pcl::OrganizedEdgeFromNormals<PointT, PointNT, PointLT>::compute (pcl::PointClou
 {
   pcl::Label invalid_pt;
   invalid_pt.label = unsigned (0);
-  labels.points.resize (input_->size (), invalid_pt);
+  labels.resize (input_->size (), invalid_pt);
   labels.width = input_->width;
   labels.height = input_->height;
   
@@ -333,7 +333,7 @@ pcl::OrganizedEdgeFromRGBNormals<PointT, PointNT, PointLT>::compute (pcl::PointC
 {
   pcl::Label invalid_pt;
   invalid_pt.label = unsigned (0);
-  labels.points.resize (input_->size (), invalid_pt);
+  labels.resize (input_->size (), invalid_pt);
   labels.width = input_->width;
   labels.height = input_->height;
   

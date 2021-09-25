@@ -77,7 +77,7 @@ private:
   using KeypointExtractor<PointInT>::input_;
   using KeypointExtractor<PointInT>::radius_;
   float sampling_density_;
-  std::shared_ptr<std::vector<std::vector<int>>> neighborhood_indices_;
+  std::shared_ptr<std::vector<pcl::Indices>> neighborhood_indices_;
   std::shared_ptr<std::vector<std::vector<float>>> neighborhood_dist_;
 
   void
@@ -92,12 +92,12 @@ private:
       tree.reset(new pcl::search::KdTree<PointInT>(false));
     tree->setInputCloud(input);
 
-    neighborhood_indices_.reset(new std::vector<std::vector<int>>);
+    neighborhood_indices_.reset(new std::vector<pcl::Indices>);
     neighborhood_indices_->resize(keypoints_cloud->size());
     neighborhood_dist_.reset(new std::vector<std::vector<float>>);
     neighborhood_dist_->resize(keypoints_cloud->size());
 
-    filtered_keypoints.points.resize(keypoints_cloud->size());
+    filtered_keypoints.resize(keypoints_cloud->size());
     int good = 0;
 
     for (std::size_t i = 0; i < keypoints_cloud->size(); i++) {

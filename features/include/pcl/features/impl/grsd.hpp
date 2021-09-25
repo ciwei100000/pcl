@@ -40,6 +40,7 @@
 #define PCL_FEATURES_IMPL_GRSD_H_
 
 #include <pcl/features/grsd.h>
+#include <pcl/features/rsd.h> // for RSDEstimation
 ///////// STATIC /////////
 template <typename PointInT, typename PointNT, typename PointOutT> int
 pcl::GRSDEstimation<PointInT, PointNT, PointOutT>::getSimpleType (float min_radius, float max_radius,
@@ -68,7 +69,7 @@ pcl::GRSDEstimation<PointInT, PointNT, PointOutT>::computeFeature (PointCloudOut
   {
     PCL_ERROR ("[pcl::%s::computeFeature] A voxel cell width needs to be set!\n", getClassName ().c_str ());
     output.width = output.height = 0;
-    output.points.clear ();
+    output.clear ();
     return;
   }
 
@@ -113,7 +114,7 @@ pcl::GRSDEstimation<PointInT, PointNT, PointOutT>::computeFeature (PointCloudOut
   }
 
   // Save feature values
-  output.points.resize (1);
+  output.resize (1);
   output.height = output.width = 1;
   int nrf = 0;
   for (int i = 0; i < NR_CLASS + 1; i++)

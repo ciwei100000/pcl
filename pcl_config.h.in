@@ -42,8 +42,6 @@
 
 #cmakedefine HAVE_QHULL 1
 
-#cmakedefine HAVE_QHULL_2011 1
-
 #cmakedefine HAVE_CUDA 1
 
 #cmakedefine HAVE_ENSENSO 1
@@ -94,4 +92,6 @@
 
 /* Version of OpenGL used by VTK as rendering backend */
 #define VTK_RENDERING_BACKEND_OPENGL_VERSION ${VTK_RENDERING_BACKEND_OPENGL_VERSION}
+
+#cmakedefine HAVE_QVTK 1
 

@@ -38,14 +38,12 @@
 #ifndef OCTREE_COMPRESSION_HPP
 #define OCTREE_COMPRESSION_HPP
 
+#include <pcl/common/io.h> // for getFieldIndex
 #include <pcl/compression/entropy_range_coder.h>
 
-#include <iterator>
 #include <iostream>
 #include <vector>
 #include <cstring>
-#include <iostream>
-#include <cstdio>
 
 namespace pcl
 {
@@ -475,7 +473,7 @@ namespace pcl
         LeafT &leaf_arg, const OctreeKey & key_arg)
     {
       // reference to point indices vector stored within octree leaf
-      const std::vector<int>& leafIdx = leaf_arg.getPointIndicesVector();
+      const auto& leafIdx = leaf_arg.getPointIndicesVector();
 
       if (!do_voxel_grid_enDecoding_)
       {
@@ -526,7 +524,7 @@ namespace pcl
         for (std::size_t i = 0; i < pointCount; i++)
           output_->points.push_back (newPoint);
 
-        // calculcate position of lower voxel corner
+        // calculate position of lower voxel corner
         double lowerVoxelCorner[3];
         lowerVoxelCorner[0] = static_cast<double> (key_arg.x) * this->resolution_ + this->min_x_;
         lowerVoxelCorner[1] = static_cast<double> (key_arg.y) * this->resolution_ + this->min_y_;
