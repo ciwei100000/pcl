@@ -7,11 +7,11 @@ Subject: Fix PCL_ROOT path
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/PCLConfig.cmake.in b/PCLConfig.cmake.in
-index 9f78fcf..91e6ebd 100644
+index a1283a8..0941d0f 100644
 --- a/PCLConfig.cmake.in
 +++ b/PCLConfig.cmake.in
-@@ -398,7 +398,7 @@ if(WIN32 AND NOT MINGW)
-   get_filename_component(PCL_ROOT "${PCL_DIR}" PATH)
+@@ -389,7 +389,7 @@ if(WIN32 AND NOT MINGW)
+   endif()
  else()
  # PCLConfig.cmake is installed to PCL_ROOT/share/pcl-x.y
 -  get_filename_component(PCL_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)

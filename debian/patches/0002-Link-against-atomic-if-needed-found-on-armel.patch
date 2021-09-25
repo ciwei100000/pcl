@@ -8,7 +8,7 @@ Subject: Link against atomic if needed (found on armel)
  2 files changed, 15 insertions(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index aa59b76..8ae6cc9 100644
+index 63b38df..e44ec3e 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -60,6 +60,20 @@ elseif(MINGW)
@@ -33,10 +33,10 @@ index aa59b76..8ae6cc9 100644
  # This will be used further down the road to check if the user explicitly provided CXX flags
  if(CMAKE_COMPILER_IS_MSVC)
 diff --git a/cmake/pcl_targets.cmake b/cmake/pcl_targets.cmake
-index 9dc6956..1a9947c 100644
+index 91f2404..bf11eeb 100644
 --- a/cmake/pcl_targets.cmake
 +++ b/cmake/pcl_targets.cmake
-@@ -229,7 +229,7 @@ function(PCL_ADD_LIBRARY _name)
+@@ -230,7 +230,7 @@ function(PCL_ADD_LIBRARY _name)
    endif()
  
    if((UNIX AND NOT ANDROID) OR MINGW)
