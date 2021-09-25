@@ -58,7 +58,7 @@ template <typename PointInT, typename PointNT, typename PointOutT> void
 pcl::PPFRGBEstimation<PointInT, PointNT, PointOutT>::computeFeature (PointCloudOut &output)
 {
   // Initialize output container - overwrite the sizes done by Feature::initCompute ()
-  output.points.resize (indices_->size () * input_->size ());
+  output.resize (indices_->size () * input_->size ());
   output.height = 1;
   output.width = output.size ();
 
@@ -125,8 +125,8 @@ pcl::PPFRGBRegionEstimation<PointInT, PointNT, PointOutT>::computeFeature (Point
   output.resize (indices_->size ());
   for (std::size_t index_i = 0; index_i < indices_->size (); ++index_i)
   {
-    int i = (*indices_)[index_i];
-    std::vector<int> nn_indices;
+    auto i = (*indices_)[index_i];
+    pcl::Indices nn_indices;
     std::vector<float> nn_distances;
     tree_->radiusSearch (i, static_cast<float> (search_radius_), nn_indices, nn_distances);
 
@@ -135,7 +135,7 @@ pcl::PPFRGBRegionEstimation<PointInT, PointNT, PointOutT>::computeFeature (Point
     average_feature_nn.f1 = average_feature_nn.f2 = average_feature_nn.f3 = average_feature_nn.f4 =
         average_feature_nn.r_ratio = average_feature_nn.g_ratio = average_feature_nn.b_ratio = 0.0f;
 
-    for (const int &j : nn_indices)
+    for (const auto &j : nn_indices)
     {
       if (i != j)
       {

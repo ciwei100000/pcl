@@ -37,9 +37,6 @@
 #define PCL_SURFACE_IMPL_MARCHING_CUBES_HOPPE_H_
 
 #include <pcl/surface/marching_cubes_hoppe.h>
-#include <pcl/common/common.h>
-#include <pcl/common/vector_average.h>
-#include <pcl/Vertices.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointNT>
@@ -64,7 +61,7 @@ pcl::MarchingCubesHoppe<PointNT>::voxelizeData ()
 
       for (int z = 0; z < res_z_; ++z)
       {
-        std::vector<int> nn_indices (1, 0);
+        pcl::Indices nn_indices (1, 0);
         std::vector<float> nn_sqr_dists (1, 0.0f);
         const Eigen::Vector3f point = (lower_boundary_ + size_voxel_ * Eigen::Array3f (x, y, z)).matrix ();
         PointNT p;

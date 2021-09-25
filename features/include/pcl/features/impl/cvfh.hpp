@@ -52,7 +52,7 @@ pcl::CVFHEstimation<PointInT, PointNT, PointOutT>::compute (PointCloudOut &outpu
   if (!Feature<PointInT, PointOutT>::initCompute ())
   {
     output.width = output.height = 0;
-    output.points.clear ();
+    output.clear ();
     return;
   }
   // Resize the output dataset
@@ -60,7 +60,7 @@ pcl::CVFHEstimation<PointInT, PointNT, PointOutT>::compute (PointCloudOut &outpu
   // we risk at pre-allocating too much memory which could lead to bad_alloc 
   // (see http://dev.pointclouds.org/issues/657)
   output.width = output.height = 1;
-  output.points.resize (1);
+  output.resize (1);
 
   // Perform the actual feature computation
   computeFeature (output);
@@ -100,7 +100,7 @@ pcl::CVFHEstimation<PointInT, PointNT, PointOutT>::extractEuclideanClustersSmoot
   // Create a bool vector of processed point indices, and initialize it to false
   std::vector<bool> processed (cloud.size (), false);
 
-  std::vector<int> nn_indices;
+  pcl::Indices nn_indices;
   std::vector<float> nn_distances;
   // Process all points in the indices vector
   for (std::size_t i = 0; i < cloud.size (); ++i)
@@ -159,9 +159,9 @@ pcl::CVFHEstimation<PointInT, PointNT, PointOutT>::extractEuclideanClustersSmoot
 template<typename PointInT, typename PointNT, typename PointOutT> void
 pcl::CVFHEstimation<PointInT, PointNT, PointOutT>::filterNormalsWithHighCurvature (
     const pcl::PointCloud<PointNT> & cloud,
-    std::vector<int> &indices_to_use,
-    std::vector<int> &indices_out,
-    std::vector<int> &indices_in,
+    pcl::Indices &indices_to_use,
+    pcl::Indices &indices_out,
+    pcl::Indices &indices_in,
     float threshold)
 {
   indices_out.resize (cloud.size ());
@@ -170,7 +170,7 @@ pcl::CVFHEstimation<PointInT, PointNT, PointOutT>::filterNormalsWithHighCurvatur
   std::size_t in, out;
   in = out = 0;
 
-  for (const int &index : indices_to_use)
+  for (const auto &index : indices_to_use)
   {
     if (cloud[index].curvature > threshold)
     {
@@ -197,22 +197,22 @@ pcl::CVFHEstimation<PointInT, PointNT, PointOutT>::computeFeature (PointCloudOut
   {
     PCL_ERROR ("[pcl::%s::computeFeature] No input dataset containing normals was given!\n", getClassName ().c_str ());
     output.width = output.height = 0;
-    output.points.clear ();
+    output.clear ();
     return;
   }
   if (normals_->size () != surface_->size ())
   {
     PCL_ERROR ("[pcl::%s::computeFeature] The number of points in the input dataset differs from the number of points in the dataset containing the normals!\n", getClassName ().c_str ());
     output.width = output.height = 0;
-    output.points.clear ();
+    output.clear ();
     return;
   }
 
   centroids_dominant_orientations_.clear ();
 
   // ---[ Step 0: remove normals with high curvature
-  std::vector<int> indices_out;
-  std::vector<int> indices_in;
+  pcl::Indices indices_out;
+  pcl::Indices indices_in;
   filterNormalsWithHighCurvature (*normals_, *indices_, indices_out, indices_in, curv_threshold_);
 
   pcl::PointCloud<pcl::PointNormal>::Ptr normals_filtered_cloud (new pcl::PointCloud<pcl::PointNormal> ());
@@ -298,7 +298,7 @@ pcl::CVFHEstimation<PointInT, PointNT, PointOutT>::computeFeature (PointCloudOut
     }
 
     //compute modified VFH for all dominant clusters and add them to the list!
-    output.points.resize (dominant_normals_.size ());
+    output.resize (dominant_normals_.size ());
     output.width = dominant_normals_.size ();
 
     for (std::size_t i = 0; i < dominant_normals_.size (); ++i)
@@ -325,7 +325,7 @@ pcl::CVFHEstimation<PointInT, PointNT, PointOutT>::computeFeature (PointCloudOut
     pcl::PointCloud<pcl::VFHSignature308> vfh_signature;
     vfh.compute (vfh_signature);
 
-    output.points.resize (1);
+    output.resize (1);
     output.width = 1;
 
     output[0] = vfh_signature[0];

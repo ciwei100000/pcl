@@ -69,7 +69,6 @@ using namespace Eigen;
 
 PCLPointCloud2::Ptr cloud_blob (new PCLPointCloud2);
 PointCloud<PointXYZ>::Ptr cloud (new PointCloud<PointXYZ>);
-std::vector<int> indices_;
 
 PointCloud<PointXYZRGB>::Ptr cloud_organized (new PointCloud<PointXYZRGB>);
 
@@ -238,7 +237,7 @@ TEST (ExtractIndices, Filters)
   eie.filter (result);
   EXPECT_EQ (result.size (), 0);
 
-  empty.points.resize (10);
+  empty.resize (10);
   empty.width = 10; empty.height = 1;
   eie.setInputCloud (empty.makeShared ());
   for (int i = 0; i < 10; ++i)
@@ -253,7 +252,7 @@ TEST (ExtractIndices, Filters)
 
   /*
   PointCloud<PointXYZ> sc, scf;
-  sc.points.resize (5); sc.width = 5; sc.height = 1; sc.is_dense = true;
+  sc.resize (5); sc.width = 5; sc.height = 1; sc.is_dense = true;
   for (int i = 0; i < 5; i++)
   {
     sc[i].x = sc[i].z = 0;
@@ -897,7 +896,7 @@ TEST (VoxelGrid_RGB, Filters)
     pt.r = col_r[i];
     pt.g = col_g[i];
     pt.b = col_b[i];
-    cloud_rgb_.points.push_back (pt);
+    cloud_rgb_.push_back (pt);
   }
 
   toPCLPointCloud2 (cloud_rgb_, cloud_rgb_blob_);
@@ -991,7 +990,7 @@ TEST (VoxelGrid_RGBA, Filters)
     pt.y = 0.0f;
     pt.z = 0.0f;
     pt.rgba = *reinterpret_cast<std::uint32_t*> (&rgba);
-    cloud_rgba_.points.push_back (pt);
+    cloud_rgba_.push_back (pt);
   }
 
   toPCLPointCloud2 (cloud_rgba_, cloud_rgba_blob_);
@@ -1188,7 +1187,7 @@ TEST (VoxelGrid_XYZNormal, Filters)
       for (unsigned xIdx = 0; xIdx < 2; ++xIdx, ++idx)
       {
         PointNormal& voxel = ground_truth [xIdx][yIdx][zIdx];
-        PointNormal& point = output.points [idx];
+        PointNormal& point = output[idx];
         // check for point equalities
         EXPECT_EQ (voxel.x, point.x);
         EXPECT_EQ (voxel.y, point.y);
@@ -1224,7 +1223,7 @@ TEST (VoxelGrid_XYZNormal, Filters)
       for (unsigned xIdx = 0; xIdx < 2; ++xIdx, ++idx)
       {
         PointNormal& voxel = ground_truth [xIdx][yIdx][zIdx];
-        PointNormal& point = output.points [idx];
+        PointNormal& point = output[idx];
         // check for point equalities
         EXPECT_EQ (voxel.x, point.x);
         EXPECT_EQ (voxel.y, point.y);
@@ -1327,6 +1326,107 @@ TEST (VoxelGridCovariance, Filters)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+TEST (VoxelGridMinPoints, Filters)
+{
+  // Setup input with 4 clusters, single point at 0,0,0 and 1,1,1 with 5 point cluster around 0.11,0.11,0.11 and 6 point cluster around 0.31,0.31,0.31
+  PointCloud<PointXYZRGB>::Ptr input(new PointCloud<PointXYZRGB>());
+
+  input->emplace_back(0.0f, 0.0f, 0.0f);
+  std::vector<float> offsets {0.001, 0.002, 0.003, -0.001, -0.002, -0.003};
+  for (unsigned int i=0; i<5; ++i) {
+    input->emplace_back(0.11f+offsets[i], 0.11f+offsets[i], 0.11f+offsets[i],200,0,0);
+    input->emplace_back(0.31f+offsets[i], 0.31f+offsets[i], 0.31f+offsets[i],0,127,127);
+  }
+  input->emplace_back(0.31f+offsets[5], 0.31f+offsets[5], 0.31f+offsets[5],0,127,127);
+  input->emplace_back(1.0f, 1.0f, 1.0f);
+
+  // Test the PointCloud<PointT> VoxelGrid filter method
+  PointCloud<PointXYZRGB> outputMin4;
+  VoxelGrid<PointXYZRGB> grid;
+  // Run filter on input with MinimumPoints threshold at 4
+  grid.setLeafSize (0.02f, 0.02f, 0.02f);
+  grid.setInputCloud (input);
+  grid.setMinimumPointsNumberPerVoxel(4);
+  grid.setDownsampleAllData(true);
+  grid.filter (outputMin4);
+
+  // Verify 2 clusters (0.11 and 0.31) passed threshold and verify their location and color
+  EXPECT_EQ (outputMin4.size (), 2);
+  // Offset noise applied by offsets vec are 1e-3 magnitude, so check within 1e-2 
+  EXPECT_NEAR (outputMin4[0].x, input->at(1).x, 1e-2);
+  EXPECT_NEAR (outputMin4[0].y, input->at(1).y, 1e-2);
+  EXPECT_NEAR (outputMin4[0].z, input->at(1).z, 1e-2);
+  EXPECT_NEAR (outputMin4[0].r, input->at(1).r, 1);
+
+  EXPECT_NEAR (outputMin4[1].x, input->at(2).x, 1e-2);
+  EXPECT_NEAR (outputMin4[1].y, input->at(2).y, 1e-2);
+  EXPECT_NEAR (outputMin4[1].z, input->at(2).z, 1e-2);
+  EXPECT_NEAR (outputMin4[1].g, input->at(2).g, 1);
+  EXPECT_NEAR (outputMin4[1].b, input->at(2).b, 1);
+
+  // Run filter again on input with MinimumPoints threshold at 6
+  PointCloud<PointXYZRGB> outputMin6;
+  grid.setMinimumPointsNumberPerVoxel(6);
+  grid.setDownsampleAllData(false);
+  grid.filter (outputMin6);
+
+  // Verify 1 cluster (0.31) passed threshold and verify location
+  EXPECT_EQ (outputMin6.size (), 1);
+
+  EXPECT_NEAR (outputMin6[0].x, input->at(2).x, 1e-2);
+  EXPECT_NEAR (outputMin6[0].y, input->at(2).y, 1e-2);
+  EXPECT_NEAR (outputMin6[0].z, input->at(2).z, 1e-2);
+
+  // Test the pcl::PCLPointCloud2 VoxelGrid filter method
+  PCLPointCloud2 output_pc2;
+  VoxelGrid<PCLPointCloud2> grid_pc2;
+  PCLPointCloud2::Ptr input_pc2(new PCLPointCloud2());
+
+  // Use same input as above converted to PCLPointCloud2
+  toPCLPointCloud2(*input, *input_pc2);
+
+  // Run filter on input with MinimumPoints threshold at 4
+  grid_pc2.setLeafSize (0.02f, 0.02f, 0.02f);
+  grid_pc2.setInputCloud (input_pc2);
+  grid_pc2.setMinimumPointsNumberPerVoxel(4);
+  grid_pc2.setDownsampleAllData(true);
+  grid_pc2.filter (output_pc2);
+
+  // Convert back to PointXYZRGB for easier data access
+  PointCloud<pcl::PointXYZRGB>::Ptr out_pc( new pcl::PointCloud<pcl::PointXYZRGB> );
+  pcl::fromPCLPointCloud2( output_pc2, *out_pc );
+
+  // Verify 2 clusters (0.11 and 0.31) passed threshold and verify their location and color
+  // PCLPointCloud2 output should be same as PointCloudXYZRGB, account for floating point rounding error with 1e-4
+  EXPECT_EQ (out_pc->points.size (), outputMin4.size());
+
+  EXPECT_NEAR (out_pc->at(0).x, outputMin4[0].x, 1e-4);
+  EXPECT_NEAR (out_pc->at(0).y, outputMin4[0].y, 1e-4);
+  EXPECT_NEAR (out_pc->at(0).z, outputMin4[0].z, 1e-4);
+  EXPECT_NEAR (out_pc->at(0).r, outputMin4[0].r, 1);
+
+  EXPECT_NEAR (out_pc->at(1).x, outputMin4[1].x, 1e-4);
+  EXPECT_NEAR (out_pc->at(1).y, outputMin4[1].y, 1e-4);
+  EXPECT_NEAR (out_pc->at(1).z, outputMin4[1].z, 1e-4);
+  EXPECT_NEAR (out_pc->at(1).g, outputMin4[1].g, 1);
+  EXPECT_NEAR (out_pc->at(1).b, outputMin4[1].b, 1);
+
+  // Run filter again on input with MinimumPoints threshold at 6
+  grid_pc2.setMinimumPointsNumberPerVoxel(6);
+  grid_pc2.setDownsampleAllData(false);
+  grid_pc2.filter (output_pc2);
+
+  // Convert back to PointXYZRGB for easier data access
+  pcl::fromPCLPointCloud2( output_pc2, *out_pc );
+
+  // Verify 1 cluster (0.31) passed threshold and verify location
+  EXPECT_EQ (out_pc->points.size (), outputMin6.size());
+
+  EXPECT_NEAR (out_pc->at(0).x, outputMin6[0].x, 1e-4);
+  EXPECT_NEAR (out_pc->at(0).y, outputMin6[0].y, 1e-4);
+  EXPECT_NEAR (out_pc->at(0).z, outputMin6[0].z, 1e-4);
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 TEST (ProjectInliers, Filters)
 {
   // Test the PointCloud<PointT> method
@@ -1344,7 +1444,7 @@ TEST (ProjectInliers, Filters)
   proj.setModelCoefficients (coefficients);
   proj.filter (output);
 
-  for (const auto &point : output.points)
+  for (const auto &point : output)
     EXPECT_NEAR (point.z, 0.0, 1e-4);
 
   // Test the pcl::PCLPointCloud2 method
@@ -1359,7 +1459,7 @@ TEST (ProjectInliers, Filters)
 
   fromPCLPointCloud2 (output_blob, output);
 
-  for (const auto &point : output.points)
+  for (const auto &point : output)
     EXPECT_NEAR (point.z, 0.0, 1e-4);
 }
 
@@ -1589,7 +1689,7 @@ TEST (ConditionalRemoval, Filters)
   condrem.filter (output);
 
   int num_not_nan = 0;
-  for (const auto &point : output.points)
+  for (const auto &point : output)
   {
     if (std::isfinite (point.x) &&
         std::isfinite (point.y) &&
@@ -1626,7 +1726,7 @@ TEST (ConditionalRemoval, Filters)
   condrem_.filter (output);
 
   num_not_nan = 0;
-  for (const auto &point : output.points)
+  for (const auto &point : output)
   {
     if (std::isfinite (point.x) &&
         std::isfinite (point.y) &&
@@ -1694,7 +1794,7 @@ TEST (ConditionalRemovalSetIndices, Filters)
   EXPECT_EQ ((*cloud)[cloud->size () - 1].z, output[output.size () - 1].z);
 
   int num_not_nan = 0;
-  for (const auto &point : output.points)
+  for (const auto &point : output)
   {
     if (std::isfinite (point.x) &&
         std::isfinite (point.y) &&
@@ -1744,7 +1844,7 @@ TEST (ConditionalRemovalSetIndices, Filters)
   EXPECT_EQ ((*cloud)[cloud->size () - 1].z, output[output.size () - 1].z);
 
   num_not_nan = 0;
-  for (const auto &point : output.points)
+  for (const auto &point : output)
   {
     if (std::isfinite (point.x) &&
         std::isfinite (point.y) &&
@@ -1775,7 +1875,7 @@ TEST (SamplingSurfaceNormal, Filters)
       pt.x = i;
       pt.y = j;
       pt.z = 1;
-      incloud->points.push_back (pt);
+      incloud->push_back (pt);
     }
   }
   incloud->height = 1;
@@ -1787,7 +1887,7 @@ TEST (SamplingSurfaceNormal, Filters)
   ssn_filter.filter (outcloud);
 
   // All the sampled points should have normals along the direction of Z axis
-  for (const auto &point : outcloud.points)
+  for (const auto &point : outcloud)
   {
     EXPECT_NEAR (point.normal[0], 0, 1e-3);
     EXPECT_NEAR (point.normal[1], 0, 1e-3);
@@ -1810,7 +1910,7 @@ TEST (ShadowPoints, Filters)
 
   // Adding a shadow point
   PointXYZ pt (.0f, .0f, .1f);
-  input->points.push_back (pt);
+  input->push_back (pt);
 
   input->height = 1;
   input->width = input->size ();
@@ -1875,7 +1975,7 @@ TEST (FrustumCulling, Filters)
         pt.x = float (i);
         pt.y = float (j);
         pt.z = float (k);
-        input->points.push_back (pt);
+        input->push_back (pt);
       }
     }
   }
@@ -2152,7 +2252,7 @@ TEST (NormalRefinement, Filters)
 
   // Input without NaN
   pcl::PointCloud<pcl::PointXYZRGB> cloud_organized_nonan;
-  std::vector<int> dummy;
+  pcl::Indices dummy;
   pcl::removeNaNFromPointCloud<pcl::PointXYZRGB> (*cloud_organized, cloud_organized_nonan, dummy);
 
   // Viewpoint
@@ -2162,7 +2262,7 @@ TEST (NormalRefinement, Filters)
 
   // Search parameters
   const int k = 5;
-  std::vector<std::vector<int> > k_indices;
+  std::vector<pcl::Indices> k_indices;
   std::vector<std::vector<float> > k_sqr_distances;
 
   // Estimated and refined normal containers
@@ -2176,7 +2276,7 @@ TEST (NormalRefinement, Filters)
   // Search for neighbors
   pcl::search::KdTree<pcl::PointXYZRGB> kdtree;
   kdtree.setInputCloud (cloud_organized_nonan.makeShared ());
-  kdtree.nearestKSearch (cloud_organized_nonan, std::vector<int> (), k, k_indices, k_sqr_distances);
+  kdtree.nearestKSearch (cloud_organized_nonan, pcl::Indices (), k, k_indices, k_sqr_distances);
 
   /*
    * Estimate normals
@@ -2226,7 +2326,7 @@ TEST (NormalRefinement, Filters)
   seg.segment (*inliers, *coefficients);
 
   // Read out SAC model
-  const std::vector<int>& idx_table = inliers->indices;
+  const auto& idx_table = inliers->indices;
   float a = coefficients->values[0];
   float b = coefficients->values[1];
   float c = coefficients->values[2];
@@ -2256,7 +2356,7 @@ TEST (NormalRefinement, Filters)
   int num_nans = 0;
 
   // Loop
-  for (const int &idx : idx_table)
+  for (const auto &idx : idx_table)
   {
     float tmp;
 
@@ -2334,10 +2434,6 @@ main (int argc, char** argv)
   // Load a standard PCD file from disk
   loadPCDFile (file_name, *cloud_blob);
   fromPCLPointCloud2 (*cloud_blob, *cloud);
-
-  indices_.resize (cloud->size ());
-  for (index_t i = 0; i < static_cast<index_t>(indices_.size ()); ++i)
-    indices_[i] = i;
 
 
   loadPCDFile (argv[2], *cloud_organized);

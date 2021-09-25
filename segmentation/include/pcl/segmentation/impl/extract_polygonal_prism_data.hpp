@@ -39,6 +39,7 @@
 #define PCL_SEGMENTATION_IMPL_EXTRACT_POLYGONAL_PRISM_DATA_H_
 
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
+#include <pcl/sample_consensus/sac_model_plane.h> // for SampleConsensusModelPlane
 #include <pcl/common/centroid.h>
 #include <pcl/common/eigen.h>
 
@@ -85,7 +86,7 @@ pcl::isPointIn2DPolygon (const PointT &point, const pcl::PointCloud<PointT> &pol
   k2 = (k0 + 2) % 3;
   // Project the convex hull
   pcl::PointCloud<PointT> xy_polygon;
-  xy_polygon.points.resize (polygon.size ());
+  xy_polygon.resize (polygon.size ());
   for (std::size_t i = 0; i < polygon.size (); ++i)
   {
     Eigen::Vector4f pt (polygon[i].x, polygon[i].y, polygon[i].z, 0);
@@ -214,7 +215,7 @@ pcl::ExtractPolygonalPrismData<PointT>::segment (pcl::PointIndices &output)
   k2 = (k0 + 2) % 3;
   // Project the convex hull
   pcl::PointCloud<PointT> polygon;
-  polygon.points.resize (planar_hull_->size ());
+  polygon.resize (planar_hull_->size ());
   for (std::size_t i = 0; i < planar_hull_->size (); ++i)
   {
     Eigen::Vector4f pt ((*planar_hull_)[i].x, (*planar_hull_)[i].y, (*planar_hull_)[i].z, 0);

@@ -67,7 +67,7 @@ pcl::CropHull<PointT>::applyFilter (PointCloud &output)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename PointT> void
-pcl::CropHull<PointT>::applyFilter (std::vector<int> &indices)
+pcl::CropHull<PointT>::applyFilter (Indices &indices)
 {
   if (dim_ == 2)
   {
@@ -104,16 +104,16 @@ pcl::CropHull<PointT>::getHullCloudRange ()
     -std::numeric_limits<float>::max (),
     -std::numeric_limits<float>::max ()
   );
-  for (std::size_t index = 0; index < indices_->size (); index++)
+  for (pcl::Vertices const & poly : hull_polygons_)
   {
-    Eigen::Vector3f pt = (*input_)[(*indices_)[index]].getVector3fMap ();
-    for (int i = 0; i < 3; i++)
+    for (auto const & idx : poly.vertices)
     {
-      if (pt[i] < cloud_min[i]) cloud_min[i] = pt[i];
-      if (pt[i] > cloud_max[i]) cloud_max[i] = pt[i];
+      Eigen::Vector3f pt = (*hull_cloud_)[idx].getVector3fMap ();
+      cloud_min = cloud_min.cwiseMin(pt);
+      cloud_max = cloud_max.cwiseMax(pt);
     }
   }
-  
+
   return (cloud_max - cloud_min);
 }
 
@@ -148,7 +148,7 @@ pcl::CropHull<PointT>::applyFilter2D (PointCloud &output)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename PointT> template<unsigned PlaneDim1, unsigned PlaneDim2> void 
-pcl::CropHull<PointT>::applyFilter2D (std::vector<int> &indices)
+pcl::CropHull<PointT>::applyFilter2D (Indices &indices)
 {
   // see comments in (PointCloud& output) overload
   for (std::size_t index = 0; index < indices_->size (); index++)
@@ -208,7 +208,7 @@ pcl::CropHull<PointT>::applyFilter3D (PointCloud &output)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename PointT> void 
-pcl::CropHull<PointT>::applyFilter3D (std::vector<int> &indices)
+pcl::CropHull<PointT>::applyFilter3D (Indices &indices)
 {
   // see comments in applyFilter3D (PointCloud& output)
   for (std::size_t index = 0; index < indices_->size (); index++)

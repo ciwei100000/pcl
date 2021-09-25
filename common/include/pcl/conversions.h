@@ -49,11 +49,9 @@
 #include <pcl/point_cloud.h>
 #include <pcl/type_traits.h>
 #include <pcl/for_each_type.h>
-#include <pcl/exceptions.h>
 #include <pcl/console/print.h>
-#ifndef Q_MOC_RUN
+
 #include <boost/foreach.hpp>
-#endif
 
 namespace pcl
 {
@@ -68,10 +66,10 @@ namespace pcl
       template<typename U> void operator() ()
       {
         pcl::PCLPointField f;
-        f.name = traits::name<PointT, U>::value;
-        f.offset = traits::offset<PointT, U>::value;
-        f.datatype = traits::datatype<PointT, U>::value;
-        f.count = traits::datatype<PointT, U>::size;
+        f.name = pcl::traits::name<PointT, U>::value;
+        f.offset = pcl::traits::offset<PointT, U>::value;
+        f.datatype = pcl::traits::datatype<PointT, U>::value;
+        f.count = pcl::traits::datatype<PointT, U>::size;
         fields_.push_back (f);
       }
 
@@ -97,14 +95,14 @@ namespace pcl
           {
             FieldMapping mapping;
             mapping.serialized_offset = field.offset;
-            mapping.struct_offset = traits::offset<PointT, Tag>::value;
-            mapping.size = sizeof (typename traits::datatype<PointT, Tag>::type);
+            mapping.struct_offset = pcl::traits::offset<PointT, Tag>::value;
+            mapping.size = sizeof (typename pcl::traits::datatype<PointT, Tag>::type);
             map_.push_back (mapping);
             return;
           }
         }
         // Disable thrown exception per #595: http://dev.pointclouds.org/issues/595
-        PCL_WARN ("Failed to find match for field '%s'.\n", traits::name<PointT, Tag>::value);
+        PCL_WARN ("Failed to find match for field '%s'.\n", pcl::traits::name<PointT, Tag>::value);
         //throw pcl::InvalidConversionException (ss.str ());
       }
 
@@ -176,7 +174,7 @@ namespace pcl
 
     // Copy point data
     std::uint32_t num_points = msg.width * msg.height;
-    cloud.points.resize (num_points);
+    cloud.resize (num_points);
     std::uint8_t* cloud_data = reinterpret_cast<std::uint8_t*>(&cloud[0]);
 
     // Check if we can copy adjacent points in a single memcpy.  We can do so if there
@@ -205,10 +203,10 @@ namespace pcl
     else
     {
       // If not, memcpy each group of contiguous fields separately
-      for (std::uint32_t row = 0; row < msg.height; ++row)
+      for (index_t row = 0; row < msg.height; ++row)
       {
         const std::uint8_t* row_data = &msg.data[row * msg.row_step];
-        for (std::uint32_t col = 0; col < msg.width; ++col)
+        for (index_t col = 0; col < msg.width; ++col)
         {
           const std::uint8_t* msg_data = row_data + col * msg.point_step;
           for (const detail::FieldMapping& mapping : field_map)
@@ -293,6 +291,7 @@ namespace pcl
     }
 
     // ensor_msgs::image_encodings::BGR8;
+    msg.header = cloud.header;
     msg.encoding = "bgr8";
     msg.step = msg.width * sizeof (std::uint8_t) * 3;
     msg.data.resize (msg.step * msg.height);
@@ -331,6 +330,7 @@ namespace pcl
     int point_step = cloud.point_step;
 
     // pcl::image_encodings::BGR8;
+    msg.header = cloud.header;
     msg.encoding = "bgr8";
     msg.step = static_cast<std::uint32_t>(msg.width * sizeof (std::uint8_t) * 3);
     msg.data.resize (msg.step * msg.height);

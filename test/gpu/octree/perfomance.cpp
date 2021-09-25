@@ -100,8 +100,8 @@ TEST(PCL_OctreeGPU, performance)
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_host(new pcl::PointCloud<pcl::PointXYZ>);	
     cloud_host->width = data.points.size();
     cloud_host->height = 1;
-    cloud_host->points.resize (cloud_host->width * cloud_host->height);    
-    std::transform(data.points.begin(), data.points.end(), cloud_host->points.begin(), DataGenerator::ConvPoint<pcl::PointXYZ>());
+    cloud_host->resize (cloud_host->width * cloud_host->height);    
+    std::transform(data.points.cbegin(), data.points.cend(), cloud_host->begin(), DataGenerator::ConvPoint<pcl::PointXYZ>());
 
     float host_octree_resolution = 25.f;    
     
@@ -133,7 +133,7 @@ TEST(PCL_OctreeGPU, performance)
     cv::Octree octree_opencv;
     const static int opencv_octree_points_per_leaf = 32;    
     std::vector<cv::Point3f> opencv_points(data.size());
-    std::transform(data.points.begin(), data.points.end(), opencv_points.begin(), DataGenerator::ConvPoint<cv::Point3f>());
+    std::transform(data.cbegin(), data.cend(), opencv_points.begin(), DataGenerator::ConvPoint<cv::Point3f>());
         
     {        
         ScopeTime t("opencv-build");	        
@@ -145,17 +145,18 @@ TEST(PCL_OctreeGPU, performance)
 
     const int max_answers = 500;
     float dist;
-    int inds;
 
     //host buffers
-    std::vector<int> indeces;
+    std::vector<int> indices;
+    pcl::Indices indices_host;
     std::vector<float> pointRadiusSquaredDistance;
 #ifdef HAVE_OPENCV  
     std::vector<cv::Point3f> opencv_results;
 #endif
 
     //reserve
-    indeces.reserve(data.data_size);
+    indices.reserve(data.data_size);
+    indices_host.reserve(data.data_size);
     pointRadiusSquaredDistance.reserve(data.data_size);
 #ifdef HAVE_OPENCV
     opencv_results.reserve(data.data_size);
@@ -178,14 +179,14 @@ TEST(PCL_OctreeGPU, performance)
     {
         ScopeTime up("gpu-radius-search-{host}-all");	
         for(std::size_t i = 0; i < data.tests_num; ++i)
-            octree_device.radiusSearchHost(data.queries[i], data.radiuses[i], indeces, max_answers);                        
+            octree_device.radiusSearchHost(data.queries[i], data.radiuses[i], indices, max_answers);
     }
 
     {                
         ScopeTime up("host-radius-search-all");	
         for(std::size_t i = 0; i < data.tests_num; ++i)
             octree_host.radiusSearch(pcl::PointXYZ(data.queries[i].x, data.queries[i].y, data.queries[i].z), 
-                data.radiuses[i], indeces, pointRadiusSquaredDistance, max_answers);                        
+                data.radiuses[i], indices_host, pointRadiusSquaredDistance, max_answers);
     }
      
     {
@@ -204,14 +205,14 @@ TEST(PCL_OctreeGPU, performance)
     {
         ScopeTime up("gpu-radius-search-{host}-all");
         for(std::size_t i = 0; i < data.tests_num; ++i)
-            octree_device.radiusSearchHost(data.queries[i], data.shared_radius, indeces, max_answers);                        
+            octree_device.radiusSearchHost(data.queries[i], data.shared_radius, indices, max_answers);
     }
 
     {                
         ScopeTime up("host-radius-search-all");	
         for(std::size_t i = 0; i < data.tests_num; ++i)
             octree_host.radiusSearch(pcl::PointXYZ(data.queries[i].x, data.queries[i].y, data.queries[i].z), 
-                data.radiuses[i], indeces, pointRadiusSquaredDistance, max_answers);                        
+                data.radiuses[i], indices_host, pointRadiusSquaredDistance, max_answers);
     }
      
     {
@@ -223,17 +224,20 @@ TEST(PCL_OctreeGPU, performance)
     std::cout << "======  Approx nearest search =====" << std::endl;
 
     {
-        ScopeTime up("gpu-approx-nearest-batch-all");	        
-        octree_device.approxNearestSearch(queries_device, result_device);                        
+        ScopeTime up("gpu-approx-nearest-batch-all");	       
+        pcl::gpu::Octree::ResultSqrDists sqr_distance;
+        octree_device.approxNearestSearch(queries_device, result_device, sqr_distance);
     }
 
     {        
+        int inds;
         ScopeTime up("gpu-approx-nearest-search-{host}-all");
         for(std::size_t i = 0; i < data.tests_num; ++i)
             octree_device.approxNearestSearchHost(data.queries[i], inds, dist);                        
     }
 
     {                
+        pcl::index_t inds;
         ScopeTime up("host-approx-nearest-search-all");	
         for(std::size_t i = 0; i < data.tests_num; ++i)
             octree_host.approxNearestSearch(data.queries[i], inds, dist);
@@ -248,7 +252,7 @@ TEST(PCL_OctreeGPU, performance)
     {                
         ScopeTime up("host-knn-search-all");	
         for(std::size_t i = 0; i < data.tests_num; ++i)
-            octree_host.nearestKSearch(data.queries[i], k, indeces, pointRadiusSquaredDistance);
+            octree_host.nearestKSearch(data.queries[i], k, indices, pointRadiusSquaredDistance);
     }*/
 }
 

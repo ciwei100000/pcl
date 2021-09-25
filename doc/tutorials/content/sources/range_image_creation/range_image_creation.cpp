@@ -1,6 +1,6 @@
 #include <pcl/range_image/range_image.h>
 
-int main (int argc, char** argv) {
+int main () {
   pcl::PointCloud<pcl::PointXYZ> pointCloud;
   
   // Generate the data
@@ -10,7 +10,7 @@ int main (int argc, char** argv) {
       point.x = 2.0f - y;
       point.y = y;
       point.z = z;
-      pointCloud.points.push_back(point);
+      pointCloud.push_back(point);
     }
   }
   pointCloud.width = pointCloud.size();

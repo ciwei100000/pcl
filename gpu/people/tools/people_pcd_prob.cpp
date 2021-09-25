@@ -48,7 +48,6 @@
 #include <pcl/gpu/people/people_detector.h>
 #include <pcl/gpu/people/colormap.h>
 #include <pcl/visualization/image_viewer.h>
-#include <pcl/search/pcl_search.h>
 #include <Eigen/Core>
 
 #include <pcl/io/png_io.h>
@@ -193,7 +192,7 @@ class PeoplePCDApp
         char val = static_cast<char> (value8);
         pcl::RGB p;
         p.r = val; p.b = val; p.g = val;
-        rgb.points.push_back(p);
+        rgb.push_back(p);
       }
       rgb.width = histograms.width;
       rgb.height = histograms.height;

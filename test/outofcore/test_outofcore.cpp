@@ -742,12 +742,12 @@ TEST_F (OutofcoreTest, PointCloud2_Insertion)
 
   pcl::PointCloud<pcl::PointXYZ> point_cloud;
 
-  point_cloud.points.reserve (numPts);
+  point_cloud.reserve (numPts);
   point_cloud.width = static_cast<std::uint32_t> (numPts);
   point_cloud.height = 1;
 
   for (std::size_t i=0; i < numPts; i++)
-    point_cloud.points.emplace_back(static_cast<float>(rand () % 10), static_cast<float>(rand () % 10), static_cast<float>(rand () % 10));
+    point_cloud.emplace_back(static_cast<float>(rand () % 10), static_cast<float>(rand () % 10), static_cast<float>(rand () % 10));
 
 
   pcl::PCLPointCloud2::Ptr input_cloud (new pcl::PCLPointCloud2 ());
@@ -914,7 +914,7 @@ TEST_F (OutofcoreTest, PointCloud2_Query)
   std::uint64_t points_added = octreeA.addPointCloud (dst_blob, false);
   std::uint64_t LOD_points_added = octreeB.addPointCloud_and_genLOD (dst_blob);
 
-  ASSERT_EQ (points_added, dst_blob->width*dst_blob->height) << "Number of points returned by addPointCloud does not match the number of poitns in the input point cloud\n";
+  ASSERT_EQ (points_added, dst_blob->width*dst_blob->height) << "Number of points returned by addPointCloud does not match the number of points in the input point cloud\n";
   ASSERT_EQ (LOD_points_added, dst_blob->width*dst_blob->height) << "Number of points returned by addPointCloud_and_genLOD does not match the number of points in the input point cloud\n";
 
   pcl::PCLPointCloud2::Ptr query_result_a (new pcl::PCLPointCloud2 ());

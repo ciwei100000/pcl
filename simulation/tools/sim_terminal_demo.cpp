@@ -11,9 +11,8 @@
  */
 
 #include <pcl/common/time.h> // for getTime
+#include <pcl/io/pcd_io.h>   // for PCDWriter
 #include <pcl/memory.h>
-
-#include <Eigen/Dense>
 
 #include "simulation_io.hpp"
 

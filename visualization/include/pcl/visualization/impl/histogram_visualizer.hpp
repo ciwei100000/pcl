@@ -86,7 +86,7 @@ template <typename PointT> bool
 PCLHistogramVisualizer::addFeatureHistogram (
     const pcl::PointCloud<PointT> &cloud,
     const std::string &field_name,
-    const int index,
+    const pcl::index_t index,
     const std::string &id, int win_width, int win_height)
 {
   if (index < 0 || index >= cloud.size ())
@@ -118,7 +118,7 @@ PCLHistogramVisualizer::addFeatureHistogram (
 
   // Parse the cloud data and store it in the array
   double xy[2];
-  for (std::uint32_t d = 0; d < fields[field_idx].count; ++d)
+  for (uindex_t d = 0; d < fields[field_idx].count; ++d)
   {
     xy[0] = d;
     //xy[1] = cloud[index].histogram[d];
@@ -168,7 +168,7 @@ PCLHistogramVisualizer::updateFeatureHistogram (
 
 template <typename PointT> bool
 PCLHistogramVisualizer::updateFeatureHistogram (
-    const pcl::PointCloud<PointT> &cloud, const std::string &field_name, const int index,
+    const pcl::PointCloud<PointT> &cloud, const std::string &field_name, const pcl::index_t index,
     const std::string &id)
 {
   if (index < 0 || index >= cloud.size ())

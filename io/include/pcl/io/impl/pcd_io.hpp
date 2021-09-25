@@ -40,13 +40,13 @@
 #ifndef PCL_IO_PCD_IO_IMPL_H_
 #define PCL_IO_PCD_IO_IMPL_H_
 
+#include <boost/algorithm/string/trim.hpp> // for trim
 #include <fstream>
 #include <fcntl.h>
 #include <string>
 #include <cstdlib>
 #include <pcl/common/io.h> // for getFields, ...
 #include <pcl/console/print.h>
-#include <pcl/io/boost.h>
 #include <pcl/io/low_level_io.h>
 #include <pcl/io/pcd_io.h>
 
@@ -242,7 +242,7 @@ template <typename PointT> int
 pcl::PCDWriter::writeBinaryCompressed (const std::string &file_name, 
                                        const pcl::PointCloud<PointT> &cloud)
 {
-  if (cloud.points.empty ())
+  if (cloud.empty ())
   {
     throw pcl::IOException ("[pcl::PCDWriter::writeBinaryCompressed] Input point cloud has no data!");
     return (-1);
@@ -447,7 +447,7 @@ pcl::PCDWriter::writeASCII (const std::string &file_name, const pcl::PointCloud<
   }
 
   std::ofstream fs;
-  fs.open (file_name.c_str ());      // Open file
+  fs.open (file_name.c_str (), std::ios::binary);      // Open file
   
   if (!fs.is_open () || fs.fail ())
   {
@@ -586,9 +586,9 @@ pcl::PCDWriter::writeASCII (const std::string &file_name, const pcl::PointCloud<
 template <typename PointT> int
 pcl::PCDWriter::writeBinary (const std::string &file_name, 
                              const pcl::PointCloud<PointT> &cloud, 
-                             const std::vector<int> &indices)
+                             const pcl::Indices &indices)
 {
-  if (cloud.points.empty () || indices.empty ())
+  if (cloud.empty () || indices.empty ())
   {
     throw pcl::IOException ("[pcl::PCDWriter::writeBinary] Input point cloud has no data or empty indices given!");
     return (-1);
@@ -671,7 +671,7 @@ pcl::PCDWriter::writeBinary (const std::string &file_name,
 
   char *out = &map[0] + data_idx;
   // Copy the data
-  for (const int &index : indices)
+  for (const auto &index : indices)
   {
     int nrj = 0;
     for (const auto &field : fields)
@@ -714,10 +714,10 @@ pcl::PCDWriter::writeBinary (const std::string &file_name,
 template <typename PointT> int
 pcl::PCDWriter::writeASCII (const std::string &file_name, 
                             const pcl::PointCloud<PointT> &cloud, 
-                            const std::vector<int> &indices,
+                            const pcl::Indices &indices,
                             const int precision)
 {
-  if (cloud.points.empty () || indices.empty ())
+  if (cloud.empty () || indices.empty ())
   {
     throw pcl::IOException ("[pcl::PCDWriter::writeASCII] Input point cloud has no data or empty indices given!");
     return (-1);
@@ -730,7 +730,7 @@ pcl::PCDWriter::writeASCII (const std::string &file_name,
   }
 
   std::ofstream fs;
-  fs.open (file_name.c_str ());      // Open file
+  fs.open (file_name.c_str (), std::ios::binary);      // Open file
   if (!fs.is_open () || fs.fail ())
   {
     throw pcl::IOException ("[pcl::PCDWriter::writeASCII] Could not open file for writing!");
@@ -754,7 +754,7 @@ pcl::PCDWriter::writeASCII (const std::string &file_name,
   stream.imbue (std::locale::classic ());
 
   // Iterate through the points
-  for (const int &index : indices)
+  for (const auto &index : indices)
   {
     for (std::size_t d = 0; d < fields.size (); ++d)
     {
