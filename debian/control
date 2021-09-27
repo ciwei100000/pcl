@@ -28,7 +28,7 @@ Build-Depends: debhelper-compat (= 13),
 	       libvtk9-qt-dev,
 Build-Depends-Indep: doxygen,
 		     doxygen-latex
-Standards-Version: 4.5.0
+Standards-Version: 4.6.0
 Vcs-Browser: https://salsa.debian.org/science-team/pcl
 Vcs-Git: https://salsa.debian.org/science-team/pcl.git
 Rules-Requires-Root: no
