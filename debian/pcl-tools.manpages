@@ -50,7 +50,6 @@ debian/manpages/pcl_openni_save_image.1
 debian/manpages/pcl_openni_tracking.1
 debian/manpages/pcl_openni_uniform_sampling.1
 debian/manpages/pcl_openni_viewer.1
-debian/manpages/pcl_organized_pcd_to_png.1
 debian/manpages/pcl_outlier_removal.1
 debian/manpages/pcl_passthrough_filter.1
 debian/manpages/pcl_pcd2ply.1
@@ -69,7 +68,6 @@ debian/manpages/pcl_ply2raw.1
 debian/manpages/pcl_ply2vtk.1
 debian/manpages/pcl_plyheader.1
 debian/manpages/pcl_png2pcd.1
-debian/manpages/pcl_pointclouds.1
 debian/manpages/pcl_poisson_reconstruction.1
 debian/manpages/pcl_ppf_object_recognition.1
 debian/manpages/pcl_sac_segmentation_plane.1
