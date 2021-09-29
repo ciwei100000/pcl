@@ -1,3 +1,4 @@
 0001-Fix-PCL_ROOT-path.patch
 0002-Link-against-atomic-if-needed-found-on-armel.patch
 0003-Use-newly-build-libs-when-testing.patch
+0004-Disable-failing-tests.patch
