@@ -1,3 +1,24 @@
+pcl (1.12.0+dfsg-1) experimental; urgency=medium
+
+  * New upstream version 1.12.0+dfsg
+    - Switch to Qhull reentrant (Closes: #990399)
+    - Fix PCLConfig.cmake (LP: #1928819)
+  * Switch to VTK9
+  * Update copyright
+  * Rebase patches
+  * Use /tags in d/watch
+  * Bump policy version (no changes)
+  * Remove unused manpages
+  * Rename binary package due to Soversion bump
+  * Install examples
+  * Simplify rules, run tests
+  * Add patch to set LD_LIBRARY_PATH for tests
+  * Add patch to disable failing tests
+  * Add d/clean
+  * Cleanup
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 02 Oct 2021 12:29:30 +0200
+
 pcl (1.11.1+dfsg-1) unstable; urgency=medium
 
   * New upstream version 1.11.1+dfsg
