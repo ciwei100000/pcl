@@ -14,6 +14,12 @@ else
   PARALLEL=
 endif
 
+ifneq (,$(filter $(DEB_BUILD_ARCH),s390x powerpc powerpc64 riscv64))
+  RUN_TESTS=
+else
+  RUN_TESTS=-DBUILD_global_tests=ON -DBUILD_TESTS=ON
+endif
+
 override_dh_auto_configure:
 	dh_auto_configure -- 						\
 	-DLIB_INSTALL_DIR:STRING="lib/$(DEB_HOST_MULTIARCH)"		\
@@ -22,10 +28,8 @@ override_dh_auto_configure:
 	-DBUILD_apps_modeler=ON \
 	-DBUILD_apps=ON \
 	-DBUILD_apps_point_cloud_editor=ON \
-	-DBUILD_global_tests=ON \
-	-DBUILD_TESTS=ON \
 	-DPCL_DISABLE_GPU_TESTS=ON \
-	$(BUILD_DOC)
+	$(BUILD_DOC) $(RUN_TESTS)
 
 override_dh_auto_test:
 	make -C obj-${DEB_HOST_GNU_TYPE} tests

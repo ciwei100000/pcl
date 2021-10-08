@@ -4,8 +4,8 @@ Subject: Link against atomic if needed (found on armel)
 
 ---
  CMakeLists.txt          | 14 ++++++++++++++
- cmake/pcl_targets.cmake |  2 +-
- 2 files changed, 15 insertions(+), 1 deletion(-)
+ cmake/pcl_targets.cmake |  4 ++--
+ 2 files changed, 16 insertions(+), 2 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 63b38df..e44ec3e 100644
@@ -33,7 +33,7 @@ index 63b38df..e44ec3e 100644
  # This will be used further down the road to check if the user explicitly provided CXX flags
  if(CMAKE_COMPILER_IS_MSVC)
 diff --git a/cmake/pcl_targets.cmake b/cmake/pcl_targets.cmake
-index 91f2404..bf11eeb 100644
+index 91f2404..435a50e 100644
 --- a/cmake/pcl_targets.cmake
 +++ b/cmake/pcl_targets.cmake
 @@ -230,7 +230,7 @@ function(PCL_ADD_LIBRARY _name)
@@ -45,3 +45,12 @@ index 91f2404..bf11eeb 100644
    endif()
  
    if(MINGW)
+@@ -385,7 +385,7 @@ macro(PCL_ADD_TEST _name _exename)
+   #target_link_libraries(${_exename} ${GTEST_BOTH_LIBRARIES} ${PCL_ADD_TEST_LINK_WITH})
+   target_link_libraries(${_exename} ${PCL_ADD_TEST_LINK_WITH} ${CLANG_LIBRARIES})
+ 
+-  target_link_libraries(${_exename} Threads::Threads)
++  target_link_libraries(${_exename} Threads::Threads ${ATOMIC_LIBRARY})
+ 
+   # must link explicitly against boost only on Windows
+   target_link_libraries(${_exename} ${Boost_LIBRARIES})
