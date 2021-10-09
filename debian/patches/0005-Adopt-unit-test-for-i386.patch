@@ -63,14 +63,14 @@ index 0b000cb..c8f8598 100644
  }
  
 diff --git a/test/filters/test_convolution.cpp b/test/filters/test_convolution.cpp
-index 26e5cbe..5c0c658 100644
+index 26e5cbe..f61a8f4 100644
 --- a/test/filters/test_convolution.cpp
 +++ b/test/filters/test_convolution.cpp
 @@ -393,6 +393,7 @@ TEST (Convolution, convolveRowsXYZRGB)
      RGB(0, 0, 0),        RGB(0, 0, 0),
    };
  
-+#ifndef (__i386__)
++#ifndef __i386__
    // check result
    for (std::uint32_t i = 0; i < output->width ; ++i)
    {
@@ -83,14 +83,14 @@ index 26e5cbe..5c0c658 100644
  
  int
 diff --git a/test/filters/test_sampling.cpp b/test/filters/test_sampling.cpp
-index d7e1070..484355b 100644
+index d7e1070..46d7cf8 100644
 --- a/test/filters/test_sampling.cpp
 +++ b/test/filters/test_sampling.cpp
 @@ -86,16 +86,20 @@ TEST (CovarianceSampling, Filters)
    covariance_sampling.setNumberOfSamples (static_cast<unsigned int> (cloud_turtle_normals->size ()) / 8);
    double cond_num_turtle = covariance_sampling.computeConditionNumber ();
  
-+#ifndef (__i386__)
++#ifndef __i386__
    // Conditioning number should be loosely close to the expected number. Adopting 10% of the reference value
    EXPECT_NEAR (cond_num_turtle, 20661.7663, 2e4);
 +#endif
@@ -100,7 +100,7 @@ index d7e1070..484355b 100644
    covariance_sampling.setIndices (turtle_indices);
    double cond_num_turtle_sampled = covariance_sampling.computeConditionNumber ();
  
-+#ifndef (__i386__)
++#ifndef __i386__
    // Conditioning number should be loosely close to the expected number. Adopting 10% of the reference value
    EXPECT_NEAR (cond_num_turtle_sampled, 5795.5057, 5e3);
 +#endif
