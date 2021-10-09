@@ -1,3 +1,9 @@
+pcl (1.12.0+dfsg-3) experimental; urgency=medium
+
+  * Fix preprocessor syntax
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 09 Oct 2021 17:38:10 +0200
+
 pcl (1.12.0+dfsg-2) experimental; urgency=medium
 
   * Fix build and disable failing tests
