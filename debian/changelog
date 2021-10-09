@@ -1,3 +1,9 @@
+pcl (1.12.0+dfsg-2) experimental; urgency=medium
+
+  * Fix build and disable failing tests
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 09 Oct 2021 16:59:23 +0200
+
 pcl (1.12.0+dfsg-1) experimental; urgency=medium
 
   * New upstream version 1.12.0+dfsg
