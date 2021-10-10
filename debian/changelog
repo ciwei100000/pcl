@@ -1,3 +1,10 @@
+pcl (1.12.0+dfsg-4) experimental; urgency=medium
+
+  * Only run tests if they are enabled
+  * Fix tests on armel
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sun, 10 Oct 2021 11:23:52 +0200
+
 pcl (1.12.0+dfsg-3) experimental; urgency=medium
 
   * Fix preprocessor syntax
