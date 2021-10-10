@@ -18,6 +18,10 @@ ifneq (,$(filter $(DEB_BUILD_ARCH),s390x powerpc powerpc64 riscv64))
   RUN_TESTS=
 else
   RUN_TESTS=-DBUILD_global_tests=ON -DBUILD_TESTS=ON
+
+override_dh_auto_test:
+	make -C obj-${DEB_HOST_GNU_TYPE} tests
+
 endif
 
 override_dh_auto_configure:
@@ -30,9 +34,6 @@ override_dh_auto_configure:
 	-DBUILD_apps_point_cloud_editor=ON \
 	-DPCL_DISABLE_GPU_TESTS=ON \
 	$(BUILD_DOC) $(RUN_TESTS)
-
-override_dh_auto_test:
-	make -C obj-${DEB_HOST_GNU_TYPE} tests
 
 %:
 	dh  $@ $(PARALLEL)
