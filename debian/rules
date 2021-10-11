@@ -14,7 +14,7 @@ else
   PARALLEL=
 endif
 
-ifneq (,$(filter $(DEB_BUILD_ARCH),s390x powerpc powerpc64 riscv64))
+ifneq (,$(filter $(DEB_BUILD_ARCH),s390x powerpc ppc64 riscv64))
   RUN_TESTS=
 else
   RUN_TESTS=-DBUILD_global_tests=ON -DBUILD_TESTS=ON
