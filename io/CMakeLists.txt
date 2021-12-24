@@ -1,13 +1,14 @@
 set(SUBSYS_NAME io)
 set(SUBSYS_DESC "Point cloud IO library")
 set(SUBSYS_DEPS common octree)
+set(SUBSYS_EXT_DEPS boost eigen)
 
 set(build TRUE)
 PCL_SUBSYS_OPTION(build "${SUBSYS_NAME}" "${SUBSYS_DESC}" ON)
 if(WIN32)
-  PCL_SUBSYS_DEPEND(build "${SUBSYS_NAME}" DEPS ${SUBSYS_DEPS} OPT_DEPS openni openni2 ensenso davidSDK dssdk rssdk rssdk2 pcap png vtk)
+  PCL_SUBSYS_DEPEND(build "${SUBSYS_NAME}" DEPS ${SUBSYS_DEPS} OPT_DEPS openni openni2 ensenso davidSDK dssdk rssdk rssdk2 pcap png vtk EXT_DEPS ${SUBSYS_EXT_DEPS})
 else()
-  PCL_SUBSYS_DEPEND(build "${SUBSYS_NAME}" DEPS ${SUBSYS_DEPS} OPT_DEPS openni openni2 ensenso davidSDK dssdk pcap png vtk libusb)
+  PCL_SUBSYS_DEPEND(build "${SUBSYS_NAME}" DEPS ${SUBSYS_DEPS} OPT_DEPS openni openni2 ensenso davidSDK dssdk pcap png vtk libusb EXT_DEPS ${SUBSYS_EXT_DEPS})
 endif()
 
 PCL_ADD_DOC("${SUBSYS_NAME}")
@@ -190,7 +191,7 @@ if(VTK_FOUND AND NOT ANDROID)
     src/vtk_lib_io.cpp
     src/png_io.cpp
   )
-  set(VTK_IO_TARGET_LINK_LIBRARIES vtkCommon vtkWidgets vtkIO vtkImaging vtkHybrid vtkGraphics vtkRendering vtkFiltering vtkVolumeRendering)
+
   # Indicates that we can rely on VTK to be present
   set(VTK_DEFINES -DPCL_BUILT_WITH_VTK)
 endif()
@@ -210,6 +211,7 @@ if(MINGW)
 endif()
 PCL_ADD_INCLUDES("${SUBSYS_NAME}" "${SUBSYS_NAME}/ply" ${PLY_INCLUDES})
 target_include_directories(pcl_io_ply PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_link_libraries(pcl_io_ply Boost::boost)
 
 set(srcs
   src/debayer.cpp
@@ -229,6 +231,7 @@ set(srcs
   src/robot_eye_grabber.cpp
   src/auto_io.cpp
   src/io_exception.cpp
+  src/tim_grabber.cpp
   ${VTK_IO_SOURCE}
   ${OPENNI_GRABBER_SOURCES}
   ${OPENNI2_GRABBER_SOURCES}
@@ -280,6 +283,7 @@ set(incs
   "include/pcl/${SUBSYS_NAME}/robot_eye_grabber.h"
   "include/pcl/${SUBSYS_NAME}/point_cloud_image_extractors.h"
   "include/pcl/${SUBSYS_NAME}/io_exception.h"
+  "include/pcl/${SUBSYS_NAME}/tim_grabber.h"
   ${VTK_IO_INCLUDES}
   ${OPENNI_GRABBER_INCLUDES}
   ${OPENNI2_GRABBER_INCLUDES}
@@ -338,16 +342,26 @@ PCL_ADD_LIBRARY(${LIB_NAME} COMPONENT ${SUBSYS_NAME} SOURCES ${srcs} ${incs} ${c
 
 target_include_directories(${LIB_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-target_link_libraries("${LIB_NAME}" pcl_common pcl_io_ply)
+target_link_libraries("${LIB_NAME}" Boost::boost Boost::filesystem Boost::iostreams pcl_common pcl_io_ply)
+
 if(VTK_FOUND)
-  if(${VTK_VERSION} VERSION_LESS 9.0)
-    link_directories(${VTK_LINK_DIRECTORIES})
-    target_link_libraries("${LIB_NAME}" ${VTK_LIBRARIES})
-  else()
+  if(${VTK_VERSION} VERSION_GREATER_EQUAL 9.0)
     target_link_libraries("${LIB_NAME}" 
                           VTK::IOImage
                           VTK::IOGeometry
                           VTK::IOPLY)
+  else()
+    link_directories(${VTK_LINK_DIRECTORIES})
+    target_link_libraries("${LIB_NAME}"
+                          vtkIOImage
+                          vtkIOGeometry
+                          vtkIOMPIImage
+                          vtkIOMPIParallel
+                          vtkIOPLY
+                          )
+    if(${VTK_VERSION} VERSION_GREATER_EQUAL 7.0 AND ${VTK_VERSION} VERSION_LESS 8.0)
+      target_link_libraries("${LIB_NAME}" vtkFiltersParallelDIY2)
+    endif()
   endif()
 endif()
 
@@ -401,7 +415,7 @@ if(PCAP_FOUND)
   target_link_libraries("${LIB_NAME}" ${PCAP_LIBRARIES})
 endif()
 
-set(EXT_DEPS eigen3)
+set(EXT_DEPS boost eigen3)
 
 if(WITH_OPENNI)
   list(APPEND EXT_DEPS libopenni)
