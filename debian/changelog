@@ -1,3 +1,12 @@
+pcl (1.12.1+dfsg-1) unstable; urgency=medium
+
+  * New upstream version 1.12.1+dfsg
+  * Rebase patches
+  * Update copyright
+  * Drop empty documentation
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Fri, 24 Dec 2021 23:58:00 +0100
+
 pcl (1.12.0+dfsg-6) unstable; urgency=medium
 
   * Fix ppc64 in d/rules
