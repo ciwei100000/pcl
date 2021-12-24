@@ -24,10 +24,10 @@ index d89d80c..d05945f 100644
                 FILES test_moment_of_inertia_estimation.cpp
                 LINK_WITH pcl_gtest pcl_io pcl_features
 diff --git a/test/features/test_normal_estimation.cpp b/test/features/test_normal_estimation.cpp
-index 29fbbc9..f332cd3 100644
+index 5211a2c..e197644 100644
 --- a/test/features/test_normal_estimation.cpp
 +++ b/test/features/test_normal_estimation.cpp
-@@ -278,7 +278,7 @@ TEST (PCL, NormalEstimationOpenMP)
+@@ -409,7 +409,7 @@ TEST (PCL, NormalEstimationOpenMP)
  // IntegralImageNormalEstimation could crash or produce
  // incorrect normals.
  // This test reproduces the issue.

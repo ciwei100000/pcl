@@ -3,5 +3,4 @@
 0003-Use-newly-build-libs-when-testing.patch
 0004-Disable-failing-tests.patch
 0005-Adopt-unit-test-for-i386.patch
-0006-Fix-alignment-in-tests-for-armhf-armel.patch
 0007-Adopt-unit-tests-for-arm64-and-ppc64el.patch

@@ -6,9 +6,8 @@ Subject: Adopt unit test for i386
  test/features/test_curvatures_estimation.cpp | 12 ++++++------
  test/features/test_gasd_estimation.cpp       |  2 +-
  test/filters/test_convolution.cpp            |  2 ++
- test/filters/test_sampling.cpp               |  4 ++++
  test/octree/test_octree.cpp                  |  2 +-
- 5 files changed, 14 insertions(+), 8 deletions(-)
+ 4 files changed, 10 insertions(+), 8 deletions(-)
 
 diff --git a/test/features/test_curvatures_estimation.cpp b/test/features/test_curvatures_estimation.cpp
 index 11e858f..51e5ba3 100644
@@ -82,31 +81,6 @@ index 26e5cbe..f61a8f4 100644
  }
  
  int
-diff --git a/test/filters/test_sampling.cpp b/test/filters/test_sampling.cpp
-index d7e1070..46d7cf8 100644
---- a/test/filters/test_sampling.cpp
-+++ b/test/filters/test_sampling.cpp
-@@ -86,16 +86,20 @@ TEST (CovarianceSampling, Filters)
-   covariance_sampling.setNumberOfSamples (static_cast<unsigned int> (cloud_turtle_normals->size ()) / 8);
-   double cond_num_turtle = covariance_sampling.computeConditionNumber ();
- 
-+#ifndef __i386__
-   // Conditioning number should be loosely close to the expected number. Adopting 10% of the reference value
-   EXPECT_NEAR (cond_num_turtle, 20661.7663, 2e4);
-+#endif
- 
-   IndicesPtr turtle_indices (new pcl::Indices ());
-   covariance_sampling.filter (*turtle_indices);
-   covariance_sampling.setIndices (turtle_indices);
-   double cond_num_turtle_sampled = covariance_sampling.computeConditionNumber ();
- 
-+#ifndef __i386__
-   // Conditioning number should be loosely close to the expected number. Adopting 10% of the reference value
-   EXPECT_NEAR (cond_num_turtle_sampled, 5795.5057, 5e3);
-+#endif
- 
-   // Ensure it respects the requested sampling size
-   EXPECT_EQ (static_cast<unsigned int> (cloud_turtle_normals->size ()) / 8, turtle_indices->size ());
 diff --git a/test/octree/test_octree.cpp b/test/octree/test_octree.cpp
 index fc37ad1..210a3c2 100644
 --- a/test/octree/test_octree.cpp
