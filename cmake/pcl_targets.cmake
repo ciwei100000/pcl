@@ -223,8 +223,8 @@ function(PCL_ADD_LIBRARY _name)
   add_library(${_name} ${PCL_LIB_TYPE} ${ADD_LIBRARY_OPTION_SOURCES})
   PCL_ADD_VERSION_INFO(${_name})
   target_compile_features(${_name} PUBLIC ${PCL_CXX_COMPILE_FEATURES})
-  # must link explicitly against boost.
-  target_link_libraries(${_name} ${Boost_LIBRARIES} Threads::Threads)
+
+  target_link_libraries(${_name} Threads::Threads)
   if(TARGET OpenMP::OpenMP_CXX)
     target_link_libraries(${_name} OpenMP::OpenMP_CXX)
   endif()
@@ -251,6 +251,11 @@ function(PCL_ADD_LIBRARY _name)
           RUNTIME DESTINATION ${BIN_INSTALL_DIR} COMPONENT pcl_${ADD_LIBRARY_OPTION_COMPONENT}
           LIBRARY DESTINATION ${LIB_INSTALL_DIR} COMPONENT pcl_${ADD_LIBRARY_OPTION_COMPONENT}
           ARCHIVE DESTINATION ${LIB_INSTALL_DIR} COMPONENT pcl_${ADD_LIBRARY_OPTION_COMPONENT})
+
+  # Copy PDB if available
+  if(MSVC AND PCL_SHARED_LIBS)
+    install(FILES $<TARGET_PDB_FILE:${_name}> DESTINATION ${BIN_INSTALL_DIR} OPTIONAL)
+  endif()
 endfunction()
 
 ###############################################################################
@@ -265,16 +270,14 @@ function(PCL_CUDA_ADD_LIBRARY _name)
   cmake_parse_arguments(ADD_LIBRARY_OPTION "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   REMOVE_VTK_DEFINITIONS()
-  if(PCL_SHARED_LIBS)
-    # to overcome a limitation in cuda_add_library, we add manually PCLAPI_EXPORTS macro
-    cuda_add_library(${_name} ${PCL_LIB_TYPE} ${ADD_LIBRARY_OPTION_SOURCES} OPTIONS -DPCLAPI_EXPORTS)
-  else()
-    cuda_add_library(${_name} ${PCL_LIB_TYPE} ${ADD_LIBRARY_OPTION_SOURCES})
-  endif()
+
+  add_library(${_name} ${PCL_LIB_TYPE} ${ADD_LIBRARY_OPTION_SOURCES})
+
   PCL_ADD_VERSION_INFO(${_name})
 
-  # must link explicitly against boost.
-  target_link_libraries(${_name} ${Boost_LIBRARIES})
+  target_compile_options(${_name} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>: ${GEN_CODE} --expt-relaxed-constexpr>)
+
+  target_include_directories(${_name} PRIVATE ${CUDA_TOOLKIT_INCLUDE})
 
   set_target_properties(${_name} PROPERTIES
     VERSION ${PCL_VERSION}
@@ -306,8 +309,8 @@ function(PCL_ADD_EXECUTABLE _name)
     add_executable(${_name} ${ADD_LIBRARY_OPTION_SOURCES})
   endif()
   PCL_ADD_VERSION_INFO(${_name})
-  # must link explicitly against boost.
-  target_link_libraries(${_name} ${Boost_LIBRARIES} Threads::Threads)
+  
+  target_link_libraries(${_name} Threads::Threads)
 
   if(WIN32 AND MSVC)
     set_target_properties(${_name} PROPERTIES DEBUG_OUTPUT_NAME ${_name}${CMAKE_DEBUG_POSTFIX}
@@ -346,11 +349,14 @@ function(PCL_CUDA_ADD_EXECUTABLE _name)
   cmake_parse_arguments(ADD_LIBRARY_OPTION "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   REMOVE_VTK_DEFINITIONS()
-  cuda_add_executable(${_name} ${ADD_LIBRARY_OPTION_SOURCES})
+  
+  add_executable(${_name} ${ADD_LIBRARY_OPTION_SOURCES})
+  
   PCL_ADD_VERSION_INFO(${_name})
 
-  # must link explicitly against boost.
-  target_link_libraries(${_name} ${Boost_LIBRARIES})
+  target_compile_options(${_name} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>: ${GEN_CODE} --expt-relaxed-constexpr>)
+  
+  target_include_directories(${_name} PRIVATE ${CUDA_TOOLKIT_INCLUDE})
 
   if(WIN32 AND MSVC)
     set_target_properties(${_name} PROPERTIES DEBUG_OUTPUT_NAME ${_name}${CMAKE_DEBUG_POSTFIX}
@@ -386,9 +392,6 @@ macro(PCL_ADD_TEST _name _exename)
   target_link_libraries(${_exename} ${PCL_ADD_TEST_LINK_WITH} ${CLANG_LIBRARIES})
 
   target_link_libraries(${_exename} Threads::Threads)
-
-  # must link explicitly against boost only on Windows
-  target_link_libraries(${_exename} ${Boost_LIBRARIES})
 
   #Only applies to MSVC
   if(MSVC)
@@ -506,7 +509,7 @@ endmacro()
 ###############################################################################
 # Make a pkg-config file for a library. Do not include general PCL stuff in the
 # arguments; they will be added automatically.
-# _name The library name. "pcl_" will be preprended to this.
+# _name The library name. Please prepend "pcl_" to ensure no conflicts in user systems
 # COMPONENT The part of PCL that this pkg-config file belongs to.
 # DESC Description of the library.
 # PCL_DEPS External dependencies to pcl libs, as a list. (will get mangled to external pkg-config name)

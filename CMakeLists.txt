@@ -1,5 +1,5 @@
 ### ---[ PCL global CMake
-cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 if(POLICY CMP0074)
   # 1. Remove with 3.12.4.
@@ -11,13 +11,10 @@ endif()
 set(CMAKE_CXX_STANDARD 14 CACHE STRING "The target C++ standard. PCL requires C++14 or higher.")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-if(CMAKE_VERSION VERSION_LESS 3.8)
-  # CMake did not have cxx_std_14 compile feature prior to 3.8
-  # We use cxx_attribute_deprecated as a proxy because this feature is a part of c++14 standard
-  set(PCL_CXX_COMPILE_FEATURES cxx_attribute_deprecated)
-else()
-  set(PCL_CXX_COMPILE_FEATURES cxx_std_14)
-endif()
+set(PCL_CXX_COMPILE_FEATURES cxx_std_14)
+
+set(CMAKE_CUDA_STANDARD 14 CACHE STRING "The target CUDA/C++ standard. PCL requires CUDA/C++ 14 or higher.")
+set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "possible configurations" FORCE)
 
@@ -26,7 +23,7 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "")
   set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "build type default to RelWithDebInfo, set to Release to improve performance" FORCE)
 endif()
 
-project(PCL VERSION 1.12.0)
+project(PCL VERSION 1.12.1)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 ### ---[ Find universal dependencies
@@ -90,7 +87,7 @@ if(PCL_ENABLE_SSE AND "${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}"
   PCL_CHECK_FOR_SSE()
 endif()
 
-# check for AVX flags for windows
+# check for AVX flags
 if(PCL_ENABLE_AVX AND "${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")
   include("${PCL_SOURCE_DIR}/cmake/pcl_find_avx.cmake")
   PCL_CHECK_FOR_AVX()
@@ -104,7 +101,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     else()
       string(APPEND CMAKE_CXX_FLAGS " -Wabi")
     endif()
-    string(APPEND CMAKE_CXX_FLAGS " -Wall -Wextra -Wno-unknown-pragmas -fno-strict-aliasing -Wno-format-extra-args -Wno-sign-compare -Wno-invalid-offsetof -Wno-conversion ${SSE_FLAGS}")
+    string(APPEND CMAKE_CXX_FLAGS " -Wall -Wextra -Wno-unknown-pragmas -fno-strict-aliasing -Wno-format-extra-args -Wno-sign-compare -Wno-invalid-offsetof -Wno-conversion ${SSE_FLAGS} ${AVX_FLAGS}")
   endif()
 
   if(PCL_WARNINGS_ARE_ERRORS)
@@ -131,10 +128,8 @@ endif()
 if(CMAKE_COMPILER_IS_MSVC)
   add_definitions("-DBOOST_ALL_NO_LIB -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX -DPCL_ONLY_CORE_POINT_TYPES ${SSE_DEFINITIONS}")
   
-  add_compile_options(/bigobj)
-  
   if("${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")
-    string(APPEND CMAKE_CXX_FLAGS " /fp:precise /wd4800 /wd4521 /wd4251 /wd4275 /wd4305 /wd4355 ${SSE_FLAGS} ${AVX_FLAGS}")
+    string(APPEND CMAKE_CXX_FLAGS " /fp:precise /wd4800 /wd4521 /wd4251 /wd4275 /wd4305 /wd4355 ${SSE_FLAGS} ${AVX_FLAGS} /bigobj")
 
     # Add extra code generation/link optimizations
     if(CMAKE_MSVC_CODE_LINK_OPTIMIZATION AND (NOT BUILD_CUDA) AND (NOT BUILD_GPU))
@@ -142,6 +137,8 @@ if(CMAKE_COMPILER_IS_MSVC)
       string(APPEND CMAKE_SHARED_LINKER_FLAGS_RELEASE " /LTCG /OPT:REF")
       string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " /LTCG")
     else()
+      set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Xcompiler=/bigobj")
+      
       message("Global optimizations /GL has been turned off, as it doesn't work with nvcc/thrust")
     endif()
     # /MANIFEST:NO") # please, don't disable manifest generation, otherwise crash at start for vs2008
@@ -154,7 +151,7 @@ if(CMAKE_COMPILER_IS_MSVC)
     ProcessorCount(CPUCores)
     set(MSVC_MP ${CPUCores} CACHE STRING "Number of simultaneously running compilers (0 = automatic detection by MSVC). See documentation of /MP flag.")
     if (CMAKE_VERSION VERSION_LESS 3.11.0)
-      # Usage of COMPILE_LANGUAGE generator expression for MSVC in add_compile_options requires at least CMake 3.11, see https://gitlab.kitware.com/cmake/cmake/issues/17435	  
+      # Usage of COMPILE_LANGUAGE generator expression for MSVC in add_compile_options requires at least CMake 3.11, see https://gitlab.kitware.com/cmake/cmake/issues/17435
       if(MSVC_MP EQUAL 0)
         # MSVC_MP is 0 in case the information cannot be determined by ProcessorCount => fallback
         string(APPEND CMAKE_C_FLAGS " /MP")
@@ -194,7 +191,7 @@ if(CMAKE_COMPILER_IS_CLANG)
     set(CMAKE_C_FLAGS "-Qunused-arguments")
   endif()
   if("${CMAKE_CXX_FLAGS}" STREQUAL "")
-    set(CMAKE_CXX_FLAGS "-ftemplate-depth=1024 -Qunused-arguments -Wno-invalid-offsetof ${SSE_FLAGS_STR}") # Unfortunately older Clang versions do not have this: -Wno-unnamed-type-template-args
+    set(CMAKE_CXX_FLAGS "-ftemplate-depth=1024 -Qunused-arguments -Wno-invalid-offsetof ${SSE_FLAGS} ${AVX_FLAGS}") # Unfortunately older Clang versions do not have this: -Wno-unnamed-type-template-args
     if(APPLE AND WITH_CUDA AND CUDA_FOUND)
       string(APPEND CMAKE_CXX_FLAGS " -stdlib=libstdc++")
     endif()
@@ -286,6 +283,8 @@ if(OpenMP_FOUND)
       set(OPENMP_DLL VCOMP140)
     elseif(MSVC_VERSION MATCHES "^192[0-9]$")
       set(OPENMP_DLL VCOMP140)
+    elseif(MSVC_VERSION MATCHES "^193[0-9]$")
+      set(OPENMP_DLL VCOMP140)
     endif()
     if(OPENMP_DLL)
       string(APPEND CMAKE_SHARED_LINKER_FLAGS_DEBUG " /DELAYLOAD:${OPENMP_DLL}D.dll")
@@ -314,7 +313,7 @@ endif()
 # libusb
 option(WITH_LIBUSB "Build USB RGBD-Camera drivers" TRUE)
 if(WITH_LIBUSB)
-  find_package(libusb)
+  include("${PCL_SOURCE_DIR}/cmake/pcl_find_libusb.cmake")
 endif()
 
 # Dependencies for different grabbers
@@ -352,12 +351,9 @@ endif()
 # Qhull
 option(WITH_QHULL "Include convex-hull operations" TRUE)
 if(WITH_QHULL)
-  if(NOT PCL_SHARED_LIBS OR ((WIN32 AND NOT MINGW) AND NOT PCL_BUILD_WITH_QHULL_DYNAMIC_LINKING_WIN32))
-    set(QHULL_USE_STATIC ON)
-  endif()
   find_package(Qhull)
-  if(QHULL_FOUND)
-    include_directories(SYSTEM ${QHULL_INCLUDE_DIRS})
+  if(NOT (${QHULL_LIBRARY_TYPE} MATCHES ${PCL_QHULL_REQUIRED_TYPE}) AND NOT (${PCL_QHULL_REQUIRED_TYPE} MATCHES "DONTCARE"))
+    message(FATAL_ERROR "Qhull was selected with ${PCL_QHULL_REQUIRED_TYPE} but found as ${QHULL_LIBRARY_TYPE}")
   endif()
 endif()
 
@@ -380,29 +376,11 @@ if(WITH_VTK)
   endif()
 endif()
 
-#VTK can depend on Qt and search for its required version, so search after so we can overwrite Qt5_FOUND if the version we require is not found.
-option(WITH_QT "Build QT Front-End" TRUE)
+# VTK can depend on Qt and search for its required version, so search after so we can overwrite Qt5_FOUND/Qt6_FOUND if the version we require is not found.
+set(WITH_QT "AUTO" CACHE STRING "Build QT Front-End (AUTO|YES|QT6|QT5|NO)")
+set_property(CACHE WITH_QT PROPERTY STRINGS "AUTO" "YES" "QT6" "QT5" "NO")
 if(WITH_QT)
-  find_package(Qt5 5.9.5 COMPONENTS Concurrent OpenGL Widgets)
-  set(QT_DISABLE_PRECATED_BEFORE_VAL "0x050900")
-  
-  if(Qt5_FOUND)
-    message(STATUS "Qt5 version: ${Qt5_VERSION}")
-    set(QT5_FOUND ${Qt5_FOUND})
-    #Set Cmake Auto features to skip .hh files
-    if(POLICY CMP0100)
-      cmake_policy(SET CMP0100 OLD)
-    endif()
-    
-    get_property(core_def TARGET Qt5::Core PROPERTY INTERFACE_COMPILE_DEFINITIONS)
-    list(APPEND core_def "QT_DISABLE_DEPRECATED_BEFORE=${QT_DISABLE_PRECATED_BEFORE_VAL}")
-    set_property(TARGET Qt5::Core PROPERTY INTERFACE_COMPILE_DEFINITIONS ${core_def})
-
-  else()
-    message(STATUS "Qt5 is not found.")
-  endif()
-else()
-  set(Qt5_FOUND FALSE)
+  include("${PCL_SOURCE_DIR}/cmake/pcl_find_qt.cmake")
 endif()
 
 #Find PCAP

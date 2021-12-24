@@ -101,6 +101,7 @@ class PCLCropHullTestFixture : public ::testing::Test
       baseOffsetList_.emplace_back(10, 1, 5);
       baseOffsetList_.emplace_back(10, 5, 1);
     }
+  PCL_MAKE_ALIGNED_OPERATOR_NEW
   protected:
 
     void
@@ -307,6 +308,27 @@ TYPED_TEST (PCLCropHullTestFixture, simple_test)
       crop_hull_filter.setInputCloud(test_data.input_cloud_);
       pcl::Indices filtered_indices;
       crop_hull_filter.filter(filtered_indices);
+      ASSERT_EQ(test_data.inside_indices_.size(), filtered_indices.size());
+      pcl::test::EXPECT_EQ_VECTORS(test_data.inside_indices_, filtered_indices);
+    }
+  }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// checking that the result is independent of the original state of the output_indices
+TYPED_TEST (PCLCropHullTestFixture, non_empty_output_indices)
+{
+  for (auto & entry : this->data_)
+  {
+    auto & crop_hull_filter = entry.first;
+    for (TestData const & test_data : entry.second)
+    {
+      crop_hull_filter.setInputCloud(test_data.input_cloud_);
+      // the size of indices array does not matter. only that it is not empty
+      pcl::Indices filtered_indices(42);
+      crop_hull_filter.filter(filtered_indices);
+      ASSERT_EQ(test_data.inside_indices_.size(), filtered_indices.size());
       pcl::test::EXPECT_EQ_VECTORS(test_data.inside_indices_, filtered_indices);
     }
   }
@@ -329,6 +351,31 @@ TYPED_TEST (PCLCropHullTestFixture, test_cloud_filtering)
       for (pcl::index_t i = 0; i < cloud_size; ++i)
       {
         EXPECT_XYZ_NEAR(test_data.inside_cloud_->at(i), filteredCloud[i], 1e-5);
+      }
+    }
+  }
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+TYPED_TEST (PCLCropHullTestFixture, test_keep_organized)
+{
+  for (auto & entry : this->data_)
+  {
+    auto & crop_hull_filter = entry.first;
+    crop_hull_filter.setKeepOrganized(true);
+    crop_hull_filter.setUserFilterValue(-10.);
+    const pcl::PointXYZ defaultPoint(-10., -10., -10.);
+    for (TestData const & test_data : entry.second)
+    {
+      crop_hull_filter.setInputCloud(test_data.input_cloud_);
+      pcl::PointCloud<pcl::PointXYZ> filteredCloud;
+      crop_hull_filter.filter(filteredCloud);
+      ASSERT_EQ (test_data.input_cloud_->size(), filteredCloud.size());
+      for (size_t i = 0; i < test_data.input_cloud_->size(); ++i)
+      {
+        pcl::PointXYZ expectedPoint = test_data.inside_mask_[i] ? test_data.input_cloud_->at(i) : defaultPoint;
+        ASSERT_XYZ_NEAR(expectedPoint, filteredCloud[i], 1e-5);
       }
     }
   }

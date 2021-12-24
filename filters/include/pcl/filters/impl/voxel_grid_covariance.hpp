@@ -330,8 +330,9 @@ pcl::VoxelGridCovariance<PointT>::applyFilter (PointCloud &output)
       eigen_val = eigensolver.eigenvalues ().asDiagonal ();
       leaf.evecs_ = eigensolver.eigenvectors ();
 
-      if (eigen_val (0, 0) < 0 || eigen_val (1, 1) < 0 || eigen_val (2, 2) <= 0)
+      if (eigen_val (0, 0) < -Eigen::NumTraits<double>::dummy_precision () || eigen_val (1, 1) < -Eigen::NumTraits<double>::dummy_precision () || eigen_val (2, 2) <= 0)
       {
+        PCL_WARN ("[VoxelGridCovariance::applyFilter] Invalid eigen value! (%g, %g, %g)\n", eigen_val (0, 0), eigen_val (1, 1), eigen_val (2, 2));
         leaf.nr_points = -1;
         continue;
       }
@@ -455,6 +456,9 @@ pcl::VoxelGridCovariance<PointT>::getDisplayCloud (pcl::PointCloud<PointXYZ>& ce
   Eigen::Vector3d cell_mean;
   Eigen::Vector3d rand_point;
   Eigen::Vector3d dist_point;
+
+  cell_cloud.reserve (pnt_per_cell * std::count_if (leaves_.begin (), leaves_.end (),
+      [this] (auto& l) { return (l.second.nr_points >= min_points_per_voxel_); }));
 
   // Generate points for each occupied voxel with sufficient points.
   for (typename std::map<std::size_t, Leaf>::iterator it = leaves_.begin (); it != leaves_.end (); ++it)
