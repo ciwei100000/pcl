@@ -1,3 +1,9 @@
+pcl (1.12.1+dfsg-2) unstable; urgency=medium
+
+  * Fix more unit tests on i386
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 25 Dec 2021 15:01:23 +0100
+
 pcl (1.12.1+dfsg-1) unstable; urgency=medium
 
   * New upstream version 1.12.1+dfsg
