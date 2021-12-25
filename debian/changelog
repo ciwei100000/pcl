@@ -4,6 +4,7 @@ pcl (1.12.1+dfsg-1) unstable; urgency=medium
   * Rebase patches
   * Update copyright
   * Drop empty documentation
+  * Add patch to drop build path in cmake file
 
  -- Jochen Sprickerhof <jspricke@debian.org>  Fri, 24 Dec 2021 23:58:00 +0100
 

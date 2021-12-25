@@ -4,3 +4,4 @@
 0004-Disable-failing-tests.patch
 0005-Adopt-unit-test-for-i386.patch
 0007-Adopt-unit-tests-for-arm64-and-ppc64el.patch
+0007-Drop-PCL_SOURCES_TREE-from-installation-cmake.patch
