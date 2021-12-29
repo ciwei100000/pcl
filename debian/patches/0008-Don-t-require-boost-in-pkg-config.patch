@@ -1,0 +1,22 @@
+From: Jochen Sprickerhof <git@jochen.sprickerhof.de>
+Date: Wed, 29 Dec 2021 10:42:28 +0100
+Subject: Don't require boost in pkg-config
+
+There is no boost.pc. Regression of 87e12d1c8.
+---
+ io/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/io/CMakeLists.txt b/io/CMakeLists.txt
+index 163639b..460b3d5 100644
+--- a/io/CMakeLists.txt
++++ b/io/CMakeLists.txt
+@@ -415,7 +415,7 @@ if(PCAP_FOUND)
+   target_link_libraries("${LIB_NAME}" ${PCAP_LIBRARIES})
+ endif()
+ 
+-set(EXT_DEPS boost eigen3)
++set(EXT_DEPS eigen3)
+ 
+ if(WITH_OPENNI)
+   list(APPEND EXT_DEPS libopenni)
