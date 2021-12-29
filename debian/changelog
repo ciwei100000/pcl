@@ -1,3 +1,10 @@
+pcl (1.12.1+dfsg-3) unstable; urgency=medium
+
+  * Add missing dependency (Closes: #1002786)
+  * Add patch for wrong boost pkg-config dependency (Closes: #1002753)
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Wed, 29 Dec 2021 10:52:53 +0100
+
 pcl (1.12.1+dfsg-2) unstable; urgency=medium
 
   * Fix more unit tests on i386
