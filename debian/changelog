@@ -1,3 +1,11 @@
+pcl (1.12.1+dfsg-4) unstable; urgency=medium
+
+  * Add upstream source
+  * Temporary add depends for #1013316
+  * Bump policy version (no changes)
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Wed, 13 Jul 2022 15:20:25 +0200
+
 pcl (1.12.1+dfsg-3) unstable; urgency=medium
 
   * Add missing dependency (Closes: #1002786)
