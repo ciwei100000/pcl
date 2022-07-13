@@ -7,6 +7,7 @@ Priority: optional
 Build-Depends: debhelper-compat (= 13),
                cmake,
 	       clang [mipsel armel armhf],
+	       libstdc++-12-dev [mipsel armel armhf],
 	       python3-sphinx,
 	       libboost-system-dev,
 	       libboost-filesystem-dev,
