@@ -1,6 +1,4 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: PCL
-Upstream-Contact: http://pointclouds.org/contact.html
 Source: https://github.com/PointCloudLibrary/pcl
 Files-Excluded: cuda/common/include/pcl/cuda/cutil*.h
 Comment: Copyright 1993-2010 NVIDIA Corporation.  All rights reserved.
@@ -9,10 +7,10 @@ Files: *
 Copyright: 2001, Addison-Wesley
            2012, Aitor Aldoma, Federico Tombari
            2011, Alexandru-Eugen Ichim
-           2006, Andreas Schneider <mail@cynapses.org>
            2001, Andrei Alexandrescu
            2007-2012, Ares Lagae
            2008, Ben Gurion University of the Negev, Beer Sheva, Israel
+           1999-2007, Brian Paul
            2014, Centrum Wiskunde Informatica
            2000-2012, Chih-Chung Chang and Chih-Jen Lin
            2011, Dirk Holz, University of Bonn
@@ -29,14 +27,14 @@ Copyright: 2001, Addison-Wesley
            2012, KU Leuven
            1993-2008, Ken Martin, Will Schroeder, Bill Lorensen
            2012, Keven Ring
-           2008, Kyle Machulis <kyle@nonpolynomial.com>
            1997-2002, Makoto Matsumoto and Takuji Nishimura
            2003-2010, Mark Borgerding
            2013, Martin Szarski
            2015, Michael 'v4hn' Goerner
            2009-2010, NVIDIA Corporation
-           2012-2020, Open Perception Inc
+           2012-2021, Open Perception, Inc
            2014, RadiantBlue Technologies, Inc
+           2011 Suat Gedikli <gedikli@willowgarage.com>
            2004, Sylvain Paris and Francois Sillion
            2012, Texas A&M University
            2011, The Autonomous Systems Lab (ASL), ETH Zurich,
@@ -48,12 +46,13 @@ Copyright: 2001, Addison-Wesley
            2012, Yani Ioannou <yani.ioannou@gmail.com>
            2001, softSurfer (www.softsurfer.com)
            2011, wwww.pointclouds.org
+           2020, ysuzuki19
 License: BSD-3-clause
 
 Files: doc/*
 Copyright: 2009-2012, Willow Garage, Inc
            2012-2014, Open Perception, Inc
-License: CC-BY-SA3.0
+License: CC-BY-SA-3
 
 Files: surface/include/pcl/surface/3rdparty/opennurbs/*
        surface/src/3rdparty/opennurbs/*
@@ -97,9 +96,9 @@ Files: common/include/pcl/sse.h
        io/include/pcl/io/lzf.h
        io/src/lzf.cpp
        io/tools/openni_pcd_recorder.cpp
-       recognition/include/pcl/recognition/3rdparty/*
        people/include/pcl/people/hog.h
        people/src/hog.cpp
+       recognition/include/pcl/recognition/3rdparty/*
 Copyright: 2000-2010, Marc Alexander Lehmann <schmorp@schmorp.de>
            2006-2012, Mirko Maischberger <mirko.maischberger@gmail.com>
            2012-2013, Open Perception, Inc
@@ -108,10 +107,29 @@ Copyright: 2000-2010, Marc Alexander Lehmann <schmorp@schmorp.de>
            2010-2011, Willow Garage, Inc
 License: BSD-2-clause
 
+Files: apps/cloud_composer/resources/insert_from_OpenNi.png
+Copyright: 2008-2010, Martin Sourada <mso@fedoraproject.org>
+           2008-2010, Luya Tshimbalanga <luya@muamba.benashima>
+License: CC-BY-SA-3
+Comment: Echo Icon Theme (https://fedorahosted.org/echo-icon-theme)
+
+Files: apps/cloud_composer/resources/insert_from_file.png
+       apps/cloud_composer/resources/new_project.png
+       apps/cloud_composer/resources/save_project.png
+Copyright: 2009-2010, David Vignoni <hello@davidvignoni.info>
+           2009-2010, Nuno Pinheiro <nuno@nuno-icons.com>
+License: CC-BY-SA-3
+Comment: Oxygen Icons (http://www.oxygen-icons.org)
+
 Files: outofcore/include/pcl/outofcore/cJSON.h
        outofcore/src/cJSON.cpp
 Copyright: 2009, Dave Gamble
 License: Expat
+
+Files: cmake/pcl_utils.cmake
+Copyright: 2007, Douglas Gregor <doug.gregor@gmail.com>
+           2007, Troy Straszheim
+License: BSL-1
 
 Files: segmentation/include/pcl/segmentation/extract_polygonal_prism_data.h
        segmentation/include/pcl/segmentation/impl/extract_polygonal_prism_data.hpp
@@ -129,7 +147,7 @@ Files: debian/*
 Copyright: 2014-2018, Jochen Sprickerhof <jspricke@debian.org>
            2014, Leopold Palomo-Avellaneda <leo@alaxarxa.net>
            2013, Thomas Moulard <thomas.moulard@gmail.com>
-License: GPL-2
+License: BSD-3-clause
 
 License: BSD-2-clause
  All rights reserved.
@@ -184,8 +202,35 @@ License: BSD-3-clause
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
 
-License: CC-BY-SA3.0
+License: BSL-1
+ Boost Software License - Version 1.0 - August 17th, 2003
  .
+ Permission is hereby granted, free of charge, to any person or
+ organization obtaining a copy of the software and accompanying
+ documentation covered by this license (the "Software") to use,
+ reproduce, display, distribute, execute, and transmit the
+ Software, and to prepare derivative works of the Software, and
+ to permit third-parties to whom the Software is furnished to do
+ so, all subject to the following:
+ .
+ The copyright notices in the Software and this entire statement,
+ including the above license grant, this restriction and the
+ following disclaimer, must be included in all copies of the
+ Software, in whole or in part, and all derivative works of the
+ Software, unless such copies or derivative works are solely in
+ the form of machine-executable object code generated by a source
+ language processor.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
+ NON-INFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR
+ ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE FOR ANY DAMAGES OR
+ OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, ARISING
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ OTHER DEALINGS IN THE SOFTWARE.
+
+License: CC-BY-SA-3
  THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS CREATIVE
  COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS PROTECTED BY
  COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE WORK OTHER THAN AS
@@ -530,9 +575,6 @@ License: Expat
  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-License: GPL-2
- See /usr/share/common-licenses/GPL-2.
 
 License: Open-Source
  Redistribution and use in source and binary forms, with or without

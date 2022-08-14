@@ -40,6 +40,9 @@
 #define PCL_SEGMENTATION_IMPL_SEEDED_HUE_SEGMENTATION_H_
 
 #include <pcl/segmentation/seeded_hue_segmentation.h>
+#include <pcl/console/print.h> // for PCL_ERROR
+#include <pcl/search/organized.h> // for OrganizedNeighbor
+#include <pcl/search/kdtree.h> // for KdTree
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
@@ -61,18 +64,18 @@ pcl::seededHueSegmentation (const PointCloud<PointXYZRGB>          &cloud,
   // Create a bool vector of processed point indices, and initialize it to false
   std::vector<bool> processed (cloud.size (), false);
 
-  std::vector<int> nn_indices;
+  Indices nn_indices;
   std::vector<float> nn_distances;
 
   // Process all points in the indices vector
-  for (const int &i : indices_in.indices)
+  for (const auto &i : indices_in.indices)
   {
     if (processed[i])
       continue;
 
     processed[i] = true;
 
-    std::vector<int> seed_queue;
+    Indices seed_queue;
     int sq_idx = 0;
     seed_queue.push_back (i);
 
@@ -85,7 +88,7 @@ pcl::seededHueSegmentation (const PointCloud<PointXYZRGB>          &cloud,
     {
       int ret = tree->radiusSearch (seed_queue[sq_idx], tolerance, nn_indices, nn_distances, std::numeric_limits<int>::max());
       if(ret == -1)
-        PCL_ERROR("[pcl::seededHueSegmentation] radiusSearch returned error code -1");
+        PCL_ERROR("[pcl::seededHueSegmentation] radiusSearch returned error code -1\n");
       // Search for sq_idx
       if (!ret)
       {
@@ -113,7 +116,7 @@ pcl::seededHueSegmentation (const PointCloud<PointXYZRGB>          &cloud,
       sq_idx++;
     }
     // Copy the seed queue into the output indices
-    for (const int &l : seed_queue)
+    for (const auto &l : seed_queue)
       indices_out.indices.push_back(l);
   }
   // This is purely esthetical, can be removed for speed purposes
@@ -139,18 +142,18 @@ pcl::seededHueSegmentation (const PointCloud<PointXYZRGB>            &cloud,
   // Create a bool vector of processed point indices, and initialize it to false
   std::vector<bool> processed (cloud.size (), false);
 
-  std::vector<int> nn_indices;
+  Indices nn_indices;
   std::vector<float> nn_distances;
 
   // Process all points in the indices vector
-  for (const int &i : indices_in.indices)
+  for (const auto &i : indices_in.indices)
   {
     if (processed[i])
       continue;
 
     processed[i] = true;
 
-    std::vector<int> seed_queue;
+    Indices seed_queue;
     int sq_idx = 0;
     seed_queue.push_back (i);
 
@@ -163,7 +166,7 @@ pcl::seededHueSegmentation (const PointCloud<PointXYZRGB>            &cloud,
     {
       int ret = tree->radiusSearch (seed_queue[sq_idx], tolerance, nn_indices, nn_distances, std::numeric_limits<int>::max());
       if(ret == -1)
-        PCL_ERROR("[pcl::seededHueSegmentation] radiusSearch returned error code -1");
+        PCL_ERROR("[pcl::seededHueSegmentation] radiusSearch returned error code -1\n");
       // Search for sq_idx
       if (!ret)
       {
@@ -190,7 +193,7 @@ pcl::seededHueSegmentation (const PointCloud<PointXYZRGB>            &cloud,
       sq_idx++;
     }
     // Copy the seed queue into the output indices
-    for (const int &l : seed_queue)
+    for (const auto &l : seed_queue)
       indices_out.indices.push_back(l);
   }
   // This is purely esthetical, can be removed for speed purposes

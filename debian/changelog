@@ -1,3 +1,88 @@
+pcl (1.12.1+dfsg-4) unstable; urgency=medium
+
+  * Add upstream source
+  * Temporary add depends for #1013316
+  * Bump policy version (no changes)
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Wed, 13 Jul 2022 15:20:25 +0200
+
+pcl (1.12.1+dfsg-3) unstable; urgency=medium
+
+  * Add missing dependency (Closes: #1002786)
+  * Add patch for wrong boost pkg-config dependency (Closes: #1002753)
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Wed, 29 Dec 2021 10:52:53 +0100
+
+pcl (1.12.1+dfsg-2) unstable; urgency=medium
+
+  * Fix more unit tests on i386
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 25 Dec 2021 15:01:23 +0100
+
+pcl (1.12.1+dfsg-1) unstable; urgency=medium
+
+  * New upstream version 1.12.1+dfsg
+  * Rebase patches
+  * Update copyright
+  * Drop empty documentation
+  * Add patch to drop build path in cmake file
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Fri, 24 Dec 2021 23:58:00 +0100
+
+pcl (1.12.0+dfsg-6) unstable; urgency=medium
+
+  * Fix ppc64 in d/rules
+  * Fix double space
+  * Add patch for failing tests
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Mon, 13 Dec 2021 22:14:52 +0100
+
+pcl (1.12.0+dfsg-5) unstable; urgency=medium
+
+  * upload to unstable
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Mon, 11 Oct 2021 21:43:17 +0200
+
+pcl (1.12.0+dfsg-4) experimental; urgency=medium
+
+  * Only run tests if they are enabled
+  * Fix tests on armel
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sun, 10 Oct 2021 11:23:52 +0200
+
+pcl (1.12.0+dfsg-3) experimental; urgency=medium
+
+  * Fix preprocessor syntax
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 09 Oct 2021 17:38:10 +0200
+
+pcl (1.12.0+dfsg-2) experimental; urgency=medium
+
+  * Fix build and disable failing tests
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 09 Oct 2021 16:59:23 +0200
+
+pcl (1.12.0+dfsg-1) experimental; urgency=medium
+
+  * New upstream version 1.12.0+dfsg
+    - Switch to Qhull reentrant (Closes: #990399)
+    - Fix PCLConfig.cmake (LP: #1928819)
+  * Switch to VTK9
+  * Update copyright
+  * Rebase patches
+  * Use /tags in d/watch
+  * Bump policy version (no changes)
+  * Remove unused manpages
+  * Rename binary package due to Soversion bump
+  * Install examples
+  * Simplify rules, run tests
+  * Add patch to set LD_LIBRARY_PATH for tests
+  * Add patch to disable failing tests
+  * Add d/clean
+  * Cleanup
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 02 Oct 2021 12:29:30 +0200
+
 pcl (1.11.1+dfsg-1-vtk8) unstable; urgency=medium
 
   * Merge tag 'debian/1.11.1+dfsg-1' into vtk8 
@@ -387,4 +472,3 @@ pcl (1.7.2-1) unstable; urgency=medium
   * Cosmetic changes.
 
  -- Leopold Palomo-Avellaneda <leo@alaxarxa.net>  Mon, 06 Oct 2014 09:30:55 +0200
-

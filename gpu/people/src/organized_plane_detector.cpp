@@ -38,10 +38,6 @@
 
 #include <pcl/console/print.h>
 
-#include <pcl/filters/voxel_grid.h>
-
-#include <pcl/features/integral_image_normal.h>
-
 #include <pcl/common/transforms.h>
 
 #include <pcl/segmentation/organized_multi_plane_segmentation.h>
@@ -110,7 +106,7 @@ pcl::gpu::people::OrganizedPlaneDetector::process(const PointCloud<PointTC>::Con
   // Fill in the probabilities
   for(const auto &inlier_index : inlier_indices)                           // iterate over all found planes
   {
-    for(const int &index : inlier_index.indices)                           // iterate over all the indices in that plane
+    for(const auto &index : inlier_index.indices)                           // iterate over all the indices in that plane
     {
       P_l_host_[index].probs[pcl::gpu::people::Background] = 1.f;   // set background at max
     }
@@ -124,11 +120,11 @@ pcl::gpu::people::OrganizedPlaneDetector::allocate_buffers(int rows, int cols)
   PCL_DEBUG("[pcl::gpu::people::OrganizedPlaneDetector::allocate_buffers] : (D) : Called\n");
 
   // Create histogram on host
-  P_l_host_.points.resize(rows*cols);
+  P_l_host_.resize(rows*cols);
   P_l_host_.width = cols;
   P_l_host_.height = rows;
 
-  P_l_host_prev_.points.resize(rows*cols);
+  P_l_host_prev_.resize(rows*cols);
   P_l_host_prev_.width = cols;
   P_l_host_prev_.height = rows;
 

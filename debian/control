@@ -7,6 +7,7 @@ Priority: optional
 Build-Depends: debhelper-compat (= 13),
                cmake,
 	       clang [mipsel armel armhf],
+	       libstdc++-12-dev [mipsel armel armhf],
 	       python3-sphinx,
 	       libboost-system-dev,
 	       libboost-filesystem-dev,
@@ -27,6 +28,8 @@ Build-Depends: debhelper-compat (= 13),
 	       libpcap-dev,
                libpng-dev,
 	       libvtk8-qt-dev,
+	       libglew-dev,
+	       libgtest-dev,
 Build-Depends-Indep: doxygen,
 		     doxygen-latex
 Standards-Version: 4.5.0
@@ -44,28 +47,29 @@ Depends: libboost-all-dev,
 	 libvtk8-dev,
 	 libqhull-dev,
 	 libvtk8-qt-dev,
+	 libusb-1.0-0-dev,
 	 libopenni-dev [!s390x !alpha !hppa !hurd-i386 !ia64 !kfreebsd-any !m68k !riscv64 !sh4 !sparc64],
 	 libopenni2-dev [!hurd-i386 !hppa !kfreebsd-any],
-	 libpcl-apps1.11 (= ${binary:Version}),
-	 libpcl-common1.11 (= ${binary:Version}),
-	 libpcl-features1.11 (= ${binary:Version}),
-	 libpcl-filters1.11 (= ${binary:Version}),
-	 libpcl-io1.11 (= ${binary:Version}),
-	 libpcl-kdtree1.11 (= ${binary:Version}),
-	 libpcl-keypoints1.11 (= ${binary:Version}),
-	 libpcl-ml1.11 (= ${binary:Version}),
-	 libpcl-octree1.11 (= ${binary:Version}),
-	 libpcl-outofcore1.11 (= ${binary:Version}),
-	 libpcl-people1.11 (= ${binary:Version}),
-	 libpcl-recognition1.11 (= ${binary:Version}),
-	 libpcl-registration1.11 (= ${binary:Version}),
-	 libpcl-sample-consensus1.11 (= ${binary:Version}),
-	 libpcl-search1.11 (= ${binary:Version}),
-	 libpcl-segmentation1.11 (= ${binary:Version}),
-	 libpcl-stereo1.11 (= ${binary:Version}),
-	 libpcl-surface1.11 (= ${binary:Version}),
-	 libpcl-tracking1.11 (= ${binary:Version}),
-	 libpcl-visualization1.11 (= ${binary:Version}),
+	 libpcl-apps1.12 (= ${binary:Version}),
+	 libpcl-common1.12 (= ${binary:Version}),
+	 libpcl-features1.12 (= ${binary:Version}),
+	 libpcl-filters1.12 (= ${binary:Version}),
+	 libpcl-io1.12 (= ${binary:Version}),
+	 libpcl-kdtree1.12 (= ${binary:Version}),
+	 libpcl-keypoints1.12 (= ${binary:Version}),
+	 libpcl-ml1.12 (= ${binary:Version}),
+	 libpcl-octree1.12 (= ${binary:Version}),
+	 libpcl-outofcore1.12 (= ${binary:Version}),
+	 libpcl-people1.12 (= ${binary:Version}),
+	 libpcl-recognition1.12 (= ${binary:Version}),
+	 libpcl-registration1.12 (= ${binary:Version}),
+	 libpcl-sample-consensus1.12 (= ${binary:Version}),
+	 libpcl-search1.12 (= ${binary:Version}),
+	 libpcl-segmentation1.12 (= ${binary:Version}),
+	 libpcl-stereo1.12 (= ${binary:Version}),
+	 libpcl-surface1.12 (= ${binary:Version}),
+	 libpcl-tracking1.12 (= ${binary:Version}),
+	 libpcl-visualization1.12 (= ${binary:Version}),
 	 ${misc:Depends}
 Suggests: libpcl-doc
 Breaks: libvtk7-dev,
@@ -87,7 +91,7 @@ Description: Point Cloud Library - development files
  This package contains development files (headers and shared library
  symbolic link).
 
-Package: libpcl-apps1.11
+Package: libpcl-apps1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -101,7 +105,7 @@ Description: Point Cloud Library - apps library
  This package contains the libraries needed to run applications depending
  on PCL apps.
 
-Package: libpcl-common1.11
+Package: libpcl-common1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -117,7 +121,7 @@ Description: Point Cloud Library - common library
  .
  This package contains the PCL common library.
 
-Package: libpcl-features1.11
+Package: libpcl-features1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -133,7 +137,7 @@ Description: Point Cloud Library - features library
  .
  This package contains the PCL features library.
 
-Package: libpcl-filters1.11
+Package: libpcl-filters1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -149,15 +153,12 @@ Description: Point Cloud Library - filters library
  .
  This package contains the PCL filters library.
 
-Package: libpcl-io1.11
+Package: libpcl-io1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends},
-         ${misc:Depends},
-         libpcap-dev,
-         libpng-dev,
-         libusb-1.0-0-dev
+         ${misc:Depends}
 Description: Point Cloud Library - I/O library
  The Point Cloud Library (PCL) is a standalone, large scale, open
  project for 2D/3D image and point cloud processing.
@@ -169,7 +170,7 @@ Description: Point Cloud Library - I/O library
  This package contains the libraries needed to run applications
  depending on PCL io.
 
-Package: libpcl-kdtree1.11
+Package: libpcl-kdtree1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -185,7 +186,7 @@ Description: Point Cloud Library - kdtree library
  .
  This package contains the PCL kdtree library.
 
-Package: libpcl-keypoints1.11
+Package: libpcl-keypoints1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -201,7 +202,7 @@ Description: Point Cloud Library - keypoints library
  .
  This package contains the PCL keypoints library.
 
-Package: libpcl-ml1.11
+Package: libpcl-ml1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -217,7 +218,7 @@ Description: Point Cloud Library - ml library
  .
  This package contains the PCL ml library.
 
-Package: libpcl-octree1.11
+Package: libpcl-octree1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -233,7 +234,7 @@ Description: Point Cloud Library - octree library
  .
  This package contains the PCL octree library.
 
-Package: libpcl-outofcore1.11
+Package: libpcl-outofcore1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -247,7 +248,7 @@ Description: Point Cloud Library - outofcore library
  This package contains the libraries needed to run applications
  depending on PCL outofcore.
 
-Package: libpcl-people1.11
+Package: libpcl-people1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -261,7 +262,7 @@ Description: Point Cloud Library - people library
  This package contains the libraries needed to run applications
  depending on PCL people.
 
-Package: libpcl-recognition1.11
+Package: libpcl-recognition1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -275,7 +276,7 @@ Description: Point Cloud Library - recognition library
  This package contains the libraries needed to run applications
  depending on PCL recognition.
 
-Package: libpcl-registration1.11
+Package: libpcl-registration1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -291,7 +292,7 @@ Description: Point Cloud Library - registration library
  .
  This package contains the PCL registration library.
 
-Package: libpcl-sample-consensus1.11
+Package: libpcl-sample-consensus1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -307,7 +308,7 @@ Description: Point Cloud Library - sample consensus library
  .
  This package contains the PCL sample consensus library.
 
-Package: libpcl-search1.11
+Package: libpcl-search1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -323,7 +324,7 @@ Description: Point Cloud Library - search library
  .
  This package contains the PCL search library.
 
-Package: libpcl-segmentation1.11
+Package: libpcl-segmentation1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -339,7 +340,7 @@ Description: Point Cloud Library - segmentation library
  .
  This package contains the PCL segmentation library.
 
-Package: libpcl-stereo1.11
+Package: libpcl-stereo1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -355,7 +356,7 @@ Description: Point Cloud Library - stereo library
  .
  This package contains the PCL stereo library.
 
-Package: libpcl-surface1.11
+Package: libpcl-surface1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -371,7 +372,7 @@ Description: Point Cloud Library - surface library
  .
  This package contains the PCL surface library.
 
-Package: libpcl-tracking1.11
+Package: libpcl-tracking1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -387,7 +388,7 @@ Description: Point Cloud Library - tracking library
  .
  This package contains the PCL tracking library.
 
-Package: libpcl-visualization1.11
+Package: libpcl-visualization1.12
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}

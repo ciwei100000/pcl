@@ -40,9 +40,7 @@
 #pragma once
 
 // PCL
-#include <pcl/common/io.h>
 #include <pcl/common/point_tests.h> // for pcl::isFinite
-#include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl/type_traits.h>
 
@@ -77,7 +75,7 @@ pcl::io::vtkPolyDataToPointCloud (vtkPolyData* const polydata, pcl::PointCloud<P
   cloud.width = polydata->GetNumberOfPoints ();
   cloud.height = 1; // This indicates that the point cloud is unorganized
   cloud.is_dense = false;
-  cloud.points.resize (cloud.width * cloud.height);
+  cloud.resize (cloud.width * cloud.height);
 
   // Get a list of all the fields available
   std::vector<pcl::PCLPointField> fields;
@@ -166,7 +164,7 @@ pcl::io::vtkStructuredGridToPointCloud (vtkStructuredGrid* const structured_grid
   cloud.width = dimensions[0];
   cloud.height = dimensions[1]; // This indicates that the point cloud is organized
   cloud.is_dense = true;
-  cloud.points.resize (cloud.width * cloud.height);
+  cloud.resize (cloud.width * cloud.height);
 
   // Get a list of all the fields available
   std::vector<pcl::PCLPointField> fields;
@@ -192,9 +190,9 @@ pcl::io::vtkStructuredGridToPointCloud (vtkStructuredGrid* const structured_grid
       {
         int queryPoint[3] = {i, j, 0};
         vtkIdType pointId = vtkStructuredData::ComputePointId (dimensions, queryPoint);
-        double coordinate[3];
         if (structured_grid->IsPointVisible (pointId))
         {
+          double coordinate[3];
           structured_grid->GetPoint (pointId, coordinate);
           pcl::setFieldValue<PointT, float> (cloud (i, j), x_idx, coordinate[0]);
           pcl::setFieldValue<PointT, float> (cloud (i, j), y_idx, coordinate[1]);
@@ -230,9 +228,9 @@ pcl::io::vtkStructuredGridToPointCloud (vtkStructuredGrid* const structured_grid
       {
         int queryPoint[3] = {i, j, 0};
         vtkIdType pointId = vtkStructuredData::ComputePointId (dimensions, queryPoint);
-        float normal[3];
         if (structured_grid->IsPointVisible (pointId))
         {
+          float normal[3];
           normals->GetTupleValue (i, normal);
           pcl::setFieldValue<PointT, float> (cloud (i, j), normal_x_idx, normal[0]);
           pcl::setFieldValue<PointT, float> (cloud (i, j), normal_y_idx, normal[1]);

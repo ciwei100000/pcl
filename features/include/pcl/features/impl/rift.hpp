@@ -47,7 +47,7 @@
 template <typename PointInT, typename GradientT, typename PointOutT> void
 pcl::RIFTEstimation<PointInT, GradientT, PointOutT>::computeRIFT (
       const PointCloudIn &cloud, const PointCloudGradient &gradient, 
-      int p_idx, float radius, const std::vector<int> &indices, 
+      int p_idx, float radius, const pcl::Indices &indices, 
       const std::vector<float> &sqr_distances, Eigen::MatrixXf &rift_descriptor)
 {
   if (indices.empty ())
@@ -118,7 +118,7 @@ pcl::RIFTEstimation<PointInT, GradientT, PointOutT>::computeFeature (PointCloudO
     PCL_ERROR ("[pcl::%s::computeFeature] The search radius must be set before computing the feature!\n",
                getClassName ().c_str ());
     output.width = output.height = 0;
-    output.points.clear ();
+    output.clear ();
     return;
   }
 
@@ -128,7 +128,7 @@ pcl::RIFTEstimation<PointInT, GradientT, PointOutT>::computeFeature (PointCloudO
     PCL_ERROR ("[pcl::%s::computeFeature] The number of gradient bins must be greater than zero!\n",
                getClassName ().c_str ());
     output.width = output.height = 0;
-    output.points.clear ();
+    output.clear ();
     return;
   }
   if (nr_distance_bins_ <= 0)
@@ -136,7 +136,7 @@ pcl::RIFTEstimation<PointInT, GradientT, PointOutT>::computeFeature (PointCloudO
     PCL_ERROR ("[pcl::%s::computeFeature] The number of distance bins must be greater than zero!\n",
                getClassName ().c_str ());
     output.width = output.height = 0;
-    output.points.clear ();
+    output.clear ();
     return;
   }
 
@@ -145,7 +145,7 @@ pcl::RIFTEstimation<PointInT, GradientT, PointOutT>::computeFeature (PointCloudO
   {
     PCL_ERROR ("[pcl::%s::computeFeature] No input gradient was given!\n", getClassName ().c_str ());
     output.width = output.height = 0;
-    output.points.clear ();
+    output.clear ();
     return;
   }
   if (gradient_->size () != surface_->size ())
@@ -153,12 +153,12 @@ pcl::RIFTEstimation<PointInT, GradientT, PointOutT>::computeFeature (PointCloudO
     PCL_ERROR ("[pcl::%s::computeFeature] ", getClassName ().c_str ());
     PCL_ERROR ("The number of points in the input dataset differs from the number of points in the gradient!\n");
     output.width = output.height = 0;
-    output.points.clear ();
+    output.clear ();
     return;
   }
 
   Eigen::MatrixXf rift_descriptor (nr_distance_bins_, nr_gradient_bins_);
-  std::vector<int> nn_indices;
+  pcl::Indices nn_indices;
   std::vector<float> nn_dist_sqr;
  
   // Iterating over the entire index vector

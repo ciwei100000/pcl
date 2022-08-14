@@ -4,14 +4,14 @@ Subject: Link against atomic if needed (found on armel)
 
 ---
  CMakeLists.txt          | 14 ++++++++++++++
- cmake/pcl_targets.cmake |  2 +-
- 2 files changed, 15 insertions(+), 1 deletion(-)
+ cmake/pcl_targets.cmake |  4 ++--
+ 2 files changed, 16 insertions(+), 2 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index aa59b76..8ae6cc9 100644
+index 1e61bfd..02b690d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -60,6 +60,20 @@ elseif(MINGW)
+@@ -57,6 +57,20 @@ elseif(MINGW)
    set(CMAKE_COMPILER_IS_MINGW 1)
  endif()
  
@@ -33,10 +33,10 @@ index aa59b76..8ae6cc9 100644
  # This will be used further down the road to check if the user explicitly provided CXX flags
  if(CMAKE_COMPILER_IS_MSVC)
 diff --git a/cmake/pcl_targets.cmake b/cmake/pcl_targets.cmake
-index 9dc6956..1a9947c 100644
+index ff79c20..f12a472 100644
 --- a/cmake/pcl_targets.cmake
 +++ b/cmake/pcl_targets.cmake
-@@ -229,7 +229,7 @@ function(PCL_ADD_LIBRARY _name)
+@@ -230,7 +230,7 @@ function(PCL_ADD_LIBRARY _name)
    endif()
  
    if((UNIX AND NOT ANDROID) OR MINGW)
@@ -45,3 +45,12 @@ index 9dc6956..1a9947c 100644
    endif()
  
    if(MINGW)
+@@ -391,7 +391,7 @@ macro(PCL_ADD_TEST _name _exename)
+   #target_link_libraries(${_exename} ${GTEST_BOTH_LIBRARIES} ${PCL_ADD_TEST_LINK_WITH})
+   target_link_libraries(${_exename} ${PCL_ADD_TEST_LINK_WITH} ${CLANG_LIBRARIES})
+ 
+-  target_link_libraries(${_exename} Threads::Threads)
++  target_link_libraries(${_exename} Threads::Threads ${ATOMIC_LIBRARY})
+ 
+   #Only applies to MSVC
+   if(MSVC)

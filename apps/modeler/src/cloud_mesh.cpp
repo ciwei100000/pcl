@@ -115,10 +115,10 @@ pcl::modeler::CloudMesh::save(const std::vector<const CloudMesh*>& cloud_meshes,
   CloudMesh cloud_mesh;
   for (const auto& mesh : cloud_meshes) {
     if (filename.rfind(".obj") == (filename.length() - 4)) {
-      std::size_t delta = cloud_mesh.cloud_->size();
+      index_t delta = cloud_mesh.cloud_->size();
       for (auto polygon : mesh->polygons_) {
-        for (unsigned int& vertice : polygon.vertices)
-          vertice += static_cast<unsigned int>(delta);
+        for (index_t& vertice : polygon.vertices)
+          vertice += delta;
         cloud_mesh.polygons_.push_back(polygon);
       }
     }
@@ -174,7 +174,7 @@ pcl::modeler::CloudMesh::updateVtkPoints()
   }
   // Need to check for NaNs, Infs, ec
   else {
-    pcl::IndicesPtr indices(new std::vector<int>());
+    pcl::IndicesPtr indices(new pcl::Indices());
     pcl::removeNaNFromPointCloud(*cloud_, *indices);
 
     data->SetNumberOfValues(3 * indices->size());
@@ -198,17 +198,17 @@ pcl::modeler::CloudMesh::updateVtkPolygons()
   if (cloud_->is_dense) {
     for (const auto& polygon : polygons_) {
       vtk_polygons_->InsertNextCell(polygon.vertices.size());
-      for (const unsigned int& vertex : polygon.vertices)
+      for (const auto& vertex : polygon.vertices)
         vtk_polygons_->InsertCellPoint(vertex);
     }
   }
   else {
-    pcl::IndicesPtr indices(new std::vector<int>());
+    pcl::IndicesPtr indices(new pcl::Indices());
     pcl::removeNaNFromPointCloud(*cloud_, *indices);
 
     for (const auto& polygon : polygons_) {
       vtk_polygons_->InsertNextCell(polygon.vertices.size());
-      for (const unsigned int& vertex : polygon.vertices)
+      for (const auto& vertex : polygon.vertices)
         vtk_polygons_->InsertCellPoint((*indices)[vertex]);
     }
   }

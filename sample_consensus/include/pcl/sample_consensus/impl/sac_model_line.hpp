@@ -44,6 +44,7 @@
 #include <pcl/sample_consensus/sac_model_line.h>
 #include <pcl/common/centroid.h>
 #include <pcl/common/concatenate.h>
+#include <pcl/common/eigen.h> // for eigen33
 
 //////////////////////////////////////////////////////////////////////////
 template <typename PointT> bool
@@ -97,6 +98,9 @@ pcl::SampleConsensusModelLine<PointT>::computeModelCoefficients (
   model_coefficients[5] = (*input_)[samples[1]].z - model_coefficients[2];
 
   model_coefficients.template tail<3> ().normalize ();
+  PCL_DEBUG ("[pcl::SampleConsensusModelLine::computeModelCoefficients] Model is (%g,%g,%g,%g,%g,%g).\n",
+             model_coefficients[0], model_coefficients[1], model_coefficients[2],
+             model_coefficients[3], model_coefficients[4], model_coefficients[5]);
   return (true);
 }
 
@@ -220,7 +224,12 @@ pcl::SampleConsensusModelLine<PointT>::optimizeModelCoefficients (
 
   // Compute the 3x3 covariance matrix
   Eigen::Vector4f centroid;
-  compute3DCentroid (*input_, inliers, centroid);
+  if (0 == compute3DCentroid (*input_, inliers, centroid))
+  {
+    PCL_WARN ("[pcl::SampleConsensusModelLine::optimizeModelCoefficients] compute3DCentroid failed (returned 0) because there are no valid inliers.\n");
+    optimized_coefficients = model_coefficients;
+    return;
+  }
   Eigen::Matrix3f covariance_matrix;
   computeCovarianceMatrix (*input_, inliers, centroid, covariance_matrix);
   optimized_coefficients[0] = centroid[0];
@@ -257,7 +266,7 @@ pcl::SampleConsensusModelLine<PointT>::projectPoints (
   if (copy_data_fields)
   {
     // Allocate enough space and copy the basics
-    projected_points.points.resize (input_->size ());
+    projected_points.resize (input_->size ());
     projected_points.width    = input_->width;
     projected_points.height   = input_->height;
 
@@ -284,7 +293,7 @@ pcl::SampleConsensusModelLine<PointT>::projectPoints (
   else
   {
     // Allocate enough space and copy the basics
-    projected_points.points.resize (inliers.size ());
+    projected_points.resize (inliers.size ());
     projected_points.width    = inliers.size ();
     projected_points.height   = 1;
 

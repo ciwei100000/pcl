@@ -40,6 +40,7 @@
 #define PCL_WORLD_MODEL_IMPL_HPP_
 
 #include <pcl/gpu/kinfu_large_scale/world_model.h>
+#include <pcl/common/transforms.h> // for transformPointCloud
 
 template <typename PointT>
 void 
@@ -114,7 +115,7 @@ pcl::kinfuLS::WorldModel<PointT>::getExistingData(const double previous_origin_x
   // apply filter
   condrem.filter (existing_slice);  
  
-  if(!existing_slice.points.empty ())
+  if(!existing_slice.empty ())
   {
 	//transform the slice in new cube coordinates
 	Eigen::Affine3f transformation; 
@@ -146,7 +147,7 @@ pcl::kinfuLS::WorldModel<PointT>::getWorldAsCubes (const double size, std::vecto
 
   // remove nans from world cloud
   world_->is_dense = false;
-  std::vector<int> indices;
+  pcl::Indices indices;
   pcl::removeNaNFromPointCloud ( *world_, *world_, indices);
 
   PCL_INFO("World contains %zu points after nan removal.\n",

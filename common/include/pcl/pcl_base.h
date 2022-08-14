@@ -46,9 +46,6 @@
 #include <pcl/memory.h>
 #include <pcl/pcl_macros.h>
 
-#include <Eigen/StdVector>
-#include <Eigen/Core>
-
 // Point Cloud message includes. Needed everywhere.
 #include <pcl/point_cloud.h>
 #include <pcl/PointIndices.h>
@@ -237,7 +234,7 @@ namespace pcl
       bool fake_indices_;
 
       /** \brief The size of each individual field. */
-      std::vector<int> field_sizes_;
+      std::vector<uindex_t> field_sizes_;
 
       /** \brief The x-y-z fields indices. */
       index_t x_idx_, y_idx_, z_idx_;

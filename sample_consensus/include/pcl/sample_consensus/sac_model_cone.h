@@ -40,9 +40,7 @@
 
 #include <pcl/sample_consensus/sac_model.h>
 #include <pcl/sample_consensus/model_types.h>
-#include <pcl/common/common.h>
 #include <pcl/common/distances.h>
-#include <climits>
 
 namespace pcl
 {

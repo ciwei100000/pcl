@@ -1,9 +1,9 @@
 #include <iostream>
-#include <pcl/io/pcd_io.h>
+#include <pcl/common/io.h> // for concatenateFields
 #include <pcl/point_types.h>
 
 int
-  main (int argc, char** argv)
+  main ()
 {
   pcl::PointCloud<pcl::PointXYZ> cloud_a;
   pcl::PointCloud<pcl::Normal> cloud_b;
@@ -12,8 +12,8 @@ int
   // Fill in the cloud data
   cloud_a.width  = cloud_b.width  = 5;
   cloud_a.height = cloud_b.height = 1;
-  cloud_a.points.resize (cloud_a.width * cloud_a.height);
-  cloud_b.points.resize (cloud_b.width * cloud_b.height);
+  cloud_a.resize (cloud_a.width * cloud_a.height);
+  cloud_b.resize (cloud_b.width * cloud_b.height);
 
   for (std::size_t i = 0; i < cloud_a.size (); ++i)
   {

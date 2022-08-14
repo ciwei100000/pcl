@@ -43,6 +43,8 @@
 #include <algorithm>
 #include <pcl/console/print.h>
 
+#include <Eigen/LU> // for inverse
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointInT, typename PointOutT> void
 pcl::BilateralUpsampling<PointInT, PointOutT>::process (pcl::PointCloud<PointOutT> &output)
@@ -53,7 +55,7 @@ pcl::BilateralUpsampling<PointInT, PointOutT>::process (pcl::PointCloud<PointOut
   if (!initCompute ())
   {
     output.width = output.height = 0;
-    output.points.clear ();
+    output.clear ();
     return;
   }
 
