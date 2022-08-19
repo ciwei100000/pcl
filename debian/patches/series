@@ -6,3 +6,5 @@
 0007-Adopt-unit-tests-for-arm64-and-ppc64el.patch
 0007-Drop-PCL_SOURCES_TREE-from-installation-cmake.patch
 0008-Don-t-require-boost-in-pkg-config.patch
+0009-Repair-sparse_matrix.hpp.patch
+0010-Fix-variable-name-in-poisson4.patch

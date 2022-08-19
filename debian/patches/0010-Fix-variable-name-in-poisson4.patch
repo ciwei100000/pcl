@@ -1,0 +1,21 @@
+From: Markus Vieth <39675748+mvieth@users.noreply.github.com>
+Date: Fri, 20 May 2022 14:47:52 +0200
+Subject: Fix variable name in poisson4
+
+---
+ surface/include/pcl/surface/3rdparty/poisson4/sparse_matrix.hpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/surface/include/pcl/surface/3rdparty/poisson4/sparse_matrix.hpp b/surface/include/pcl/surface/3rdparty/poisson4/sparse_matrix.hpp
+index 02c2db5..24f0a54 100644
+--- a/surface/include/pcl/surface/3rdparty/poisson4/sparse_matrix.hpp
++++ b/surface/include/pcl/surface/3rdparty/poisson4/sparse_matrix.hpp
+@@ -252,7 +252,7 @@ namespace pcl
+     {
+       for (int i=0; i<rows; i++)
+       {
+-        for(int ii=0;ii<rowSizes[i];i++){m_ppElements[i][ii].Value*=V;}
++        for(int ii=0;ii<rowSizes[i];ii++){m_ppElements[i][ii].Value*=V;}
+       }
+       return *this;
+     }
