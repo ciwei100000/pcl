@@ -1,3 +1,9 @@
+pcl (1.12.1+dfsg-5) unstable; urgency=medium
+
+  * Add upstream patch to fix build on armhf
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Fri, 19 Aug 2022 13:41:49 +0200
+
 pcl (1.12.1+dfsg-4) unstable; urgency=medium
 
   * Add upstream source
