@@ -1,3 +1,10 @@
+pcl (1.12.1+dfsg-6) unstable; urgency=medium
+
+  * Disable dh_dwz for clang builds
+  * Revert "Temporary add depends for #1013316"
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sun, 25 Sep 2022 12:41:19 +0200
+
 pcl (1.12.1+dfsg-5) unstable; urgency=medium
 
   * Add upstream patch to fix build on armhf
