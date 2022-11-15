@@ -34,7 +34,7 @@ Standards-Version: 4.6.1
 Vcs-Browser: https://salsa.debian.org/science-team/pcl
 Vcs-Git: https://salsa.debian.org/science-team/pcl.git
 Rules-Requires-Root: no
-Homepage: http://www.pointclouds.org/
+Homepage: https://www.pointclouds.org/
 
 Package: libpcl-dev
 Architecture: any
