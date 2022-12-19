@@ -191,7 +191,7 @@ namespace pcl
       , payload_ ()
       , node_metadata_ (new OutofcoreOctreeNodeMetadata ())
     {
-      assert (tree != NULL);
+      assert (tree != nullptr);
       node_metadata_->setOutofcoreVersion (3);
       init_root_node (bb_min, bb_max, tree, root_name);
     }
@@ -201,7 +201,7 @@ namespace pcl
     template<typename ContainerT, typename PointT> void
     OutofcoreOctreeBaseNode<ContainerT, PointT>::init_root_node (const Eigen::Vector3d& bb_min, const Eigen::Vector3d& bb_max, OutofcoreOctreeBase<ContainerT, PointT> * const tree, const boost::filesystem::path& root_name)
     {
-      assert (tree != NULL);
+      assert (tree != nullptr);
 
       parent_ = nullptr;
       root_node_ = this;
@@ -212,13 +212,12 @@ namespace pcl
       num_children_ = 0;
 
       Eigen::Vector3d tmp_max = bb_max;
-      Eigen::Vector3d tmp_min = bb_min;
 
       // Need to make the bounding box slightly bigger so points that fall on the max side aren't excluded
       double epsilon = 1e-8;
       tmp_max += epsilon*Eigen::Vector3d (1.0, 1.0, 1.0);
 
-      node_metadata_->setBoundingBox (tmp_min, tmp_max);
+      node_metadata_->setBoundingBox (bb_min, tmp_max);
       node_metadata_->setDirectoryPathname (root_name.parent_path ());
       node_metadata_->setOutofcoreVersion (3);
 
@@ -494,7 +493,7 @@ namespace pcl
     template<typename ContainerT, typename PointT> std::uint64_t
     OutofcoreOctreeBaseNode<ContainerT, PointT>::addPointCloud (const typename pcl::PCLPointCloud2::Ptr& input_cloud, const bool skip_bb_check)
     {
-      assert (this->root_node_->m_tree_ != NULL);
+      assert (this->root_node_->m_tree_ != nullptr);
       
       if (input_cloud->height*input_cloud->width == 0)
         return (0);
@@ -558,7 +557,7 @@ namespace pcl
     template<typename ContainerT, typename PointT> void
     OutofcoreOctreeBaseNode<ContainerT, PointT>::randomSample(const AlignedPointTVector& p, AlignedPointTVector& insertBuff, const bool skip_bb_check)
     {
-      assert (this->root_node_->m_tree_ != NULL);
+      assert (this->root_node_->m_tree_ != nullptr);
       
       AlignedPointTVector sampleBuff;
       if (!skip_bb_check)
@@ -578,7 +577,7 @@ namespace pcl
 
       // Derive percentage from specified sample_percent and tree depth
       const double percent = pow(sample_percent_, double((this->root_node_->m_tree_->getDepth () - depth_)));
-      const std::uint64_t samplesize = static_cast<std::uint64_t>(percent * static_cast<double>(sampleBuff.size()));
+      const auto samplesize = static_cast<std::uint64_t>(percent * static_cast<double>(sampleBuff.size()));
       const std::uint64_t inputsize = sampleBuff.size();
 
       if(samplesize > 0)
@@ -613,7 +612,7 @@ namespace pcl
     template<typename ContainerT, typename PointT> std::uint64_t
     OutofcoreOctreeBaseNode<ContainerT, PointT>::addDataAtMaxDepth (const AlignedPointTVector& p, const bool skip_bb_check)
     {
-      assert (this->root_node_->m_tree_ != NULL);
+      assert (this->root_node_->m_tree_ != nullptr);
 
       // Trust me, just add the points
       if (skip_bb_check)
@@ -807,7 +806,7 @@ namespace pcl
 
       //  when adding data and generating sampled LOD 
       // If the max depth has been reached
-      assert (this->root_node_->m_tree_ != NULL );
+      assert (this->root_node_->m_tree_ != nullptr );
       
       if (this->depth_ == this->root_node_->m_tree_->getDepth ())
       {
@@ -1334,11 +1333,7 @@ namespace pcl
     template<typename ContainerT, typename PointT> void
     OutofcoreOctreeBaseNode<ContainerT, PointT>::queryBBIntersects (const Eigen::Vector3d& min_bb, const Eigen::Vector3d& max_bb, const std::uint32_t query_depth, std::list<std::string>& file_names)
     {
-      
-      Eigen::Vector3d my_min = min_bb;
-      Eigen::Vector3d my_max = max_bb;
-      
-      if (intersectsWithBoundingBox (my_min, my_max))
+      if (intersectsWithBoundingBox (min_bb, max_bb))
       {
         if (this->depth_ < query_depth)
         {
@@ -1347,7 +1342,7 @@ namespace pcl
             for (std::size_t i = 0; i < 8; i++)
             {
               if (children_[i])
-                children_[i]->queryBBIntersects (my_min, my_max, query_depth, file_names);
+                children_[i]->queryBBIntersects (min_bb, max_bb, query_depth, file_names);
             }
           }
           else if (hasUnloadedChildren ())
@@ -1357,7 +1352,7 @@ namespace pcl
             for (std::size_t i = 0; i < 8; i++)
             {
               if (children_[i])
-                children_[i]->queryBBIntersects (my_min, my_max, query_depth, file_names);
+                children_[i]->queryBBIntersects (min_bb, max_bb, query_depth, file_names);
             }
           }
           return;
@@ -1684,7 +1679,7 @@ namespace pcl
 
           //use STL random_shuffle and push back a random selection of the points onto our list
           std::shuffle (payload_cache_within_region.begin (), payload_cache_within_region.end (), std::mt19937(std::random_device()()));
-          std::size_t numpick = static_cast<std::size_t> (percent * static_cast<double> (payload_cache_within_region.size ()));;
+          auto numpick = static_cast<std::size_t> (percent * static_cast<double> (payload_cache_within_region.size ()));;
 
           for (std::size_t i = 0; i < numpick; i++)
           {
@@ -1719,7 +1714,7 @@ namespace pcl
       this->parent_ = super;
       root_node_ = super->root_node_;
       m_tree_ = super->root_node_->m_tree_;
-      assert (m_tree_ != NULL);
+      assert (m_tree_ != nullptr);
 
       depth_ = super->depth_ + 1;
       num_children_ = 0;

@@ -39,9 +39,6 @@
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/memory.h>
 
-#include <vtkOrientationMarkerWidget.h>
-#include <vtkRenderWindowInteractor.h>
-
 #include <mutex>
 #include <thread>
 
@@ -149,9 +146,7 @@ struct pcl::visualization::CloudViewer::CloudViewer_impl
     }
   }
 
-  ~CloudViewer_impl ()
-  {
-  }
+  ~CloudViewer_impl () = default;
 
   ////////////////////////////////////////////////////////////////////////////////////////////
   template <typename T> void

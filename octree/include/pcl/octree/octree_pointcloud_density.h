@@ -53,7 +53,7 @@ public:
   OctreePointCloudDensityContainer() : point_counter_(0) {}
 
   /** \brief Empty class deconstructor. */
-  ~OctreePointCloudDensityContainer() {}
+  ~OctreePointCloudDensityContainer() override = default;
 
   /** \brief deep copy function */
   virtual OctreePointCloudDensityContainer*
@@ -68,7 +68,7 @@ public:
   bool
   operator==(const OctreeContainerBase& other) const override
   {
-    const OctreePointCloudDensityContainer* otherContainer =
+    const auto* otherContainer =
         dynamic_cast<const OctreePointCloudDensityContainer*>(&other);
 
     return (this->point_counter_ == otherContainer->point_counter_);
@@ -76,7 +76,11 @@ public:
 
   /** \brief Read input data. Only an internal counter is increased.
    */
-  void addPointIndex(uindex_t) { point_counter_++; }
+  void
+  addPointIndex(index_t) override
+  {
+    point_counter_++;
+  }
 
   /** \brief Return point counter.
    * \return Amount of points
@@ -122,7 +126,7 @@ public:
 
   /** \brief Empty class deconstructor. */
 
-  ~OctreePointCloudDensity() {}
+  ~OctreePointCloudDensity() override = default;
 
   /** \brief Get the amount of points within a leaf node voxel which is addressed by a
    * point

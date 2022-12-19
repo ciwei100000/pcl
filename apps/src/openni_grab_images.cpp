@@ -42,7 +42,6 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/common/float_image_utils.h>
 #include <pcl/visualization/image_viewer.h>
-#include <pcl/visualization/vtk.h>
 #include <pcl/point_types.h>
 
 #include <boost/filesystem.hpp>
@@ -378,12 +377,9 @@ main(int argc, char** argv)
                     << "Supported image modes for device: " << device->getVendorName()
                     << " , " << device->getProductName() << std::endl;
           modes = grabber.getAvailableImageModes();
-          for (std::vector<std::pair<int, XnMapOutputMode>>::const_iterator it =
-                   modes.begin();
-               it != modes.end();
-               ++it) {
-            std::cout << it->first << " = " << it->second.nXRes << " x "
-                      << it->second.nYRes << " @ " << it->second.nFPS << std::endl;
+          for (const auto& mode : modes) {
+            std::cout << mode.first << " = " << mode.second.nXRes << " x "
+                      << mode.second.nYRes << " @ " << mode.second.nFPS << std::endl;
           }
         }
       }

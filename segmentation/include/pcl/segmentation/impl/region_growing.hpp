@@ -275,7 +275,7 @@ pcl::RegionGrowing<PointT, NormalT>::extract (std::vector <pcl::PointIndices>& c
   assembleRegions ();
 
   clusters.resize (clusters_.size ());
-  std::vector<pcl::PointIndices>::iterator cluster_iter_input = clusters.begin ();
+  auto cluster_iter_input = clusters.begin ();
   for (const auto& cluster : clusters_)
   {
     if ((cluster.indices.size () >= min_pts_per_cluster_) &&
@@ -634,7 +634,7 @@ pcl::RegionGrowing<PointT, NormalT>::getColoredCloud ()
 
   if (!clusters_.empty ())
   {
-    colored_cloud = (new pcl::PointCloud<pcl::PointXYZRGB>)->makeShared ();
+    colored_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>);
 
     srand (static_cast<unsigned int> (time (nullptr)));
     std::vector<unsigned char> colors;
@@ -684,7 +684,7 @@ pcl::RegionGrowing<PointT, NormalT>::getColoredCloudRGBA ()
 
   if (!clusters_.empty ())
   {
-    colored_cloud = (new pcl::PointCloud<pcl::PointXYZRGBA>)->makeShared ();
+    colored_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGBA>);
 
     srand (static_cast<unsigned int> (time (nullptr)));
     std::vector<unsigned char> colors;

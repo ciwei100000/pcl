@@ -45,12 +45,17 @@
 #include <pcl/segmentation/extract_clusters.h>
 
 int 
-main (int, char **argv)
+main (int argc, char **argv)
 {
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ptr (new pcl::PointCloud<pcl::PointXYZ> ());
   pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal> ());
   pcl::PCDWriter writer;
 	
+  if (argc < 2)
+  {
+    std::cout<<"No PCD file given!"<<std::endl;
+    return (-1);
+  }
   if (pcl::io::loadPCDFile<pcl::PointXYZ> (argv[1], *cloud_ptr) == -1)
   {
     std::cout<<"Couldn't read the file "<<argv[1]<<std::endl;
@@ -84,11 +89,12 @@ main (int, char **argv)
 
   // Saving the clusters in separate pcd files
   int j = 0;
-  for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it)
+  for (const auto& cluster : cluster_indices)
   {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
-    for (const auto &index : it->indices)
-      cloud_cluster->push_back ((*cloud_ptr)[index]); 
+    for (const auto &index : cluster.indices) {
+      cloud_cluster->push_back((*cloud_ptr)[index]);
+    }
     cloud_cluster->width = cloud_cluster->size ();
     cloud_cluster->height = 1;
     cloud_cluster->is_dense = true;
@@ -97,7 +103,7 @@ main (int, char **argv)
     std::stringstream ss;
     ss << "./cloud_cluster_" << j << ".pcd";
     writer.write<pcl::PointXYZ> (ss.str (), *cloud_cluster, false); 
-    j++;
+    ++j;
   }
 
   return (0);

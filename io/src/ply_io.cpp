@@ -39,6 +39,7 @@
 #include <pcl/common/io.h>
 #include <pcl/io/ply_io.h>
 
+#include <algorithm>
 #include <cstdlib>
 #include <fstream>
 #include <functional>
@@ -114,17 +115,22 @@ pcl::PLYReader::appendScalarProperty (const std::string& name, const std::size_t
   cloud_->point_step += static_cast<std::uint32_t> (pcl::getFieldSize (pcl::traits::asEnum<Scalar>::value) * size);
 }
 
-void
+bool
 pcl::PLYReader::amendProperty (const std::string& old_name, const std::string& new_name, std::uint8_t new_datatype)
 {
-  auto finder = cloud_->fields.rbegin ();
-  for (; finder != cloud_->fields.rend (); ++finder)
-    if (finder->name == old_name)
-      break;
-  assert (finder != cloud_->fields.rend ());
-  finder->name = new_name;
-  if (new_datatype > 0 && new_datatype != finder->datatype)
-    finder->datatype = new_datatype;
+  const auto fieldIndex = pcl::getFieldIndex(*cloud_, old_name);
+  if (fieldIndex == -1) {
+    return false;
+  }
+
+  auto& field = cloud_->fields[fieldIndex];
+
+  field.name = new_name;
+  
+  if (new_datatype > 0 && new_datatype != field.datatype)
+    field.datatype = new_datatype;
+
+  return true;
 }
 
 namespace pcl
@@ -202,11 +208,19 @@ namespace pcl
       {
         if ((property_name == "red") || (property_name == "diffuse_red"))
           appendScalarProperty<pcl::io::ply::float32> ("rgb");
-        return [=] (pcl::io::ply::uint8 color) { vertexColorCallback (property_name, color); };
+        return [this, property_name] (pcl::io::ply::uint8 color) { vertexColorCallback (property_name, color); };
       }
       if (property_name == "alpha")
       {
-        amendProperty ("rgb", "rgba", pcl::PCLPointField::UINT32);
+        if (!amendProperty("rgb", "rgba", pcl::PCLPointField::UINT32))
+        {
+          PCL_ERROR("[pcl::PLYReader::scalarPropertyDefinitionCallback] 'rgb' was not "
+                    "found in cloud_->fields!,"
+                    " can't amend property '%s' to get new type 'rgba' \n",
+                    property_name.c_str());
+          return {};
+        }
+        
         return [this] (pcl::io::ply::uint8 alpha) { vertexAlphaCallback (alpha); };
       }
       if (property_name == "intensity")
@@ -272,12 +286,17 @@ namespace pcl
   template<typename Scalar> void
   PLYReader::vertexScalarPropertyCallback (Scalar value)
   {
-    unsetDenseFlagIfNotFinite(value, cloud_);
-
-    memcpy (&cloud_->data[vertex_count_ * cloud_->point_step + vertex_offset_before_],
-            &value,
-            sizeof (Scalar));
-    vertex_offset_before_ += static_cast<int> (sizeof (Scalar));
+    try
+    {
+      unsetDenseFlagIfNotFinite(value, cloud_);
+      cloud_->at<Scalar>(vertex_count_, vertex_offset_before_) = value;
+      vertex_offset_before_ += static_cast<int> (sizeof (Scalar));
+    }
+    catch(const std::out_of_range&)
+    {
+      PCL_WARN ("[pcl::PLYReader::vertexScalarPropertyCallback] Incorrect data index specified (%lu)!\n", vertex_count_ * cloud_->point_step + vertex_offset_before_);
+      assert(false);
+    }
   }
 
   template <typename SizeType> void
@@ -298,12 +317,17 @@ namespace pcl
   template<typename ContentType> void
   PLYReader::vertexListPropertyContentCallback (ContentType value)
   {
-    unsetDenseFlagIfNotFinite(value, cloud_);
-
-    memcpy (&cloud_->data[vertex_count_ * cloud_->point_step + vertex_offset_before_],
-            &value,
-            sizeof (ContentType));
-    vertex_offset_before_ += static_cast<int> (sizeof (ContentType));
+    try
+    {
+      unsetDenseFlagIfNotFinite(value, cloud_);
+      cloud_->at<ContentType>(vertex_count_, vertex_offset_before_) = value;
+      vertex_offset_before_ += static_cast<int> (sizeof (ContentType));
+    }
+    catch(const std::out_of_range&)
+    {
+      PCL_WARN ("[pcl::PLYReader::vertexListPropertyContentCallback] Incorrect data index specified (%lu)!\n", vertex_count_ * cloud_->point_step + vertex_offset_before_);
+      assert(false);
+    }
   }
 
   template <typename SizeType, typename ContentType>
@@ -366,36 +390,36 @@ pcl::PLYReader::vertexColorCallback (const std::string& color_name, pcl::io::ply
   {
     b_ = std::int32_t (color);
     std::int32_t rgb = r_ << 16 | g_ << 8 | b_;
-    memcpy (&cloud_->data[vertex_count_ * cloud_->point_step + rgb_offset_before_],
-            &rgb,
-            sizeof (pcl::io::ply::float32));
-    vertex_offset_before_ += static_cast<int> (sizeof (pcl::io::ply::float32));
+    try
+    {
+      cloud_->at<std::int32_t>(vertex_count_, rgb_offset_before_) = rgb;
+      vertex_offset_before_ += static_cast<int> (sizeof (pcl::io::ply::float32));
+    }
+    catch(const std::out_of_range&)
+    {
+      PCL_WARN ("[pcl::PLYReader::vertexColorCallback] Incorrect data index specified (%lu)!\n", vertex_count_ * cloud_->point_step + rgb_offset_before_);
+      assert(false);
+    }
   }
 }
 
 void
 pcl::PLYReader::vertexAlphaCallback (pcl::io::ply::uint8 alpha)
 {
-  a_ = std::uint32_t (alpha);
   // get anscient rgb value and store it in rgba
-  memcpy (&rgba_, 
-          &cloud_->data[vertex_count_ * cloud_->point_step + rgb_offset_before_], 
-          sizeof (pcl::io::ply::float32));
+  rgba_ = cloud_->at<std::uint32_t>(vertex_count_, rgb_offset_before_);
   // append alpha
+  a_ = std::uint32_t (alpha);
   rgba_ |= a_ << 24;
   // put rgba back
-  memcpy (&cloud_->data[vertex_count_ * cloud_->point_step + rgb_offset_before_], 
-          &rgba_, 
-          sizeof (std::uint32_t));
+  cloud_->at<std::uint32_t>(vertex_count_, rgb_offset_before_) = rgba_;
 }
 
 void
 pcl::PLYReader::vertexIntensityCallback (pcl::io::ply::uint8 intensity)
 {
   pcl::io::ply::float32 intensity_ (intensity);
-  memcpy (&cloud_->data[vertex_count_ * cloud_->point_step + vertex_offset_before_],
-          &intensity_,
-          sizeof (pcl::io::ply::float32));
+  cloud_->at<pcl::io::ply::float32>(vertex_count_, vertex_offset_before_) = intensity_;
   vertex_offset_before_ += static_cast<int> (sizeof (pcl::io::ply::float32));
 }
 
@@ -588,17 +612,49 @@ pcl::PLYReader::read (const std::string &file_name, pcl::PCLPointCloud2 &cloud,
       {
         for (const auto &field : cloud_->fields)
           if (field.datatype == ::pcl::PCLPointField::FLOAT32)
-            memcpy (&data[r * cloud_->point_step + field.offset],
+          {
+            const auto idx = r * cloud_->point_step + field.offset;
+            if (idx + sizeof (float) > data.size())
+            {
+              PCL_ERROR ("[pcl::PLYReader::read] invalid data index (%lu)!\n", idx);
+              return (-1);
+            }
+            memcpy (&data[idx],
                     reinterpret_cast<const char*> (&f_nan), sizeof (float));
+          }
           else if (field.datatype == ::pcl::PCLPointField::FLOAT64)
-            memcpy (&data[r * cloud_->point_step + field.offset],
+          {
+            const auto idx = r * cloud_->point_step + field.offset;
+            if (idx + sizeof (double) > data.size())
+            {
+              PCL_ERROR ("[pcl::PLYReader::read] invalid data index (%lu)!\n", idx);
+              return (-1);
+            }
+            memcpy (&data[idx],
                     reinterpret_cast<const char*> (&d_nan), sizeof (double));
+          }
           else
-            memset (&data[r * cloud_->point_step + field.offset], 0,
-                    pcl::getFieldSize (field.datatype) * field.count);
+          {
+            const auto idx = r * cloud_->point_step + field.offset;
+            if (idx + pcl::getFieldSize (field.datatype) * field.count > data.size())
+            {
+              PCL_ERROR ("[pcl::PLYReader::read] invalid data index (%lu)!\n", idx);
+              return (-1);
+            }
+            std::fill_n(&data[idx],
+                        pcl::getFieldSize (field.datatype) * field.count, 0);
+          }
       }
       else
-        memcpy (&data[r* cloud_->point_step], &cloud_->data[(*range_grid_)[r][0] * cloud_->point_step], cloud_->point_step);
+      {
+        const auto srcIdx = (*range_grid_)[r][0] * cloud_->point_step;
+        if (srcIdx + cloud_->point_step > cloud_->data.size())
+        {
+          PCL_ERROR ("[pcl::PLYReader::read] invalid data index (%lu)!\n", srcIdx);
+          return (-1);
+        }
+        memcpy (&data[r* cloud_->point_step], &cloud_->data[srcIdx], cloud_->point_step);
+      }
     }
     cloud_->data.swap (data);
   }
@@ -655,17 +711,49 @@ pcl::PLYReader::read (const std::string &file_name, pcl::PolygonMesh &mesh,
       {
         for (const auto &field : cloud_->fields)
           if (field.datatype == ::pcl::PCLPointField::FLOAT32)
-            memcpy (&data[r * cloud_->point_step + field.offset],
+          {
+            const auto idx = r * cloud_->point_step + field.offset;
+            if (idx + sizeof (float) > data.size())
+            {
+              PCL_ERROR ("[pcl::PLYReader::read] invalid data index (%lu)!\n", idx);
+              return (-1);
+            }
+            memcpy (&data[idx],
                     reinterpret_cast<const char*> (&f_nan), sizeof (float));
+          }
           else if (field.datatype == ::pcl::PCLPointField::FLOAT64)
-            memcpy (&data[r * cloud_->point_step + field.offset],
+          {
+            const auto idx = r * cloud_->point_step + field.offset;
+            if (idx + sizeof (double) > data.size())
+            {
+              PCL_ERROR ("[pcl::PLYReader::read] invalid data index (%lu)!\n", idx);
+              return (-1);
+            }
+            memcpy (&data[idx],
                     reinterpret_cast<const char*> (&d_nan), sizeof (double));
+          }
           else
-            memset (&data[r * cloud_->point_step + field.offset], 0,
-                    pcl::getFieldSize (field.datatype) * field.count);
+          {
+            const auto idx = r * cloud_->point_step + field.offset;
+            if (idx + pcl::getFieldSize (field.datatype) * field.count > data.size())
+            {
+              PCL_ERROR ("[pcl::PLYReader::read] invalid data index (%lu)!\n", idx);
+              return (-1);
+            }
+            std::fill_n(&data[idx],
+                        pcl::getFieldSize (field.datatype) * field.count, 0);
+          }
       }
       else
-        memcpy (&data[r* cloud_->point_step], &cloud_->data[(*range_grid_)[r][0] * cloud_->point_step], cloud_->point_step);
+      {
+        const auto srcIdx = (*range_grid_)[r][0] * cloud_->point_step;
+        if (srcIdx + cloud_->point_step > cloud_->data.size())
+        {
+          PCL_ERROR ("[pcl::PLYReader::read] invalid data index (%lu)!\n", srcIdx);
+          return (-1);
+        }
+        memcpy (&data[r* cloud_->point_step], &cloud_->data[srcIdx], cloud_->point_step);
+      }
     }
     cloud_->data.swap (data);
   }
@@ -857,19 +945,18 @@ pcl::PLYWriter::writeASCII (const std::string &file_name,
   }
 
   unsigned int nr_points  = cloud.width * cloud.height;
-  unsigned int point_size = static_cast<unsigned int> (cloud.data.size () / nr_points);
 
   // Write the header information if available
   if (use_camera)
   {
     fs << generateHeader (cloud, origin, orientation, false, use_camera, nr_points);
-    writeContentWithCameraASCII (nr_points, point_size, cloud, origin, orientation, fs);
+    writeContentWithCameraASCII (nr_points, cloud, origin, orientation, fs);
   }
   else
   {
     std::ostringstream os;
     int nr_valid_points;
-    writeContentWithRangeGridASCII (nr_points, point_size, cloud, os, nr_valid_points);
+    writeContentWithRangeGridASCII (nr_points, cloud, os, nr_valid_points);
     fs << generateHeader (cloud, origin, orientation, false, use_camera, nr_valid_points);
     fs << os.str ();
   }
@@ -881,7 +968,6 @@ pcl::PLYWriter::writeASCII (const std::string &file_name,
 
 void
 pcl::PLYWriter::writeContentWithCameraASCII (int nr_points,
-                                             int point_size,
                                              const pcl::PCLPointCloud2 &cloud,
                                              const Eigen::Vector4f &origin,
                                              const Eigen::Quaternionf &orientation,
@@ -904,56 +990,39 @@ pcl::PLYWriter::writeContentWithCameraASCII (int nr_points,
         {
           case pcl::PCLPointField::INT8:
           {
-            char value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (char)], sizeof (char));
-            fs << boost::numeric_cast<int> (value);
+            fs << boost::numeric_cast<int> (cloud.at<char>(i, cloud.fields[d].offset + c * sizeof (char)));
             break;
           }
           case pcl::PCLPointField::UINT8:
           {
-            unsigned char value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (unsigned char)], sizeof (unsigned char));
-            fs << boost::numeric_cast<int> (value);
+            fs << boost::numeric_cast<int> (cloud.at<unsigned char>(i, cloud.fields[d].offset + c * sizeof (unsigned char)));
             break;
           }
           case pcl::PCLPointField::INT16:
           {
-            short value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (short)], sizeof (short));
-            fs << boost::numeric_cast<int> (value);
+            fs << boost::numeric_cast<int> (cloud.at<short>(i, cloud.fields[d].offset + c * sizeof (short)));
             break;
           }
           case pcl::PCLPointField::UINT16:
           {
-            unsigned short value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (unsigned short)], sizeof (unsigned short));
-            fs << boost::numeric_cast<int> (value);
+            fs << boost::numeric_cast<int> (cloud.at<unsigned short>(i, cloud.fields[d].offset + c * sizeof (unsigned short)));
             break;
           }
           case pcl::PCLPointField::INT32:
           {
-            int value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (int)], sizeof (int));
-            fs << value;
+            fs << cloud.at<int>(i, cloud.fields[d].offset + c * sizeof (int));
             break;
           }
           case pcl::PCLPointField::UINT32:
           {
             if (cloud.fields[d].name.find ("rgba") == std::string::npos)
             {
-              unsigned int value;
-              memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (unsigned int)], sizeof (unsigned int));
-              fs << value;
+              fs << cloud.at<unsigned int>(i, cloud.fields[d].offset + c * sizeof (unsigned int));
             }
             else
             {
-              pcl::RGB color;
-              memcpy (&color, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (unsigned int)], sizeof (pcl::RGB));
-              int r = color.r;
-              int g = color.g;
-              int b = color.b;
-              int a = color.a;
-              fs << r << " " << g << " " << b << " " << a;
+              const auto& color = cloud.at<pcl::RGB>(i, cloud.fields[d].offset + c * sizeof (pcl::RGB));
+              fs << static_cast<int>(color.r) << " " << static_cast<int>(color.g) << " " << static_cast<int>(color.b) << " " << static_cast<int>(color.a);
             }
             break;
           }
@@ -961,26 +1030,18 @@ pcl::PLYWriter::writeContentWithCameraASCII (int nr_points,
           {
             if (cloud.fields[d].name.find ("rgb") == std::string::npos)
             {
-              float value;
-              memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (float)], sizeof (float));
-              fs << value;
+              fs << cloud.at<float>(i, cloud.fields[d].offset + c * sizeof (float));
             }
             else
             {
-              pcl::RGB color;
-              memcpy (&color, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (float)], sizeof (pcl::RGB));
-              int r = color.r;
-              int g = color.g;
-              int b = color.b;
-              fs << r << " " << g << " " << b;
+              const auto& color = cloud.at<pcl::RGB>(i, cloud.fields[d].offset + c * sizeof (pcl::RGB));
+              fs << static_cast<int>(color.r) << " " << static_cast<int>(color.g) << " " << static_cast<int>(color.b);
             }
             break;
           }
           case pcl::PCLPointField::FLOAT64:
           {
-            double value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (double)], sizeof (double));
-            fs << value;
+            fs << cloud.at<double>(i, cloud.fields[d].offset + c * sizeof (double));
             break;
           }
           default:
@@ -1020,7 +1081,6 @@ pcl::PLYWriter::writeContentWithCameraASCII (int nr_points,
 
 void
 pcl::PLYWriter::writeContentWithRangeGridASCII (int nr_points,
-                                                int point_size,
                                                 const pcl::PCLPointCloud2 &cloud,
                                                 std::ostringstream& fs,
                                                 int& valid_points)
@@ -1045,56 +1105,39 @@ pcl::PLYWriter::writeContentWithRangeGridASCII (int nr_points,
         {
           case pcl::PCLPointField::INT8:
           {
-            char value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (char)], sizeof (char));
-            line << boost::numeric_cast<int> (value);
+            line << boost::numeric_cast<int> (cloud.at<char>(i, cloud.fields[d].offset + c * sizeof (char)));
             break;
           }
           case pcl::PCLPointField::UINT8:
           {
-            unsigned char value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (unsigned char)], sizeof (unsigned char));
-            line << boost::numeric_cast<int> (value);
+            line << boost::numeric_cast<int> (cloud.at<unsigned char>(i, cloud.fields[d].offset + c * sizeof (unsigned char)));
             break;
           }
           case pcl::PCLPointField::INT16:
           {
-            short value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (short)], sizeof (short));
-            line << boost::numeric_cast<int> (value);
+            line << boost::numeric_cast<int> (cloud.at<short>(i, cloud.fields[d].offset + c * sizeof (short)));
             break;
           }
           case pcl::PCLPointField::UINT16:
           {
-            unsigned short value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (unsigned short)], sizeof (unsigned short));
-            line << boost::numeric_cast<int> (value);
+            line << boost::numeric_cast<int> (cloud.at<unsigned short>(i, cloud.fields[d].offset + c * sizeof (unsigned short)));
             break;
           }
           case pcl::PCLPointField::INT32:
           {
-            int value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (int)], sizeof (int));
-            line << value;
+            line << cloud.at<int>(i, cloud.fields[d].offset + c * sizeof (int));
             break;
           }
           case pcl::PCLPointField::UINT32:
           {
             if (cloud.fields[d].name.find ("rgba") == std::string::npos)
             {
-              unsigned int value;
-              memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (unsigned int)], sizeof (unsigned int));
-              line << value;
+              line << cloud.at<unsigned int>(i, cloud.fields[d].offset + c * sizeof (unsigned int));
             }
             else
             {
-              pcl::RGB color;
-              memcpy (&color, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (unsigned int)], sizeof (pcl::RGB));
-              int r = color.r;
-              int g = color.g;
-              int b = color.b;
-              int a = color.a;
-              line << r << " " << g << " " << b << " " << a;
+              const auto& color = cloud.at<pcl::RGB>(i, cloud.fields[d].offset + c * sizeof (pcl::RGB));
+              line << static_cast<int>(color.r) << " " << static_cast<int>(color.g) << " " << static_cast<int>(color.b) << " " << static_cast<int>(color.a);
             }
             break;
           }
@@ -1102,8 +1145,7 @@ pcl::PLYWriter::writeContentWithRangeGridASCII (int nr_points,
           {
             if (cloud.fields[d].name.find ("rgb") == std::string::npos)
             {
-              float value;
-              memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (float)], sizeof (float));
+              const float& value = cloud.at<float>(i, cloud.fields[d].offset + c * sizeof (float));
               // Test if x-coordinate is NaN, thus an invalid point
               if ("x" == cloud.fields[d].name)
               {
@@ -1114,20 +1156,14 @@ pcl::PLYWriter::writeContentWithRangeGridASCII (int nr_points,
             }
             else
             {
-              pcl::RGB color;
-              memcpy (&color, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (float)], sizeof (pcl::RGB));
-              int r = color.r;
-              int g = color.g;
-              int b = color.b;
-              line << r << " " << g << " " << b;
+              const auto& color = cloud.at<pcl::RGB>(i, cloud.fields[d].offset + c * sizeof (pcl::RGB));
+              line << static_cast<int>(color.r) << " " << static_cast<int>(color.g) << " " << static_cast<int>(color.b);
             }
             break;
           }
           case pcl::PCLPointField::FLOAT64:
           {
-            double value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + c * sizeof (double)], sizeof (double));
-            line << value;
+            line << cloud.at<double>(i, cloud.fields[d].offset + c * sizeof (double));
             break;
           }
           default:
@@ -1154,10 +1190,9 @@ pcl::PLYWriter::writeContentWithRangeGridASCII (int nr_points,
     for (int i = 0; i < nr_points; ++i)
     {
       fs << grids [i].size ();
-      for (std::vector <int>::const_iterator it = grids [i].begin ();
-           it != grids [i].end ();
-           ++it)
-        fs << " " << *it;
+      for (const auto& grid : grids [i]) {
+        fs << " " << grid;
+      }
       fs << '\n';
     }
   }
@@ -1188,7 +1223,6 @@ pcl::PLYWriter::writeBinary (const std::string &file_name,
   }
 
   unsigned int nr_points  = cloud.width * cloud.height;
-  unsigned int point_size = static_cast<unsigned int> (cloud.data.size () / nr_points);
 
   // Compute the range_grid, if necessary, and then write out the PLY header
   bool doRangeGrid = !use_camera && cloud.height > 1;
@@ -1214,8 +1248,7 @@ pcl::PLYWriter::writeBinary (const std::string &file_name,
     {
       for (std::size_t i=0; i < nr_points; ++i)
       {
-        float value;
-        memcpy(&value, &cloud.data[i * point_size + cloud.fields[xfield].offset], sizeof(float));
+        const float& value = cloud.at<float>(i, cloud.fields[xfield].offset);
         if (std::isfinite(value))
         {
           rangegrid[i] = valid_points;
@@ -1273,59 +1306,42 @@ pcl::PLYWriter::writeBinary (const std::string &file_name,
         {
           case pcl::PCLPointField::INT8:
           {
-            char value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + (total + c) * sizeof (char)], sizeof (char));
-            fpout.write (reinterpret_cast<const char*> (&value), sizeof (char));
+            fpout.write (&cloud.at<char>(i, cloud.fields[d].offset + (total + c) * sizeof (char)), sizeof (char));
             break;
           }
           case pcl::PCLPointField::UINT8:
           {
-            unsigned char value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + (total + c) * sizeof (unsigned char)], sizeof (unsigned char));
-            fpout.write (reinterpret_cast<const char*> (&value), sizeof (unsigned char));
+            fpout.write (reinterpret_cast<const char*> (&cloud.at<unsigned char>(i, cloud.fields[d].offset + (total + c) * sizeof (unsigned char))), sizeof (unsigned char));
             break;
           }
           case pcl::PCLPointField::INT16:
           {
-            short value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + (total + c) * sizeof (short)], sizeof (short));
-            fpout.write (reinterpret_cast<const char*> (&value), sizeof (short));
+            fpout.write (reinterpret_cast<const char*> (&cloud.at<short>(i, cloud.fields[d].offset + (total + c) * sizeof (short))), sizeof (short));
             break;
           }
           case pcl::PCLPointField::UINT16:
           {
-            unsigned short value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + (total + c) * sizeof (unsigned short)], sizeof (unsigned short));
-            fpout.write (reinterpret_cast<const char*> (&value), sizeof (unsigned short));
+            fpout.write (reinterpret_cast<const char*> (&cloud.at<unsigned short>(i, cloud.fields[d].offset + (total + c) * sizeof (unsigned short))), sizeof (unsigned short));
             break;
           }
           case pcl::PCLPointField::INT32:
           {
-            int value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + (total + c) * sizeof (int)], sizeof (int));
-            fpout.write (reinterpret_cast<const char*> (&value), sizeof (int));
+            fpout.write (reinterpret_cast<const char*> (&cloud.at<int>(i, cloud.fields[d].offset + (total + c) * sizeof (int))), sizeof (int));
             break;
           }
           case pcl::PCLPointField::UINT32:
           {
             if (cloud.fields[d].name.find ("rgba") == std::string::npos)
             {
-              unsigned int value;
-              memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + (total + c) * sizeof (unsigned int)], sizeof (unsigned int));
-              fpout.write (reinterpret_cast<const char*> (&value), sizeof (unsigned int));
+              fpout.write (reinterpret_cast<const char*> (&cloud.at<unsigned int>(i, cloud.fields[d].offset + (total + c) * sizeof (unsigned int))), sizeof (unsigned int));
             }
             else
             {
-              pcl::RGB color;
-              memcpy (&color, &cloud.data[i * point_size + cloud.fields[d].offset + (total + c) * sizeof (unsigned int)], sizeof (pcl::RGB));
-              unsigned char r = color.r;
-              unsigned char g = color.g;
-              unsigned char b = color.b;
-              unsigned char a = color.a;
-              fpout.write (reinterpret_cast<const char*> (&r), sizeof (unsigned char));
-              fpout.write (reinterpret_cast<const char*> (&g), sizeof (unsigned char));
-              fpout.write (reinterpret_cast<const char*> (&b), sizeof (unsigned char));
-              fpout.write (reinterpret_cast<const char*> (&a), sizeof (unsigned char));
+              const auto& color = cloud.at<pcl::RGB>(i, cloud.fields[d].offset + (total + c) * sizeof (pcl::RGB));
+              fpout.write (reinterpret_cast<const char*> (&color.r), sizeof (unsigned char));
+              fpout.write (reinterpret_cast<const char*> (&color.g), sizeof (unsigned char));
+              fpout.write (reinterpret_cast<const char*> (&color.b), sizeof (unsigned char));
+              fpout.write (reinterpret_cast<const char*> (&color.a), sizeof (unsigned char));
             }
             break;
           }
@@ -1333,28 +1349,20 @@ pcl::PLYWriter::writeBinary (const std::string &file_name,
           {
             if (cloud.fields[d].name.find ("rgb") == std::string::npos)
             {
-              float value;
-              memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + (total + c) * sizeof (float)], sizeof (float));
-              fpout.write (reinterpret_cast<const char*> (&value), sizeof (float));
+              fpout.write (reinterpret_cast<const char*> (&cloud.at<float>(i, cloud.fields[d].offset + (total + c) * sizeof (float))), sizeof (float));
             }
             else
             {
-              pcl::RGB color;
-              memcpy (&color, &cloud.data[i * point_size + cloud.fields[d].offset + (total + c) * sizeof (float)], sizeof (pcl::RGB));
-              unsigned char r = color.r;
-              unsigned char g = color.g;
-              unsigned char b = color.b;
-              fpout.write (reinterpret_cast<const char*> (&r), sizeof (unsigned char));
-              fpout.write (reinterpret_cast<const char*> (&g), sizeof (unsigned char));
-              fpout.write (reinterpret_cast<const char*> (&b), sizeof (unsigned char));
+              const auto& color = cloud.at<pcl::RGB>(i, cloud.fields[d].offset + (total + c) * sizeof (pcl::RGB));
+              fpout.write (reinterpret_cast<const char*> (&color.r), sizeof (unsigned char));
+              fpout.write (reinterpret_cast<const char*> (&color.g), sizeof (unsigned char));
+              fpout.write (reinterpret_cast<const char*> (&color.b), sizeof (unsigned char));
             }
             break;
           }
           case pcl::PCLPointField::FLOAT64:
           {
-            double value;
-            memcpy (&value, &cloud.data[i * point_size + cloud.fields[d].offset + (total + c) * sizeof (double)], sizeof (double));
-            fpout.write (reinterpret_cast<const char*> (&value), sizeof (double));
+            fpout.write (reinterpret_cast<const char*> (&cloud.at<double>(i, cloud.fields[d].offset + (total + c) * sizeof (double))), sizeof (double));
             break;
           }
           default:
@@ -1438,6 +1446,50 @@ pcl::PLYWriter::writeBinary (const std::string &file_name,
   return (0);
 }
 
+namespace pcl {
+namespace io {
+void writePLYHeader (std::ostream& fs, const pcl::PolygonMesh& mesh, const std::string& format) {
+  // Write header
+  fs << "ply";
+  fs << "\nformat " << format;
+  fs << "\ncomment PCL generated";
+  // Vertices
+  fs << "\nelement vertex "<< mesh.cloud.width * mesh.cloud.height;
+  for(const pcl::PCLPointField& field : mesh.cloud.fields) {
+    if(field.name == "x")
+      fs << "\nproperty float x";
+    else if(field.name == "y")
+      fs << "\nproperty float y";
+    else if(field.name == "z")
+      fs << "\nproperty float z";
+    else if(field.name == "rgb")
+      fs << "\nproperty uchar red"
+            "\nproperty uchar green"
+            "\nproperty uchar blue";
+    else if(field.name == "rgba")
+      fs << "\nproperty uchar red"
+            "\nproperty uchar green"
+            "\nproperty uchar blue"
+            "\nproperty uchar alpha";
+    else if(field.name == "normal_x")
+      fs << "\nproperty float nx";
+    else if(field.name == "normal_y")
+      fs << "\nproperty float ny";
+    else if(field.name == "normal_z")
+      fs << "\nproperty float nz";
+    else if(field.name == "curvature")
+      fs << "\nproperty float curvature";
+    else
+      PCL_WARN("[pcl::io::writePLYHeader] unknown field: %s\n", field.name.c_str());
+  }
+  // Faces
+  fs << "\nelement face "<< mesh.polygons.size ();
+  fs << "\nproperty list uchar int vertex_indices";
+  fs << "\nend_header\n";
+}
+} // namespace io
+} // namespace pcl
+
 ////////////////////////////////////////////////////////////////////////////////////////
 int
 pcl::io::savePLYFile (const std::string &file_name, const pcl::PolygonMesh &mesh, unsigned precision)
@@ -1459,56 +1511,8 @@ pcl::io::savePLYFile (const std::string &file_name, const pcl::PolygonMesh &mesh
 
   // number of points
   std::size_t nr_points  = mesh.cloud.width * mesh.cloud.height;
-  std::size_t point_size = mesh.cloud.data.size () / nr_points;
 
-  // number of faces
-  std::size_t nr_faces = mesh.polygons.size ();
-
-  // Write header
-  fs << "ply";
-  fs << "\nformat ascii 1.0";
-  fs << "\ncomment PCL generated";
-  // Vertices
-  fs << "\nelement vertex "<< mesh.cloud.width * mesh.cloud.height;
-  fs << "\nproperty float x"
-        "\nproperty float y"
-        "\nproperty float z";
-  // Check if we have color on vertices
-  int rgba_index = getFieldIndex (mesh.cloud, "rgba"),
-  rgb_index = getFieldIndex (mesh.cloud, "rgb");
-  if (rgba_index != -1)
-  {
-    fs << "\nproperty uchar red"
-          "\nproperty uchar green"
-          "\nproperty uchar blue"
-          "\nproperty uchar alpha";
-  }
-  else if (rgb_index != -1)
-  {
-    fs << "\nproperty uchar red"
-          "\nproperty uchar green"
-          "\nproperty uchar blue";
-  }
-  // Check if we have normal on vertices
-  int normal_x_index = getFieldIndex(mesh.cloud, "normal_x");
-  int normal_y_index = getFieldIndex(mesh.cloud, "normal_y");
-  int normal_z_index = getFieldIndex(mesh.cloud, "normal_z");
-  if (normal_x_index != -1 && normal_y_index != -1 && normal_z_index != -1)
-  {
-      fs << "\nproperty float nx"
-            "\nproperty float ny"
-            "\nproperty float nz";
-  }
-  // Check if we have curvature on vertices
-  int curvature_index = getFieldIndex(mesh.cloud, "curvature");
-  if ( curvature_index != -1)
-  {
-      fs << "\nproperty float curvature";
-  }
-  // Faces
-  fs << "\nelement face "<< nr_faces;
-  fs << "\nproperty list uchar int vertex_indices";
-  fs << "\nend_header\n";
+  pcl::io::writePLYHeader (fs, mesh, "ascii 1.0");
 
   // Write down vertices
   for (std::size_t i = 0; i < nr_points; ++i)
@@ -1516,17 +1520,13 @@ pcl::io::savePLYFile (const std::string &file_name, const pcl::PolygonMesh &mesh
     int xyz = 0;
     for (std::size_t d = 0; d < mesh.cloud.fields.size (); ++d)
     {
-      int c = 0;
-
       // adding vertex
       if ((mesh.cloud.fields[d].datatype == pcl::PCLPointField::FLOAT32) && (
           mesh.cloud.fields[d].name == "x" ||
           mesh.cloud.fields[d].name == "y" ||
           mesh.cloud.fields[d].name == "z"))
       {
-        float value;
-        memcpy (&value, &mesh.cloud.data[i * point_size + mesh.cloud.fields[d].offset + c * sizeof (float)], sizeof (float));
-        fs << value;
+        fs << mesh.cloud.at<float>(i, mesh.cloud.fields[d].offset) << " ";
         // if (++xyz == 3)
         //   break;
         ++xyz;
@@ -1535,34 +1535,27 @@ pcl::io::savePLYFile (const std::string &file_name, const pcl::PolygonMesh &mesh
                 (mesh.cloud.fields[d].name == "rgb"))
 
       {
-        pcl::RGB color;
-        memcpy (&color, &mesh.cloud.data[i * point_size + mesh.cloud.fields[rgb_index].offset + c * sizeof (float)], sizeof (RGB));
-        fs << int (color.r) << " " << int (color.g) << " " << int (color.b);
+        const auto& color = mesh.cloud.at<RGB>(i, mesh.cloud.fields[d].offset);
+        fs << int (color.r) << " " << int (color.g) << " " << int (color.b) << " ";
       }
       else if ((mesh.cloud.fields[d].datatype == pcl::PCLPointField::UINT32) &&
                (mesh.cloud.fields[d].name == "rgba"))
       {
-        pcl::RGB color;
-        memcpy (&color, &mesh.cloud.data[i * point_size + mesh.cloud.fields[rgba_index].offset + c * sizeof (std::uint32_t)], sizeof (RGB));
-        fs << int (color.r) << " " << int (color.g) << " " << int (color.b) << " " << int (color.a);
+        const auto& color = mesh.cloud.at<RGB>(i, mesh.cloud.fields[d].offset);
+        fs << int (color.r) << " " << int (color.g) << " " << int (color.b) << " " << int (color.a) << " ";
       }
       else if ((mesh.cloud.fields[d].datatype == pcl::PCLPointField::FLOAT32) && (
                 mesh.cloud.fields[d].name == "normal_x" ||
                 mesh.cloud.fields[d].name == "normal_y" ||
                 mesh.cloud.fields[d].name == "normal_z"))
       {
-        float value;
-        memcpy (&value, &mesh.cloud.data[i * point_size + mesh.cloud.fields[d].offset + c * sizeof(float)], sizeof(float));
-        fs << value;
+        fs << mesh.cloud.at<float>(i, mesh.cloud.fields[d].offset) << " ";
       }
       else if ((mesh.cloud.fields[d].datatype == pcl::PCLPointField::FLOAT32) && (
                 mesh.cloud.fields[d].name == "curvature"))
       {
-        float value;
-        memcpy(&value, &mesh.cloud.data[i * point_size + mesh.cloud.fields[d].offset + c * sizeof(float)], sizeof(float));
-        fs << value;
+        fs << mesh.cloud.at<float>(i, mesh.cloud.fields[d].offset) << " ";
       }
-      fs << " ";
     }
     if (xyz != 3)
     {
@@ -1573,12 +1566,13 @@ pcl::io::savePLYFile (const std::string &file_name, const pcl::PolygonMesh &mesh
   }
 
   // Write down faces
-  for (std::size_t i = 0; i < nr_faces; i++)
+  PCL_DEBUG ("[pcl::io::savePLYFile] Saving %zu polygons/faces\n", mesh.polygons.size());
+  for (const pcl::Vertices& polygon : mesh.polygons)
   {
-    fs << mesh.polygons[i].vertices.size () << " ";
-    for (std::size_t j = 0; j < mesh.polygons[i].vertices.size () - 1; ++j)
-      fs << mesh.polygons[i].vertices[j] << " ";
-    fs << mesh.polygons[i].vertices.back() << '\n';
+    fs << polygon.vertices.size ();
+    for (const auto& vertex : polygon.vertices)
+      fs << " " << vertex;
+    fs << '\n';
   }
 
   // Close file
@@ -1606,56 +1600,8 @@ pcl::io::savePLYFileBinary (const std::string &file_name, const pcl::PolygonMesh
 
   // number of points
   std::size_t nr_points  = mesh.cloud.width * mesh.cloud.height;
-  std::size_t point_size = mesh.cloud.data.size () / nr_points;
 
-  // number of faces
-  std::size_t nr_faces = mesh.polygons.size ();
-
-  // Write header
-  fs << "ply";
-  fs << "\nformat " << (mesh.cloud.is_bigendian ? "binary_big_endian" : "binary_little_endian") << " 1.0";
-  fs << "\ncomment PCL generated";
-  // Vertices
-  fs << "\nelement vertex "<< mesh.cloud.width * mesh.cloud.height;
-  fs << "\nproperty float x"
-        "\nproperty float y"
-        "\nproperty float z";
-  // Check if we have color on vertices
-  int rgba_index = getFieldIndex (mesh.cloud, "rgba"),
-  rgb_index = getFieldIndex (mesh.cloud, "rgb");
-  if (rgba_index != -1)
-  {
-    fs << "\nproperty uchar red"
-          "\nproperty uchar green"
-          "\nproperty uchar blue"
-          "\nproperty uchar alpha";
-  }
-  else if (rgb_index != -1)
-  {
-    fs << "\nproperty uchar red"
-          "\nproperty uchar green"
-          "\nproperty uchar blue";
-  }
-  // Check if we have normal on vertices
-  int normal_x_index = getFieldIndex(mesh.cloud, "normal_x");
-  int normal_y_index = getFieldIndex(mesh.cloud, "normal_y");
-  int normal_z_index = getFieldIndex(mesh.cloud, "normal_z");
-  if (normal_x_index != -1 && normal_y_index != -1 && normal_z_index != -1)
-  {
-	  fs << "\nproperty float nx"
-		  "\nproperty float ny"
-		  "\nproperty float nz";
-  }
-  // Check if we have curvature on vertices
-  int curvature_index = getFieldIndex(mesh.cloud, "curvature");
-  if ( curvature_index != -1)
-  {
-	  fs << "\nproperty float curvature";
-  }
-  // Faces
-  fs << "\nelement face "<< nr_faces;
-  fs << "\nproperty list uchar int vertex_indices";
-  fs << "\nend_header\n";
+  pcl::io::writePLYHeader(fs, mesh, (mesh.cloud.is_bigendian ? "binary_big_endian 1.0" : "binary_little_endian 1.0"));
 
   // Close the file
   fs.close ();
@@ -1673,17 +1619,13 @@ pcl::io::savePLYFileBinary (const std::string &file_name, const pcl::PolygonMesh
     int xyz = 0;
     for (std::size_t d = 0; d < mesh.cloud.fields.size (); ++d)
     {
-      int c = 0;
-
       // adding vertex
       if ((mesh.cloud.fields[d].datatype == pcl::PCLPointField::FLOAT32) && (
           mesh.cloud.fields[d].name == "x" ||
           mesh.cloud.fields[d].name == "y" ||
           mesh.cloud.fields[d].name == "z"))
       {
-        float value;
-        memcpy (&value, &mesh.cloud.data[i * point_size + mesh.cloud.fields[d].offset + c * sizeof (float)], sizeof (float));
-        fpout.write (reinterpret_cast<const char*> (&value), sizeof (float));
+        fpout.write (reinterpret_cast<const char*> (&mesh.cloud.at<float>(i, mesh.cloud.fields[d].offset)), sizeof (float));
         // if (++xyz == 3)
         //   break;
         ++xyz;
@@ -1692,8 +1634,7 @@ pcl::io::savePLYFileBinary (const std::string &file_name, const pcl::PolygonMesh
                 (mesh.cloud.fields[d].name == "rgb"))
 
       {
-        pcl::RGB color;
-        memcpy (&color, &mesh.cloud.data[i * point_size + mesh.cloud.fields[rgb_index].offset + c * sizeof (float)], sizeof (RGB));
+        const auto& color = mesh.cloud.at<RGB>(i, mesh.cloud.fields[d].offset);
         fpout.write (reinterpret_cast<const char*> (&color.r), sizeof (unsigned char));
         fpout.write (reinterpret_cast<const char*> (&color.g), sizeof (unsigned char));
         fpout.write (reinterpret_cast<const char*> (&color.b), sizeof (unsigned char));
@@ -1701,8 +1642,7 @@ pcl::io::savePLYFileBinary (const std::string &file_name, const pcl::PolygonMesh
       else if ((mesh.cloud.fields[d].datatype == pcl::PCLPointField::UINT32) &&
                (mesh.cloud.fields[d].name == "rgba"))
       {
-        pcl::RGB color;
-        memcpy (&color, &mesh.cloud.data[i * point_size + mesh.cloud.fields[rgba_index].offset + c * sizeof (std::uint32_t)], sizeof (RGB));
+        const auto& color = mesh.cloud.at<RGB>(i, mesh.cloud.fields[d].offset);
         fpout.write (reinterpret_cast<const char*> (&color.r), sizeof (unsigned char));
         fpout.write (reinterpret_cast<const char*> (&color.g), sizeof (unsigned char));
         fpout.write (reinterpret_cast<const char*> (&color.b), sizeof (unsigned char));
@@ -1713,31 +1653,27 @@ pcl::io::savePLYFileBinary (const std::string &file_name, const pcl::PolygonMesh
                mesh.cloud.fields[d].name == "normal_y" ||
                mesh.cloud.fields[d].name == "normal_z"))
       {
-        float value;
-        memcpy (&value, &mesh.cloud.data[i * point_size + mesh.cloud.fields[d].offset + c * sizeof (float)], sizeof (float));
-        fpout.write (reinterpret_cast<const char*> (&value), sizeof (float));
+        fpout.write (reinterpret_cast<const char*> (&mesh.cloud.at<float>(i, mesh.cloud.fields[d].offset)), sizeof (float));
       }
       else if ((mesh.cloud.fields[d].datatype == pcl::PCLPointField::FLOAT32) && 
                (mesh.cloud.fields[d].name == "curvature"))
       {
-        float value;
-        memcpy (&value, &mesh.cloud.data[i * point_size + mesh.cloud.fields[d].offset + c * sizeof (float)], sizeof (float));
-        fpout.write (reinterpret_cast<const char*> (&value), sizeof (float));        
+        fpout.write (reinterpret_cast<const char*> (&mesh.cloud.at<float>(i, mesh.cloud.fields[d].offset)), sizeof (float));
       }
     }
     if (xyz != 3)
     {
-      PCL_ERROR ("[pcl::io::savePLYFile] Input point cloud has no XYZ data!\n");
+      PCL_ERROR ("[pcl::io::savePLYFileBinary] Input point cloud has no XYZ data!\n");
       return (-2);
     }
   }
 
   // Write down faces
-  for (std::size_t i = 0; i < nr_faces; i++)
+  for (const pcl::Vertices& polygon : mesh.polygons)
   {
-    unsigned char value = static_cast<unsigned char> (mesh.polygons[i].vertices.size ());
+    auto value = static_cast<unsigned char> (polygon.vertices.size ());
     fpout.write (reinterpret_cast<const char*> (&value), sizeof (unsigned char));
-    for (const int value : mesh.polygons[i].vertices)
+    for (const int value : polygon.vertices)
     {
       //fs << mesh.polygons[i].vertices[j] << " ";
       fpout.write (reinterpret_cast<const char*> (&value), sizeof (int));

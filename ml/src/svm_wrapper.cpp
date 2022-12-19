@@ -71,7 +71,7 @@ pcl::SVMTrain::doCrossValidation()
 {
   int total_correct = 0;
   double sumv = 0, sumy = 0, sumvv = 0, sumyy = 0, sumvy = 0;
-  double* target = Malloc(double, prob_.l);
+  double* target;
 
   // number of fold for the cross validation (n of folds = number of splitting of the
   // input dataset)
@@ -79,6 +79,7 @@ pcl::SVMTrain::doCrossValidation()
     fprintf(stderr, "n-fold cross validation: n must >= 2\n");
     return;
   }
+  target = Malloc(double, prob_.l);
 
   svm_cross_validation(&prob_, &param_, nr_fold_, target); // perform cross validation
 
@@ -205,17 +206,16 @@ pcl::SVM::adaptInputToLibSVM(std::vector<SVMData> training_set, svm_problem& pro
 
     int k = 0;
 
-    for (std::size_t j = 0; j < training_set[i].SV.size(); j++)
-      if (training_set[i].SV[j].idx != -1 &&
-          std::isfinite(training_set[i].SV[j].value)) {
-        prob.x[i][k].index = training_set[i].SV[j].idx;
-        if (training_set[i].SV[j].idx < scaling_.max &&
-            scaling_.obj[training_set[i].SV[j].idx].index == 1)
-          prob.x[i][k].value = training_set[i].SV[j].value /
-                               scaling_.obj[training_set[i].SV[j].idx].value;
-        else
-          prob.x[i][k].value = training_set[i].SV[j].value;
-        k++;
+    for (const auto& train_SV : training_set[i].SV)
+      if (train_SV.idx != -1 && std::isfinite(train_SV.value)) {
+        prob.x[i][k].index = train_SV.idx;
+        if (train_SV.idx < scaling_.max && scaling_.obj[train_SV.idx].index == 1) {
+          prob.x[i][k].value = train_SV.value / scaling_.obj[train_SV.idx].value;
+        }
+        else {
+          prob.x[i][k].value = train_SV.value;
+        }
+        ++k;
       }
 
     prob.x[i][k].index = -1;
@@ -253,8 +253,7 @@ pcl::SVMTrain::trainClassifier()
     doCrossValidation();
   }
   else {
-    SVMModel* out;
-    out = static_cast<SVMModel*>(svm_train(&prob_, &param_));
+    auto* out = reinterpret_cast<SVMModel*>(svm_train(&prob_, &param_));
     if (out == nullptr) {
       PCL_ERROR("[pcl::%s::trainClassifier] Error taining the classifier model.\n",
                 getClassName().c_str());
@@ -499,8 +498,7 @@ pcl::SVM::saveProblemNorm(const char* filename,
 bool
 pcl::SVMClassify::loadClassifierModel(const char* filename)
 {
-  SVMModel* out;
-  out = static_cast<SVMModel*>(svm_load_model(filename));
+  auto* out = reinterpret_cast<SVMModel*>(svm_load_model(filename));
   if (out == nullptr) {
     PCL_ERROR("[pcl::%s::loadClassifierModel] Can't open classifier model %s.\n",
               getClassName().c_str(),

@@ -165,7 +165,9 @@ struct Frame
 class Buffer
 {
 	public:
-    Buffer () {}
+    Buffer () = default;
+    Buffer (const Buffer&) = delete;            // Disabled copy constructor
+    Buffer& operator =(const Buffer&) = delete; // Disabled assignment operator
 
     bool 
     pushBack (Frame::ConstPtr frame)
@@ -245,9 +247,6 @@ class Buffer
     }
 
 	private:
-		Buffer (const Buffer&) = delete;            // Disabled copy constructor
-		Buffer& operator =(const Buffer&) = delete; // Disabled assignment operator
-		
     std::mutex bmutex_;
 		std::condition_variable buff_empty_;
 		boost::circular_buffer<Frame::ConstPtr> buffer_;
@@ -505,8 +504,8 @@ class Viewer
                                      &rgb_data[0]);
             }
             else
-              memcpy (&rgb_data[0], 
-                      frame->image->getMetaData ().Data (), 
+              memcpy (&rgb_data[0],
+                      frame->image->getMetaData ().Data (),
                       rgb_data.size ());
 
             image_viewer_->addRGBImage (reinterpret_cast<unsigned char*> (&rgb_data[0]), 
@@ -701,17 +700,17 @@ main (int argc, char ** argv)
         {
           std::cout << std::endl << "Supported image modes for device: " << device->getVendorName () << " , " << device->getProductName () << std::endl;
           modes = grabber.getAvailableImageModes ();
-          for (std::vector<std::pair<int, XnMapOutputMode> >::const_iterator it = modes.begin (); it != modes.end (); ++it)
+          for (const auto& mode : modes)
           {
-            std::cout << it->first << " = " << it->second.nXRes << " x " << it->second.nYRes << " @ " << it->second.nFPS << std::endl;
+            std::cout << mode.first << " = " << mode.second.nXRes << " x " << mode.second.nYRes << " @ " << mode.second.nFPS << std::endl;
           }
         if (device->hasDepthStream ())
         {
           std::cout << std::endl << "Supported depth modes for device: " << device->getVendorName () << " , " << device->getProductName () << std::endl;
           modes = grabber.getAvailableDepthModes ();
-          for (std::vector<std::pair<int, XnMapOutputMode> >::const_iterator it = modes.begin (); it != modes.end (); ++it)
+          for (const auto& mode : modes)
           {
-            std::cout << it->first << " = " << it->second.nXRes << " x " << it->second.nYRes << " @ " << it->second.nFPS << std::endl;
+            std::cout << mode.first << " = " << mode.second.nXRes << " x " << mode.second.nYRes << " @ " << mode.second.nFPS << std::endl;
           }
         }
         }

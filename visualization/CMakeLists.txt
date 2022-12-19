@@ -12,7 +12,7 @@ else()
 endif()
 
 PCL_SUBSYS_OPTION(build "${SUBSYS_NAME}" "${SUBSYS_DESC}" ${DEFAULT} "${REASON}")
-PCL_SUBSYS_DEPEND(build "${SUBSYS_NAME}" DEPS ${SUBSYS_DEPS} EXT_DEPS vtk OPT_DEPS openni openni2 ensenso davidSDK dssdk rssdk)
+PCL_SUBSYS_DEPEND(build NAME ${SUBSYS_NAME} DEPS ${SUBSYS_DEPS} EXT_DEPS vtk OPT_DEPS openni openni2 ensenso davidSDK dssdk rssdk)
 
 if(ANDROID)
   set(build FALSE)
@@ -56,17 +56,8 @@ set(srcs
   src/pcl_plotter.cpp
 )
 
-if(VTK_RENDERING_BACKEND_OPENGL_VERSION VERSION_LESS 2)
-  list(APPEND srcs
-    "src/vtk/vtkVertexBufferObject.cxx"
-    "src/vtk/vtkVertexBufferObjectMapper.cxx"
-  )
-
-  # Code in this module may use deprecated declarations when using OpenGLv1
-  # Add the GCC exclusive rules for -Werror only for OpenGLv1 compile to avoid build interruption
-  if(CMAKE_COMPILER_IS_GNUCXX)
-    add_compile_options("-Wno-error=deprecated-declarations")
-  endif()
+if(${VTK_VERSION} VERSION_GREATER_EQUAL 9.0 AND UNIX AND NOT ANDROID AND NOT APPLE AND NOT APPLE_IOS)
+  list(APPEND srcs "src/vtk/vtkFixedXRenderWindowInteractor.cxx")
 endif()
 
 if(NOT (${VTK_VERSION} VERSION_LESS 9.0))
@@ -134,11 +125,8 @@ set(vtk_incs
   "include/pcl/${SUBSYS_NAME}/vtk/pcl_vtk_compatibility.h"
 )
 
-if(VTK_RENDERING_BACKEND_OPENGL_VERSION VERSION_LESS 2)
-  list(APPEND vtk_incs
-    "include/pcl/${SUBSYS_NAME}/vtk/vtkVertexBufferObject.h"
-    "include/pcl/${SUBSYS_NAME}/vtk/vtkVertexBufferObjectMapper.h"
-  )
+if(${VTK_VERSION} VERSION_GREATER_EQUAL 9.0 AND UNIX AND NOT ANDROID AND NOT APPLE AND NOT APPLE_IOS)
+  list(APPEND vtk_incs "include/pcl/${SUBSYS_NAME}/vtk/vtkFixedXRenderWindowInteractor.h")
 endif()
 
 if(${VTK_VERSION} VERSION_GREATER_EQUAL 9.0)
@@ -216,6 +204,9 @@ else()
   if(${VTK_VERSION} VERSION_GREATER_EQUAL 7.0 AND ${VTK_VERSION} VERSION_LESS 9.0)
     target_link_libraries("${LIB_NAME}" vtkRenderingGL2PS${VTK_RENDERING_BACKEND})
   endif()
+  if(${VTK_VERSION} VERSION_GREATER_EQUAL 8.0)
+    target_link_libraries("${LIB_NAME}" vtkCommonColor vtkCommonComputationalGeometry)
+  endif()
   
   # These two libraries are present and required in ubuntu 18.04 VTK 6, but not present in later versions of ubuntu using VTK 6.
   # They are also present on later versions of VTK on later versions of ubuntu.
@@ -267,7 +258,8 @@ PCL_ADD_INCLUDES("${SUBSYS_NAME}" "${SUBSYS_NAME}/vtk" ${vtk_incs})
 #TODO: Update when CMAKE 3.10 is available
 if(NOT (${VTK_VERSION} VERSION_LESS 9.0))
   vtk_module_autoinit(TARGETS "${LIB_NAME}" 
-                      MODULES VTK::RenderingOpenGL2
+                      MODULES VTK::RenderingContextOpenGL2
+                              VTK::RenderingOpenGL2
                               VTK::RenderingFreeType)
 endif()
 

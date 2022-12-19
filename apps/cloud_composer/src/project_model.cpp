@@ -444,7 +444,7 @@ pcl::cloud_composer::ProjectModel::clearSelection ()
   foreach (CloudItem* selected_item, selected_item_index_map_.keys())
   {
     qDebug () << "Setting item color back to black";
-    selected_item->setForeground (QBrush (Qt::black));;
+    selected_item->setForeground (QBrush (Qt::black));
   }
   
   selected_item_index_map_.clear ();
@@ -583,7 +583,7 @@ pcl::cloud_composer::ProjectModel::itemSelectionChanged ( const QItemSelection &
   //Set all point selected cloud items back to green text, since if they are selected they get changed to white
   foreach (CloudItem* selected_item, selected_item_index_map_.keys())
   {
-    selected_item->setForeground (QBrush (Qt::green));;
+    selected_item->setForeground (QBrush (Qt::green));
   }
 }
 
@@ -610,7 +610,7 @@ pcl::cloud_composer::ProjectModel::onlyCloudItemsSelected ()
 void 
 pcl::cloud_composer::ProjectModel::setSelectedStyle (interactor_styles::INTERACTOR_STYLES style)
 {
-  QMap<interactor_styles::INTERACTOR_STYLES, bool>::iterator itr = selected_style_map_.begin();
+  auto itr = selected_style_map_.begin();
   while (itr != selected_style_map_.end ())
   {
     itr.value() = false;

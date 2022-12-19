@@ -39,7 +39,6 @@
 
 #pragma once
 
-#include <pcl/outofcore/boost.h>
 #include <pcl/common/io.h>
 
 //outofcore classes
@@ -537,7 +536,7 @@ namespace pcl
         /** \brief Write a python script using the vpython module containing all
          * the bounding boxes */
         void
-        writeVPythonVisual (const boost::filesystem::path filename);
+        writeVPythonVisual (const boost::filesystem::path& filename);
 
         OutofcoreNodeType*
         getBranchChildPtr (const BranchNode& branch_arg, unsigned char childIdx_arg) const;

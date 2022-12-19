@@ -102,9 +102,9 @@ namespace pcl
               match_confidence_ (match_confidence),
               user_data_ (user_data)
             {
-              memcpy(this->rigid_transform_, rigid_transform, 12*sizeof (float));
+              std::copy(rigid_transform, rigid_transform + 12, this->rigid_transform_);
             }
-            virtual ~Output (){}
+            virtual ~Output () = default;
 
           public:
             std::string object_name_;
@@ -121,7 +121,7 @@ namespace pcl
               {
               }
 
-              virtual ~OrientedPointPair (){}
+              virtual ~OrientedPointPair () = default;
 
             public:
               const float *p1_, *n1_, *p2_, *n2_;
@@ -130,8 +130,8 @@ namespace pcl
         class HypothesisCreator
         {
           public:
-            HypothesisCreator (){}
-            virtual ~HypothesisCreator (){}
+            HypothesisCreator () = default;
+            virtual ~HypothesisCreator () = default;
 
             Hypothesis* create (const SimpleOctree<Hypothesis, HypothesisCreator, float>::Node* ) const { return new Hypothesis ();}
         };

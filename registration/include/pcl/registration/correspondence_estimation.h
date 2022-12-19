@@ -101,7 +101,7 @@ public:
   {}
 
   /** \brief Empty destructor */
-  ~CorrespondenceEstimationBase() {}
+  ~CorrespondenceEstimationBase() override = default;
 
   /** \brief Provide a pointer to the input source
    * (e.g., the point cloud that we want to align to the target)
@@ -145,7 +145,8 @@ public:
   }
 
   /** \brief Abstract method for setting the source normals */
-  virtual void setSourceNormals(pcl::PCLPointCloud2::ConstPtr /*cloud2*/)
+  virtual void
+  setSourceNormals(pcl::PCLPointCloud2::ConstPtr /*cloud2*/)
   {
     PCL_WARN("[pcl::registration::%s::setSourceNormals] This class does not require "
              "input source normals\n",
@@ -160,7 +161,8 @@ public:
   }
 
   /** \brief Abstract method for setting the target normals */
-  virtual void setTargetNormals(pcl::PCLPointCloud2::ConstPtr /*cloud2*/)
+  virtual void
+  setTargetNormals(pcl::PCLPointCloud2::ConstPtr /*cloud2*/)
   {
     PCL_WARN("[pcl::registration::%s::setTargetNormals] This class does not require "
              "input target normals\n",
@@ -411,7 +413,7 @@ public:
   CorrespondenceEstimation() { corr_name_ = "CorrespondenceEstimation"; }
 
   /** \brief Empty destructor */
-  ~CorrespondenceEstimation() {}
+  ~CorrespondenceEstimation() override = default;
 
   /** \brief Determine the correspondences between input and target cloud.
    * \param[out] correspondences the found correspondences (index of query point, index

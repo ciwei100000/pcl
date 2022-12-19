@@ -1708,6 +1708,15 @@ namespace pcl
                       const std::string &id = "ellipsoid",
                       int viewport = 0);
 
+        /**
+         * @brief Eye-Dome Lighting makes dark areas to improve depth perception
+         * See https://www.kitware.com/eye-dome-lighting-a-non-photorealistic-shading-technique/
+         * It is applied to all actors, including texts.
+         * @param viewport 
+        */
+        void
+        enableEDLRendering(int viewport = 0);
+
         /** \brief Changes the visual representation for all actors to surface representation. */
         void
         setRepresentationToSurfaceForAllActors ();
@@ -2060,7 +2069,7 @@ namespace pcl
           static FPSCallback *New () { return (new FPSCallback); }
 
           FPSCallback () : actor (), pcl_visualizer (), decimated (), last_fps(0.0f) {}
-          FPSCallback (const FPSCallback& src) : vtkCommand (src), actor (src.actor), pcl_visualizer (src.pcl_visualizer), decimated (src.decimated), last_fps (src.last_fps) {}
+          FPSCallback (const FPSCallback& src)  = default;
           FPSCallback& operator = (const FPSCallback& src) { actor = src.actor; pcl_visualizer = src.pcl_visualizer; decimated = src.decimated; last_fps = src.last_fps; return (*this); }
 
           void
