@@ -43,7 +43,6 @@
 #include <pcl/point_types.h>
 #include <pcl/point_representation.h>
 #include <pcl/features/feature.h>
-#include <pcl/features/spin_image.h>
 #include <pcl/kdtree/kdtree_flann.h> // for KdTreeFLANN
 
 namespace pcl
@@ -236,6 +235,7 @@ namespace pcl
       * by Jan Knopp, Mukta Prasad, Geert Willems, Radu Timofte, and Luc Van Gool
       *
       * Authors: Roman Shapovalov, Alexander Velizhev, Sergey Ushakov
+      * \ingroup recognition
       */
     template <int FeatureSize, typename PointT, typename NormalT = pcl::Normal>
     class PCL_EXPORTS ImplicitShapeModelEstimation

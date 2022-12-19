@@ -70,7 +70,7 @@ pcl::io::LZFImageWriter::saveImageBlob (const char* data,
   HANDLE fm = CreateFileMapping (h_native_file, NULL, PAGE_READWRITE, 0, data_size, NULL);
   char *map = static_cast<char*> (MapViewOfFile (fm, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, data_size));
   CloseHandle (fm);
-  memcpy (&map[0], data, data_size);
+  std::copy(data, data + data_size, map);
   UnmapViewOfFile (map);
   CloseHandle (h_native_file);
 #else
@@ -94,7 +94,7 @@ pcl::io::LZFImageWriter::saveImageBlob (const char* data,
   }
 
   // Copy the data
-  memcpy (&map[0], data, data_size);
+  std::copy(data, data + data_size, map);
 
   if (::munmap (map, (data_size)) == -1)
   {
@@ -407,10 +407,8 @@ pcl::io::LZFImageReader::loadImageBlob (const std::string &filename,
   }
 #endif
 
-  // Check the header identifier here
-  char header_string[5];
-  memcpy (&header_string,    &map[0], 5);        // PCLZF
-  if (std::string (header_string).substr (0, 5) != "PCLZF")
+  // Check the header identifier here (PCLZF)
+  if (map[0] != 'P' || map[1] != 'C' || map[2] != 'L' || map[3] != 'Z' || map[4] != 'F')
   {
     PCL_ERROR ("[pcl::io::LZFImageReader::loadImage] Wrong signature header! Should be 'P'C'L'Z'F'.\n");
 #ifdef _WIN32
@@ -423,10 +421,7 @@ pcl::io::LZFImageReader::loadImageBlob (const std::string &filename,
   }
   memcpy (&width_,            &map[5], sizeof (std::uint32_t));
   memcpy (&height_,           &map[9], sizeof (std::uint32_t));
-  char imgtype_string[16];
-  memcpy (&imgtype_string,    &map[13], 16);       // BAYER8, RGB24_, YUV422_, ...
-  image_type_identifier_ = std::string (imgtype_string).substr (0, 15);
-  image_type_identifier_.insert (image_type_identifier_.end (), 1, '\0');
+  image_type_identifier_ = std::string (map+13, 16); // BAYER8, RGB24_, YUV422_, ...
 
   static const int header_size = LZF_HEADER_SIZE;
   std::uint32_t compressed_size;
@@ -448,7 +443,7 @@ pcl::io::LZFImageReader::loadImageBlob (const std::string &filename,
 
   data.resize (compressed_size);
   memcpy (&data[0], &map[header_size], compressed_size);
- 
+
 #ifdef _WIN32
   UnmapViewOfFile (map);
   CloseHandle (fm);

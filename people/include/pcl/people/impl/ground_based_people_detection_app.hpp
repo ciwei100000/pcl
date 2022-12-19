@@ -400,7 +400,7 @@ pcl::people::GroundBasedPeopleDetectionApp<PointT>::compute (std::vector<pcl::pe
   {
     swapDimensions(rgb_image_);
   }
-  for(typename std::vector<pcl::people::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
+  for(auto it = clusters.begin(); it != clusters.end(); ++it)
   {
     //Evaluate confidence for the current PersonCluster:
     Eigen::Vector3f centroid = intrinsics_matrix_transformed_ * (it->getTCenter());
@@ -416,8 +416,5 @@ pcl::people::GroundBasedPeopleDetectionApp<PointT>::compute (std::vector<pcl::pe
 }
 
 template <typename PointT>
-pcl::people::GroundBasedPeopleDetectionApp<PointT>::~GroundBasedPeopleDetectionApp ()
-{
-  // TODO Auto-generated destructor stub
-}
+pcl::people::GroundBasedPeopleDetectionApp<PointT>::~GroundBasedPeopleDetectionApp () = default;
 #endif /* PCL_PEOPLE_GROUND_BASED_PEOPLE_DETECTION_APP_HPP_ */

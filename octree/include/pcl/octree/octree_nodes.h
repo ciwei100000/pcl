@@ -42,6 +42,7 @@
 #include <pcl/memory.h>
 #include <pcl/pcl_macros.h>
 
+#include <array>
 #include <cassert>
 
 namespace pcl {
@@ -57,10 +58,10 @@ enum node_type_t { BRANCH_NODE, LEAF_NODE };
  */
 class PCL_EXPORTS OctreeNode {
 public:
-  OctreeNode() {}
+  OctreeNode() = default;
 
-  virtual ~OctreeNode() {}
-  /** \brief Pure virtual method for receiving the type of octree node (branch or leaf)
+  virtual ~OctreeNode() = default;
+  /** \brief Pure virtual method for retrieving the type of octree node (branch or leaf)
    */
   virtual node_type_t
   getNodeType() const = 0;
@@ -72,7 +73,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /** \brief @b Abstract octree leaf class
- * \note Octree leafs may collect data of type DataT
+ * \note Octree leaves may collect data of type ContainerT
  * \author Julius Kammerl (julius@kammerl.de)
  */
 
@@ -90,7 +91,7 @@ public:
 
   /** \brief Empty deconstructor. */
 
-  ~OctreeLeafNode() {}
+  ~OctreeLeafNode() override = default;
 
   /** \brief Method to perform a deep copy of the octree */
   OctreeLeafNode<ContainerT>*
@@ -182,28 +183,31 @@ public:
   OctreeBranchNode() : OctreeNode()
   {
     // reset pointer to child node vectors
-    memset(child_node_array_, 0, sizeof(child_node_array_));
+    child_node_array_ = {};
   }
 
   /** \brief Empty constructor. */
   OctreeBranchNode(const OctreeBranchNode& source) : OctreeNode()
   {
-    memset(child_node_array_, 0, sizeof(child_node_array_));
+    child_node_array_ = {};
 
     for (unsigned char i = 0; i < 8; ++i)
-      if (source.child_node_array_[i])
+      if (source.child_node_array_[i]) {
         child_node_array_[i] = source.child_node_array_[i]->deepCopy();
+      }
   }
 
   /** \brief Copy operator. */
   inline OctreeBranchNode&
   operator=(const OctreeBranchNode& source)
   {
-    memset(child_node_array_, 0, sizeof(child_node_array_));
+    child_node_array_ = {};
 
-    for (unsigned char i = 0; i < 8; ++i)
-      if (source.child_node_array_[i])
+    for (unsigned char i = 0; i < 8; ++i) {
+      if (source.child_node_array_[i]) {
         child_node_array_[i] = source.child_node_array_[i]->deepCopy();
+      }
+    }
     return (*this);
   }
 
@@ -216,7 +220,7 @@ public:
 
   /** \brief Empty deconstructor. */
 
-  ~OctreeBranchNode() {}
+  ~OctreeBranchNode() override = default;
 
   /** \brief Access operator.
    *  \param child_idx_arg: index to child node
@@ -295,7 +299,7 @@ public:
   void
   reset()
   {
-    memset(child_node_array_, 0, sizeof(child_node_array_));
+    child_node_array_ = {};
     container_.reset();
   }
 
@@ -356,7 +360,7 @@ public:
   }
 
 protected:
-  OctreeNode* child_node_array_[8];
+  std::array<OctreeNode*, 8> child_node_array_{};
 
   ContainerT container_;
 };

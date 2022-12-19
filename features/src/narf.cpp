@@ -41,6 +41,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <map> // for std::multimap
 using std::cout;
 using std::cerr;
 using std::vector;
@@ -116,7 +117,7 @@ Narf::deepCopy (const Narf& other)
     delete[] surface_patch_;
     surface_patch_ = new float[surface_patch_pixel_size_*surface_patch_pixel_size_];
   }
-  memcpy(surface_patch_, other.surface_patch_, sizeof(*surface_patch_)*surface_patch_pixel_size_*surface_patch_pixel_size_);
+  std::copy(other.surface_patch_, other.surface_patch_ + surface_patch_pixel_size_*surface_patch_pixel_size_, surface_patch_);
   surface_patch_world_size_ = other.surface_patch_world_size_;
   surface_patch_rotation_ = other.surface_patch_rotation_;
   
@@ -126,7 +127,7 @@ Narf::deepCopy (const Narf& other)
     delete[] descriptor_;
     descriptor_ = new float[descriptor_size_];
   }
-  memcpy(descriptor_, other.descriptor_, sizeof(*descriptor_)*descriptor_size_);
+  std::copy(other.descriptor_, other.descriptor_ + descriptor_size_, descriptor_);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -476,14 +477,14 @@ Narf::getRotations (std::vector<float>& rotations, std::vector<float>& strengths
   
   while (!scored_orientations.empty())
   {
-    std::multimap<float, float>::iterator best_remaining_orientation_it = scored_orientations.end();
+    auto best_remaining_orientation_it = scored_orientations.end();
     --best_remaining_orientation_it;
     rotations.push_back(best_remaining_orientation_it->second);
     strengths.push_back(best_remaining_orientation_it->first);
     scored_orientations.erase(best_remaining_orientation_it);
-    for (std::multimap<float, float>::iterator it = scored_orientations.begin(); it!=scored_orientations.end();)
+    for (auto it = scored_orientations.begin(); it!=scored_orientations.end();)
     {
-      std::multimap<float, float>::iterator current_it = it++;
+      auto current_it = it++;
       if (normAngle(current_it->second - rotations.back()) < min_angle_dist_between_rotations)
         scored_orientations.erase(current_it);
     }
@@ -608,9 +609,7 @@ NarfDescriptor::NarfDescriptor (const RangeImage* range_image, const pcl::Indice
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-NarfDescriptor::~NarfDescriptor ()
-{
-}
+NarfDescriptor::~NarfDescriptor () = default;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void 

@@ -1,9 +1,13 @@
 function(checkVTKComponents)
-  cmake_parse_arguments(PARAM "" "MISSING_COMPONENTS" "COMPONENTS" ${ARGN})
+  cmake_parse_arguments(ARGS "" "MISSING_COMPONENTS" "COMPONENTS" ${ARGN})
+  
+  if(ARGS_UNPARSED_ARGUMENTS)
+    message(FATAL_ERROR "Unknown arguments given to checkVTKComponents: ${ARGS_UNPARSED_ARGUMENTS}")
+  endif()
 
   set(vtkMissingComponents)
   
-  foreach(vtkComponent ${PARAM_COMPONENTS})
+  foreach(vtkComponent ${ARGS_COMPONENTS})
     if (VTK_VERSION VERSION_LESS 9.0)
       if (NOT TARGET ${vtkComponent})
         list(APPEND vtkMissingComponents ${vtkComponent})
@@ -15,7 +19,9 @@ function(checkVTKComponents)
     endif()
   endforeach()
   
-  set(${PARAM_MISSING_COMPONENTS} ${vtkMissingComponents} PARENT_SCOPE)
+  if(ARGS_MISSING_COMPONENTS)
+    set(${ARGS_MISSING_COMPONENTS} ${vtkMissingComponents} PARENT_SCOPE)
+  endif()
 endfunction()
 
 # Start with a generic call to find any VTK version we are supporting, so we retrieve
@@ -69,21 +75,9 @@ set(NON_PREFIX_PCL_VTK_COMPONENTS
   ViewsContext2D
 )
 
-#If VTK version 6 use OpenGL
-if(VTK_VERSION VERSION_LESS 7.0)
-  set(VTK_RENDERING_BACKEND "OpenGL")
-  set(VTK_RENDERING_BACKEND_OPENGL_VERSION "1")
-  message(DEPRECATION "The rendering backend OpenGL is deprecated and not available anymore since VTK 8.2."
-					  "Please switch to the OpenGL2 backend instead, which is available since VTK 6.2."
-					  "Support of the deprecated backend will be dropped with PCL 1.13.")
-
-#If VTK version 7,8 or 9 use OpenGL2
-else()
-  set(VTK_RENDERING_BACKEND "OpenGL2")
-  set(VTK_RENDERING_BACKEND_OPENGL_VERSION "2")
-endif()
-
-list(APPEND NON_PREFIX_PCL_VTK_COMPONENTS Rendering${VTK_RENDERING_BACKEND})
+set(VTK_RENDERING_BACKEND "OpenGL2")
+set(VTK_RENDERING_BACKEND_OPENGL_VERSION "2")
+list(APPEND NON_PREFIX_PCL_VTK_COMPONENTS Rendering${VTK_RENDERING_BACKEND} RenderingContext${VTK_RENDERING_BACKEND})
 
 #Append vtk to components if version is <9.0
 if(VTK_VERSION VERSION_LESS 9.0)
@@ -99,8 +93,7 @@ endif()
 checkVTKComponents(COMPONENTS ${PCL_VTK_COMPONENTS} MISSING_COMPONENTS vtkMissingComponents)
 
 if (vtkMissingComponents)
-  set(VTK_FOUND FALSE)
-  message(WARNING "Missing vtk modules: ${vtkMissingComponents}")
+  message(FATAL_ERROR "Missing vtk modules: ${vtkMissingComponents}")
 endif()
 
 if("vtkGUISupportQt" IN_LIST VTK_MODULES_ENABLED)

@@ -80,7 +80,7 @@ namespace openni_wrapper
     /**
      * @brief virtual Destructor that never throws an exception
      */
-    ~OpenNIException () noexcept;
+    ~OpenNIException () noexcept override;
 
     /**
      * @brief Assignment operator to allow copying the message of another exception variable.
@@ -132,6 +132,7 @@ namespace openni_wrapper
     va_list args;
     va_start (args, format);
     vsprintf (msg, format, args);
+    va_end (args);
     throw OpenNIException (function_name, file_name, line_number, msg);
   }
 } // namespace openni_camera

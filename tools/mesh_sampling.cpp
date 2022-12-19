@@ -40,7 +40,6 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/vtk_lib_io.h>
 #include <vtkVersion.h>
-#include <vtkPLYReader.h>
 #include <vtkOBJReader.h>
 #include <vtkTriangle.h>
 #include <vtkTriangleFilter.h>
@@ -82,7 +81,7 @@ randPSurface (vtkPolyData * polydata, std::vector<double> * cumulativeAreas, dou
 {
   float r = static_cast<float> (uniform_deviate (rand ()) * totalArea);
 
-  std::vector<double>::iterator low = std::lower_bound (cumulativeAreas->begin (), cumulativeAreas->end (), r);
+  auto low = std::lower_bound (cumulativeAreas->begin (), cumulativeAreas->end (), r);
   vtkIdType el = vtkIdType (low - cumulativeAreas->begin ());
 
   double A[3], B[3], C[3];

@@ -102,7 +102,9 @@ template <typename PointT>
 class PCDBuffer
 {
   public:
-    PCDBuffer () {}
+    PCDBuffer () = default;
+    PCDBuffer (const PCDBuffer&) = delete; // Disabled copy constructor
+    PCDBuffer& operator = (const PCDBuffer&) = delete; // Disabled assignment operator
 
     bool 
     pushBack (typename PointCloud<PointT>::ConstPtr); // thread-save wrapper for push_back() method of ciruclar_buffer
@@ -145,9 +147,6 @@ class PCDBuffer
     }
 
   private:
-    PCDBuffer (const PCDBuffer&) = delete; // Disabled copy constructor
-    PCDBuffer& operator = (const PCDBuffer&) = delete; // Disabled assignment operator
-
     std::mutex bmutex_;
     std::condition_variable buff_empty_;
     boost::circular_buffer<typename PointCloud<PointT>::ConstPtr> buffer_;
@@ -230,7 +229,7 @@ class Producer
     void 
     grabAndSend ()
     {
-      OpenNIGrabber* grabber = new OpenNIGrabber ();
+      auto* grabber = new OpenNIGrabber ();
       grabber->getDevice ()->setDepthOutputFormat (depth_mode_);
 
       Grabber* interface = grabber;
@@ -403,18 +402,18 @@ main (int argc, char** argv)
         openni_wrapper::OpenNIDevice::Ptr device = grabber.getDevice ();
         std::cout << "Supported depth modes for device: " << device->getVendorName () << " , " << device->getProductName () << std::endl;
         std::vector<std::pair<int, XnMapOutputMode > > modes = grabber.getAvailableDepthModes ();
-        for (std::vector<std::pair<int, XnMapOutputMode > >::const_iterator it = modes.begin (); it != modes.end (); ++it)
+        for (const auto& mode : modes)
         {
-          std::cout << it->first << " = " << it->second.nXRes << " x " << it->second.nYRes << " @ " << it->second.nFPS << std::endl;
+          std::cout << mode.first << " = " << mode.second.nXRes << " x " << mode.second.nYRes << " @ " << mode.second.nFPS << std::endl;
         }
 
         if (device->hasImageStream ())
         {
           std::cout << std::endl << "Supported image modes for device: " << device->getVendorName () << " , " << device->getProductName () << std::endl;
           modes = grabber.getAvailableImageModes ();
-          for (std::vector<std::pair<int, XnMapOutputMode > >::const_iterator it = modes.begin (); it != modes.end (); ++it)
+          for (const auto& mode : modes)
           {
-            std::cout << it->first << " = " << it->second.nXRes << " x " << it->second.nYRes << " @ " << it->second.nFPS << std::endl;
+            std::cout << mode.first << " = " << mode.second.nXRes << " x " << mode.second.nYRes << " @ " << mode.second.nFPS << std::endl;
           }
         }
       }

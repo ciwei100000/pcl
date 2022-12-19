@@ -89,14 +89,14 @@ namespace pcl
       /** \brief Data leaf. */
       struct Leaf
       {
-        Leaf () {}
+        Leaf () = default;
 
         pcl::Indices data_indices;
         Eigen::Vector4f pt_on_surface; 
         Eigen::Vector3f vect_at_grid_pt;
       };
 
-      typedef std::unordered_map<int, Leaf, std::hash<int>, std::equal_to<>, Eigen::aligned_allocator<std::pair<const int, Leaf>>> HashMap;
+      using HashMap = std::unordered_map<int, Leaf, std::hash<int>, std::equal_to<>, Eigen::aligned_allocator<std::pair<const int, Leaf>>>;
 
       /** \brief Constructor. */ 
       GridProjection ();
@@ -107,7 +107,7 @@ namespace pcl
       GridProjection (double in_resolution);
 
       /** \brief Destructor. */
-      ~GridProjection ();
+      ~GridProjection () override;
 
       /** \brief Set the size of the grid cell
         * \param resolution  the size of the grid cell
@@ -499,6 +499,9 @@ namespace pcl
 
       /** \brief Class get name method. */
       std::string getClassName () const override { return ("GridProjection"); }
+
+      /** \brief Output will be scaled up by this factor, if previously scaled down by scaleInputDataPoint. */
+      double cloud_scale_factor_ = 1.0;
 
     public:
       PCL_MAKE_ALIGNED_OPERATOR_NEW

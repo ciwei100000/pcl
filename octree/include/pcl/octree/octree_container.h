@@ -89,8 +89,8 @@ public:
   /** \brief Empty addPointIndex implementation. This leaf node does not store any point
    * indices.
    */
-  void
-  addPointIndex(const index_t&)
+  virtual void
+  addPointIndex(index_t)
   {}
 
   /** \brief Empty getPointIndex implementation as this leaf node does not store any
@@ -100,10 +100,20 @@ public:
   getPointIndex(index_t&) const
   {}
 
+  /** \brief Empty getPointIndex implementation as this leaf node does not store any
+   * point indices.
+   */
+  virtual index_t
+  getPointIndex() const
+  {
+    assert("getPointIndex: undefined point index");
+    return -1;
+  }
+
   /** \brief Empty getPointIndices implementation as this leaf node does not store any
    * data. \
    */
-  void
+  virtual void
   getPointIndices(Indices&) const
   {}
 };
@@ -141,13 +151,15 @@ public:
   /** \brief Empty addPointIndex implementation. This leaf node does not store any point
    * indices.
    */
-  void addPointIndex(index_t) {}
+  void
+  addPointIndex(index_t) override
+  {}
 
   /** \brief Empty getPointIndex implementation as this leaf node does not store any
    * point indices.
    */
   index_t
-  getPointIndex() const
+  getPointIndex() const override
   {
     assert("getPointIndex: undefined point index");
     return -1;
@@ -157,7 +169,7 @@ public:
    * data.
    */
   void
-  getPointIndices(Indices&) const
+  getPointIndices(Indices&) const override
   {}
 };
 
@@ -184,8 +196,7 @@ public:
   bool
   operator==(const OctreeContainerBase& other) const override
   {
-    const OctreeContainerPointIndex* otherConDataT =
-        dynamic_cast<const OctreeContainerPointIndex*>(&other);
+    const auto* otherConDataT = dynamic_cast<const OctreeContainerPointIndex*>(&other);
 
     return (this->data_ == otherConDataT->data_);
   }
@@ -195,7 +206,7 @@ public:
    * \param[in] data_arg index to be stored within leaf node.
    */
   void
-  addPointIndex(index_t data_arg)
+  addPointIndex(index_t data_arg) override
   {
     data_ = data_arg;
   }
@@ -205,7 +216,7 @@ public:
    * \return index stored within container.
    */
   index_t
-  getPointIndex() const
+  getPointIndex() const override
   {
     return data_;
   }
@@ -216,7 +227,7 @@ public:
    * data vector
    */
   void
-  getPointIndices(Indices& data_vector_arg) const
+  getPointIndices(Indices& data_vector_arg) const override
   {
     if (data_ != static_cast<index_t>(-1))
       data_vector_arg.push_back(data_);
@@ -228,7 +239,7 @@ public:
   uindex_t
   getSize() const override
   {
-    return data_ != static_cast<index_t>(-1) ? 0 : 1;
+    return data_ == static_cast<index_t>(-1) ? 0 : 1;
   }
 
   /** \brief Reset leaf node memory to zero. */
@@ -263,7 +274,7 @@ public:
   bool
   operator==(const OctreeContainerBase& other) const override
   {
-    const OctreeContainerPointIndices* otherConDataTVec =
+    const auto* otherConDataTVec =
         dynamic_cast<const OctreeContainerPointIndices*>(&other);
 
     return (this->leafDataTVector_ == otherConDataTVec->leafDataTVector_);
@@ -274,7 +285,7 @@ public:
    * \param[in] data_arg index to be stored within leaf node.
    */
   void
-  addPointIndex(index_t data_arg)
+  addPointIndex(index_t data_arg) override
   {
     leafDataTVector_.push_back(data_arg);
   }
@@ -284,7 +295,7 @@ public:
    * \return index stored within container.
    */
   index_t
-  getPointIndex() const
+  getPointIndex() const override
   {
     return leafDataTVector_.back();
   }
@@ -295,7 +306,7 @@ public:
    * within data vector
    */
   void
-  getPointIndices(Indices& data_vector_arg) const
+  getPointIndices(Indices& data_vector_arg) const override
   {
     data_vector_arg.insert(
         data_vector_arg.end(), leafDataTVector_.begin(), leafDataTVector_.end());

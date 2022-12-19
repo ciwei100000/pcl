@@ -43,16 +43,14 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointNT>
-pcl::MarchingCubesRBF<PointNT>::~MarchingCubesRBF ()
-{
-}
+pcl::MarchingCubesRBF<PointNT>::~MarchingCubesRBF () = default;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointNT> void
 pcl::MarchingCubesRBF<PointNT>::voxelizeData ()
 {
   // Initialize data structures
-  const unsigned int N = static_cast<unsigned int> (input_->size ());
+  const auto N = static_cast<unsigned int> (input_->size ());
   Eigen::MatrixXd M (2*N, 2*N),
                   d (2*N, 1);
 

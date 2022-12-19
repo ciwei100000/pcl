@@ -60,8 +60,8 @@ IterativeClosestPoint<PointSource, PointTarget, Scalar>::transformCloud(
     Eigen::Matrix3f rot = tr.block<3, 3>(0, 0);
 
     for (std::size_t i = 0; i < input.size(); ++i) {
-      const std::uint8_t* data_in = reinterpret_cast<const std::uint8_t*>(&input[i]);
-      std::uint8_t* data_out = reinterpret_cast<std::uint8_t*>(&output[i]);
+      const auto* data_in = reinterpret_cast<const std::uint8_t*>(&input[i]);
+      auto* data_out = reinterpret_cast<std::uint8_t*>(&output[i]);
       memcpy(&pt[0], data_in + x_idx_offset_, sizeof(float));
       memcpy(&pt[1], data_in + y_idx_offset_, sizeof(float));
       memcpy(&pt[2], data_in + z_idx_offset_, sizeof(float));
@@ -91,8 +91,8 @@ IterativeClosestPoint<PointSource, PointTarget, Scalar>::transformCloud(
   }
   else {
     for (std::size_t i = 0; i < input.size(); ++i) {
-      const std::uint8_t* data_in = reinterpret_cast<const std::uint8_t*>(&input[i]);
-      std::uint8_t* data_out = reinterpret_cast<std::uint8_t*>(&output[i]);
+      const auto* data_in = reinterpret_cast<const std::uint8_t*>(&input[i]);
+      auto* data_out = reinterpret_cast<std::uint8_t*>(&output[i]);
       memcpy(&pt[0], data_in + x_idx_offset_, sizeof(float));
       memcpy(&pt[1], data_in + y_idx_offset_, sizeof(float));
       memcpy(&pt[2], data_in + z_idx_offset_, sizeof(float));
@@ -201,9 +201,8 @@ IterativeClosestPoint<PointSource, PointTarget, Scalar>::computeTransformation(
         *temp_correspondences = *correspondences_;
     }
 
-    std::size_t cnt = correspondences_->size();
     // Check whether we have enough correspondences
-    if (static_cast<int>(cnt) < min_number_correspondences_) {
+    if (correspondences_->size() < min_number_correspondences_) {
       PCL_ERROR("[pcl::%s::computeTransformation] Not enough correspondences found. "
                 "Relax your threshold parameters.\n",
                 getClassName().c_str());
@@ -227,8 +226,15 @@ IterativeClosestPoint<PointSource, PointTarget, Scalar>::computeTransformation(
     ++nr_iterations_;
 
     // Update the vizualization of icp convergence
-    // if (update_visualizer_ != 0)
-    //  update_visualizer_(output, source_indices_good, *target_, target_indices_good );
+    if (update_visualizer_ != nullptr) {
+      pcl::Indices source_indices_good, target_indices_good;
+      for (const Correspondence& corr : *correspondences_) {
+        source_indices_good.emplace_back(corr.index_query);
+        target_indices_good.emplace_back(corr.index_match);
+      }
+      update_visualizer_(
+          *input_transformed, source_indices_good, *target_, target_indices_good);
+    }
 
     converged_ = static_cast<bool>((*convergence_criteria_));
   } while (convergence_criteria_->getConvergenceState() ==

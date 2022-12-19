@@ -70,9 +70,9 @@
 #include <GL/gl.h>
 #endif
 
-#include <cfloat>
 #include <cmath>
 #include <iostream>
+#include <limits>
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -93,8 +93,8 @@ using GeometryHandler =
 using GeometryHandlerPtr = GeometryHandler::Ptr;
 using GeometryHandlerConstPtr = GeometryHandler::ConstPtr;
 
-#define NORMALS_SCALE 0.01
-#define PC_SCALE 0.001
+constexpr double NORMALS_SCALE = 0.01;
+constexpr double PC_SCALE = 0.001;
 
 std::uint16_t t_gamma[2048];
 Scene::Ptr scene_;
@@ -494,8 +494,8 @@ main(int argc, char** argv)
 
     int y_s = 0;
     if (!p_file_indices.empty()) {
-      y_s =
-          static_cast<int>(std::floor(sqrt(static_cast<float>(p_file_indices.size()))));
+      y_s = static_cast<int>(
+          std::floor(std::sqrt(static_cast<float>(p_file_indices.size()))));
       x_s = y_s + static_cast<int>(std::ceil(
                       (p_file_indices.size() / static_cast<double>(y_s)) - y_s));
       print_highlight("Preparing to load ");
@@ -503,7 +503,7 @@ main(int argc, char** argv)
     }
     else if (!vtk_file_indices.empty()) {
       y_s = static_cast<int>(
-          std::floor(sqrt(static_cast<float>(vtk_file_indices.size()))));
+          std::floor(std::sqrt(static_cast<float>(vtk_file_indices.size()))));
       x_s = y_s + static_cast<int>(std::ceil(
                       (vtk_file_indices.size() / static_cast<double>(y_s)) - y_s));
       print_highlight("Preparing to load ");
@@ -535,8 +535,8 @@ main(int argc, char** argv)
   pcl::visualization::PCLHistogramVisualizer::Ptr ph;
 
   // Using min_p, max_p to set the global Y min/max range for the histogram
-  float min_p = FLT_MAX;
-  float max_p = -FLT_MAX;
+  float min_p = std::numeric_limits<float>::max();
+  float max_p = std::numeric_limits<float>::lowest();
 
   int k = 0, l = 0, viewport = 0;
   // Load the data files

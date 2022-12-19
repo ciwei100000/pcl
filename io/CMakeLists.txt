@@ -6,9 +6,9 @@ set(SUBSYS_EXT_DEPS boost eigen)
 set(build TRUE)
 PCL_SUBSYS_OPTION(build "${SUBSYS_NAME}" "${SUBSYS_DESC}" ON)
 if(WIN32)
-  PCL_SUBSYS_DEPEND(build "${SUBSYS_NAME}" DEPS ${SUBSYS_DEPS} OPT_DEPS openni openni2 ensenso davidSDK dssdk rssdk rssdk2 pcap png vtk EXT_DEPS ${SUBSYS_EXT_DEPS})
+  PCL_SUBSYS_DEPEND(build NAME ${SUBSYS_NAME} DEPS ${SUBSYS_DEPS} OPT_DEPS openni openni2 ensenso davidSDK dssdk rssdk rssdk2 pcap png vtk EXT_DEPS ${SUBSYS_EXT_DEPS})
 else()
-  PCL_SUBSYS_DEPEND(build "${SUBSYS_NAME}" DEPS ${SUBSYS_DEPS} OPT_DEPS openni openni2 ensenso davidSDK dssdk pcap png vtk libusb EXT_DEPS ${SUBSYS_EXT_DEPS})
+  PCL_SUBSYS_DEPEND(build NAME ${SUBSYS_NAME} DEPS ${SUBSYS_DEPS} OPT_DEPS openni openni2 ensenso davidSDK dssdk pcap png vtk libusb EXT_DEPS ${SUBSYS_EXT_DEPS})
 endif()
 
 PCL_ADD_DOC("${SUBSYS_NAME}")
@@ -355,12 +355,15 @@ if(VTK_FOUND)
     target_link_libraries("${LIB_NAME}"
                           vtkIOImage
                           vtkIOGeometry
-                          vtkIOMPIImage
-                          vtkIOMPIParallel
                           vtkIOPLY
                           )
-    if(${VTK_VERSION} VERSION_GREATER_EQUAL 7.0 AND ${VTK_VERSION} VERSION_LESS 8.0)
-      target_link_libraries("${LIB_NAME}" vtkFiltersParallelDIY2)
+    if(${VTK_VERSION} VERSION_LESS 8.0)
+      target_link_libraries("${LIB_NAME}" vtkIOMPIImage vtkIOMPIParallel)
+      if(${VTK_VERSION} VERSION_GREATER_EQUAL 7.0)
+        target_link_libraries("${LIB_NAME}" vtkFiltersParallelDIY2)
+      endif()
+    else()
+      target_link_libraries("${LIB_NAME}" vtkImagingCore)
     endif()
   endif()
 endif()
@@ -415,7 +418,7 @@ if(PCAP_FOUND)
   target_link_libraries("${LIB_NAME}" ${PCAP_LIBRARIES})
 endif()
 
-set(EXT_DEPS boost eigen3)
+set(EXT_DEPS eigen3) # Although this depends on boost, that cannot be specified here because there is no boost.pc
 
 if(WITH_OPENNI)
   list(APPEND EXT_DEPS libopenni)

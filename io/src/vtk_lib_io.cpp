@@ -41,10 +41,19 @@
 #include <pcl/PCLPointCloud2.h>
 #include <vtkCellArray.h>
 #include <vtkCellData.h>
-#include <vtkDoubleArray.h>
+#include <vtkFloatArray.h> // for vtkFloatArray
 #include <vtkImageData.h>
 #include <vtkImageShiftScale.h>
-#include <vtkPNGWriter.h>
+#include <vtkOBJReader.h> // for vtkOBJReader
+#include <vtkPoints.h> // for vtkPoints
+#include <vtkPolyDataReader.h> // for vtkPolyDataReader
+#include <vtkPolyDataWriter.h> // for vtkPolyDataWriter
+#include <vtkPLYReader.h> // for vtkPLYReader
+#include <vtkPLYWriter.h> // for vtkPLYWriter
+#include <vtkPNGWriter.h> // for vtkPNGWriter
+#include <vtkSTLReader.h> // for vtkSTLReader
+#include <vtkSTLWriter.h> // for vtkSTLWriter
+#include <vtkUnsignedCharArray.h> // for vtkUnsignedCharArray
 
 // Support for VTK 7.1 upwards
 #ifdef vtkGenericDataArray_h
@@ -381,6 +390,7 @@ pcl::io::vtk2mesh (const vtkSmartPointer<vtkPolyData>& poly_data, pcl::TextureMe
   mesh.header = polygon_mesh.header;
   /// TODO check for sub-meshes
   mesh.tex_polygons.push_back (polygon_mesh.polygons);
+  mesh.tex_coord_indices.push_back (polygon_mesh.polygons);
 
   // Add dummy material
   mesh.tex_materials.emplace_back();
@@ -414,7 +424,7 @@ int
 pcl::io::mesh2vtk (const pcl::PolygonMesh& mesh, vtkSmartPointer<vtkPolyData>& poly_data)
 {
   auto nr_points = mesh.cloud.width * mesh.cloud.height;
-  unsigned int nr_polygons = static_cast<unsigned int> (mesh.polygons.size ());
+  auto nr_polygons = static_cast<unsigned int> (mesh.polygons.size ());
 
   // reset vtkPolyData object
   poly_data = vtkSmartPointer<vtkPolyData>::New (); // OR poly_data->Reset();
@@ -458,7 +468,7 @@ pcl::io::mesh2vtk (const pcl::PolygonMesh& mesh, vtkSmartPointer<vtkPolyData>& p
   {
     for (unsigned int i = 0; i < nr_polygons; i++)
     {
-      unsigned int nr_points_in_polygon = static_cast<unsigned int> (mesh.polygons[i].vertices.size ());
+      auto nr_points_in_polygon = static_cast<unsigned int> (mesh.polygons[i].vertices.size ());
       vtk_mesh_polygons->InsertNextCell (nr_points_in_polygon);
       for (unsigned int j = 0; j < nr_points_in_polygon; j++)
         vtk_mesh_polygons->InsertCellPoint (mesh.polygons[i].vertices[j]);

@@ -120,7 +120,7 @@ namespace pcl
         {}
       
         /** \brief Empty destructor */
-        ~PCLVisualizerInteractorStyle () {}
+        ~PCLVisualizerInteractorStyle () override = default;
 
         // this macro defines Superclass, the isA functionality and the safe downcast method
         vtkTypeMacro (PCLVisualizerInteractorStyle, vtkInteractorStyleRubberBandPick);
@@ -233,7 +233,7 @@ namespace pcl
           * \param[in] file the name of the camera parameter file
           */
         void
-        setCameraFile (const std::string file)
+        setCameraFile (const std::string& file)
         {
           camera_file_ = file;
         }

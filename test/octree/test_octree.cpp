@@ -399,7 +399,7 @@ TEST (PCL, Octree2Buf_Test)
 
     // add data to leaf node voxel
     int* voxel_container = octreeA.createLeaf(voxels[i].x, voxels[i].y, voxels[i].z);
-    data[i] = *voxel_container;
+    *voxel_container = data[i];
 
   }
 
@@ -1132,10 +1132,6 @@ TEST (PCL, Octree_Pointcloud_Nearest_K_Neighbour_Search)
 
   std::priority_queue<prioPointQueueEntry, pcl::PointCloud<prioPointQueueEntry>::VectorType> pointCandidates;
 
-  // create octree
-  OctreePointCloudSearch<PointXYZ> octree (0.1);
-  octree.setInputCloud (cloudIn);
-
   Indices k_indices;
   std::vector<float> k_sqr_distances;
 
@@ -1143,6 +1139,10 @@ TEST (PCL, Octree_Pointcloud_Nearest_K_Neighbour_Search)
   std::vector<float> k_sqr_distances_bruteforce;
 
   for (const std::size_t maxObjsPerLeaf: {0, 5}) {
+    // create octree
+    OctreePointCloudSearch<PointXYZ> octree (0.1);
+    octree.setInputCloud (cloudIn);
+
     if (maxObjsPerLeaf != 0)
       octree.enableDynamicDepth (maxObjsPerLeaf);
     for (unsigned int test_id = 0; test_id < test_runs; test_id++)
@@ -1189,7 +1189,7 @@ TEST (PCL, Octree_Pointcloud_Nearest_K_Neighbour_Search)
         pointCandidates.pop ();
 
       // copy results into vectors
-      unsigned idx = static_cast<unsigned> (pointCandidates.size ());
+      auto idx = static_cast<unsigned> (pointCandidates.size ());
       k_indices_bruteforce.resize (idx);
       k_sqr_distances_bruteforce.resize (idx);
       while (!pointCandidates.empty ())
@@ -1233,11 +1233,11 @@ TEST (PCL, Octree_Pointcloud_Box_Search)
 
   srand (static_cast<unsigned int> (time (nullptr)));
 
-  // create octree
-  OctreePointCloudSearch<PointXYZ> octree (1);
-  octree.setInputCloud (cloudIn);
-
   for (const std::size_t maxObjsPerLeaf: {0, 5}) {
+    // create octree
+    OctreePointCloudSearch<PointXYZ> octree (1);
+    octree.setInputCloud (cloudIn);
+
     if (maxObjsPerLeaf != 0)
       octree.enableDynamicDepth (maxObjsPerLeaf);
     for (unsigned int test_id = 0; test_id < test_runs; test_id++)
@@ -1417,7 +1417,7 @@ TEST (PCL, Octree_Pointcloud_Neighbours_Within_Radius_Search)
       std::vector<int> cloudSearchBruteforce;
       for (std::size_t i = 0; i < cloudIn->size (); i++)
       {
-        pointDist = sqrt (
+        pointDist = std::sqrt (
             ((*cloudIn)[i].x - searchPoint.x) * ((*cloudIn)[i].x - searchPoint.x)
                 + ((*cloudIn)[i].y - searchPoint.y) * ((*cloudIn)[i].y - searchPoint.y)
                 + ((*cloudIn)[i].z - searchPoint.z) * ((*cloudIn)[i].z - searchPoint.z));
@@ -1441,7 +1441,7 @@ TEST (PCL, Octree_Pointcloud_Neighbours_Within_Radius_Search)
       auto current = cloudNWRSearch.cbegin ();
       while (current != cloudNWRSearch.cend ())
       {
-        pointDist = sqrt (
+        pointDist = std::sqrt (
             ((*cloudIn)[*current].x - searchPoint.x) * ((*cloudIn)[*current].x - searchPoint.x)
                 + ((*cloudIn)[*current].y - searchPoint.y) * ((*cloudIn)[*current].y - searchPoint.y)
                 + ((*cloudIn)[*current].z - searchPoint.z) * ((*cloudIn)[*current].z - searchPoint.z));

@@ -42,7 +42,6 @@
 #include <pcl/common/common.h>
 #include <pcl/common/io.h>
 #include <pcl/filters/morphological_filter.h>
-#include <pcl/filters/extract_indices.h>
 #include <pcl/segmentation/approximate_progressive_morphological_filter.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -63,9 +62,7 @@ pcl::ApproximateProgressiveMorphologicalFilter<PointT>::ApproximateProgressiveMo
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT>
-pcl::ApproximateProgressiveMorphologicalFilter<PointT>::~ApproximateProgressiveMorphologicalFilter ()
-{
-}
+pcl::ApproximateProgressiveMorphologicalFilter<PointT>::~ApproximateProgressiveMorphologicalFilter () = default;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT> void

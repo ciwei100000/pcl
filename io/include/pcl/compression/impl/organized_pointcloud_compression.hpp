@@ -199,8 +199,9 @@ namespace pcl
 
        for (std::size_t i = 0; i < cloud_size; ++i, ++depth_ptr, color_ptr += sizeof(std::uint8_t) * 3)
        {
-         if (!(*depth_ptr) || (*depth_ptr==0x7FF))
-           memset(color_ptr, 0, sizeof(std::uint8_t)*3);
+         if (!(*depth_ptr) || (*depth_ptr==0x7FF)) {
+           std::fill_n(color_ptr, 3, 0);
+         }
        }
 
        // Compress disparity information
@@ -225,7 +226,7 @@ namespace pcl
            // grayscale conversion
            for (std::size_t i = 0; i < size; ++i)
            {
-             std::uint8_t grayvalue = static_cast<std::uint8_t>(0.2989 * static_cast<float>(colorImage_arg[i*3+0]) +
+             auto grayvalue = static_cast<std::uint8_t>(0.2989 * static_cast<float>(colorImage_arg[i*3+0]) +
                                                       0.5870 * static_cast<float>(colorImage_arg[i*3+1]) +
                                                       0.1140 * static_cast<float>(colorImage_arg[i*3+2]));
              monoImage.push_back(grayvalue);
