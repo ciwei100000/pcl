@@ -1,3 +1,22 @@
+pcl (1.13.0+dfsg-1) experimental; urgency=medium
+
+  [ Debian Janitor ]
+  * Use secure URI in Homepage field.
+  * Set upstream metadata fields: Bug-Database, Bug-Submit, Repository-Browse.
+
+  [ Jochen Sprickerhof ]
+  * Better fix for dwz failing with clang
+  * New upstream version 1.13.0+dfsg
+  * Rebase patches
+  * Drop patches to disable tests
+  * Switch to new libglut-dev package name
+  * Move package description to source package
+  * Rename library packages due to Soname bump
+  * Update d/copyright
+  * Bump policy version (no changes)
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sun, 01 Jan 2023 13:00:10 +0100
+
 pcl (1.12.1+dfsg-6) unstable; urgency=medium
 
   * Disable dh_dwz for clang builds
