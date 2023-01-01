@@ -55,26 +55,26 @@ Depends: libboost-all-dev,
 	 libusb-1.0-0-dev,
 	 libopenni-dev [!s390x !alpha !hppa !hurd-i386 !ia64 !kfreebsd-any !m68k !riscv64 !sh4 !sparc64],
 	 libopenni2-dev [!hurd-i386 !hppa !kfreebsd-any],
-	 libpcl-apps1.12 (= ${binary:Version}),
-	 libpcl-common1.12 (= ${binary:Version}),
-	 libpcl-features1.12 (= ${binary:Version}),
-	 libpcl-filters1.12 (= ${binary:Version}),
-	 libpcl-io1.12 (= ${binary:Version}),
-	 libpcl-kdtree1.12 (= ${binary:Version}),
-	 libpcl-keypoints1.12 (= ${binary:Version}),
-	 libpcl-ml1.12 (= ${binary:Version}),
-	 libpcl-octree1.12 (= ${binary:Version}),
-	 libpcl-outofcore1.12 (= ${binary:Version}),
-	 libpcl-people1.12 (= ${binary:Version}),
-	 libpcl-recognition1.12 (= ${binary:Version}),
-	 libpcl-registration1.12 (= ${binary:Version}),
-	 libpcl-sample-consensus1.12 (= ${binary:Version}),
-	 libpcl-search1.12 (= ${binary:Version}),
-	 libpcl-segmentation1.12 (= ${binary:Version}),
-	 libpcl-stereo1.12 (= ${binary:Version}),
-	 libpcl-surface1.12 (= ${binary:Version}),
-	 libpcl-tracking1.12 (= ${binary:Version}),
-	 libpcl-visualization1.12 (= ${binary:Version}),
+	 libpcl-apps1.13 (= ${binary:Version}),
+	 libpcl-common1.13 (= ${binary:Version}),
+	 libpcl-features1.13 (= ${binary:Version}),
+	 libpcl-filters1.13 (= ${binary:Version}),
+	 libpcl-io1.13 (= ${binary:Version}),
+	 libpcl-kdtree1.13 (= ${binary:Version}),
+	 libpcl-keypoints1.13 (= ${binary:Version}),
+	 libpcl-ml1.13 (= ${binary:Version}),
+	 libpcl-octree1.13 (= ${binary:Version}),
+	 libpcl-outofcore1.13 (= ${binary:Version}),
+	 libpcl-people1.13 (= ${binary:Version}),
+	 libpcl-recognition1.13 (= ${binary:Version}),
+	 libpcl-registration1.13 (= ${binary:Version}),
+	 libpcl-sample-consensus1.13 (= ${binary:Version}),
+	 libpcl-search1.13 (= ${binary:Version}),
+	 libpcl-segmentation1.13 (= ${binary:Version}),
+	 libpcl-stereo1.13 (= ${binary:Version}),
+	 libpcl-surface1.13 (= ${binary:Version}),
+	 libpcl-tracking1.13 (= ${binary:Version}),
+	 libpcl-visualization1.13 (= ${binary:Version}),
 	 ${misc:Depends}
 Suggests: libpcl-doc
 Breaks: libvtk6-dev,
@@ -87,7 +87,7 @@ Description: ${source:Synopsis} - development files
  This package contains development files (headers and shared library
  symbolic link).
 
-Package: libpcl-apps1.12
+Package: libpcl-apps1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -99,7 +99,7 @@ Description: ${source:Synopsis} - apps library
  This package contains the libraries needed to run applications depending
  on PCL apps.
 
-Package: libpcl-common1.12
+Package: libpcl-common1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -110,7 +110,7 @@ Description: ${source:Synopsis} - common library
  .
  This package contains the PCL common library.
 
-Package: libpcl-features1.12
+Package: libpcl-features1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -121,7 +121,7 @@ Description: ${source:Synopsis} - features library
  .
  This package contains the PCL features library.
 
-Package: libpcl-filters1.12
+Package: libpcl-filters1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -132,7 +132,7 @@ Description: ${source:Synopsis} - filters library
  .
  This package contains the PCL filters library.
 
-Package: libpcl-io1.12
+Package: libpcl-io1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -144,7 +144,7 @@ Description: ${source:Synopsis} - I/O library
  This package contains the libraries needed to run applications
  depending on PCL io.
 
-Package: libpcl-kdtree1.12
+Package: libpcl-kdtree1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -155,7 +155,7 @@ Description: ${source:Synopsis} - kdtree library
  .
  This package contains the PCL kdtree library.
 
-Package: libpcl-keypoints1.12
+Package: libpcl-keypoints1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -166,7 +166,7 @@ Description: ${source:Synopsis} - keypoints library
  .
  This package contains the PCL keypoints library.
 
-Package: libpcl-ml1.12
+Package: libpcl-ml1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -177,7 +177,7 @@ Description: ${source:Synopsis} - ml library
  .
  This package contains the PCL ml library.
 
-Package: libpcl-octree1.12
+Package: libpcl-octree1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -188,7 +188,7 @@ Description: ${source:Synopsis} - octree library
  .
  This package contains the PCL octree library.
 
-Package: libpcl-outofcore1.12
+Package: libpcl-outofcore1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -200,7 +200,7 @@ Description: ${source:Synopsis} - outofcore library
  This package contains the libraries needed to run applications
  depending on PCL outofcore.
 
-Package: libpcl-people1.12
+Package: libpcl-people1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -212,7 +212,7 @@ Description: ${source:Synopsis} - people library
  This package contains the libraries needed to run applications
  depending on PCL people.
 
-Package: libpcl-recognition1.12
+Package: libpcl-recognition1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -224,7 +224,7 @@ Description: ${source:Synopsis} - recognition library
  This package contains the libraries needed to run applications
  depending on PCL recognition.
 
-Package: libpcl-registration1.12
+Package: libpcl-registration1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -235,7 +235,7 @@ Description: ${source:Synopsis} - registration library
  .
  This package contains the PCL registration library.
 
-Package: libpcl-sample-consensus1.12
+Package: libpcl-sample-consensus1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -246,7 +246,7 @@ Description: ${source:Synopsis} - sample consensus library
  .
  This package contains the PCL sample consensus library.
 
-Package: libpcl-search1.12
+Package: libpcl-search1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -257,7 +257,7 @@ Description: ${source:Synopsis} - search library
  .
  This package contains the PCL search library.
 
-Package: libpcl-segmentation1.12
+Package: libpcl-segmentation1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -268,7 +268,7 @@ Description: ${source:Synopsis} - segmentation library
  .
  This package contains the PCL segmentation library.
 
-Package: libpcl-stereo1.12
+Package: libpcl-stereo1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -279,7 +279,7 @@ Description: ${source:Synopsis} - stereo library
  .
  This package contains the PCL stereo library.
 
-Package: libpcl-surface1.12
+Package: libpcl-surface1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -290,7 +290,7 @@ Description: ${source:Synopsis} - surface library
  .
  This package contains the PCL surface library.
 
-Package: libpcl-tracking1.12
+Package: libpcl-tracking1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
@@ -301,7 +301,7 @@ Description: ${source:Synopsis} - tracking library
  .
  This package contains the PCL tracking library.
 
-Package: libpcl-visualization1.12
+Package: libpcl-visualization1.13
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
