@@ -64,7 +64,7 @@ index 0b000cb..c8f8598 100644
  }
  
 diff --git a/test/filters/test_convolution.cpp b/test/filters/test_convolution.cpp
-index 26e5cbe..f61a8f4 100644
+index 2bae7ae..3e5c0a0 100644
 --- a/test/filters/test_convolution.cpp
 +++ b/test/filters/test_convolution.cpp
 @@ -393,6 +393,7 @@ TEST (Convolution, convolveRowsXYZRGB)
@@ -84,7 +84,7 @@ index 26e5cbe..f61a8f4 100644
  
  int
 diff --git a/test/io/test_tim_grabber.cpp b/test/io/test_tim_grabber.cpp
-index 8897af5..ed97958 100644
+index f245e0c..046900f 100644
 --- a/test/io/test_tim_grabber.cpp
 +++ b/test/io/test_tim_grabber.cpp
 @@ -89,7 +89,7 @@ TEST_F (TimGrabberTest, Test1)
@@ -97,7 +97,7 @@ index 8897af5..ed97958 100644
        EXPECT_NEAR (correct_point.z, answer_point.z, 1.0e-3);
      }
 diff --git a/test/octree/test_octree.cpp b/test/octree/test_octree.cpp
-index fc37ad1..210a3c2 100644
+index 4130a90..d6110ac 100644
 --- a/test/octree/test_octree.cpp
 +++ b/test/octree/test_octree.cpp
 @@ -1538,7 +1538,7 @@ TEST (PCL, Octree_Pointcloud_Ray_Traversal)
@@ -110,10 +110,10 @@ index fc37ad1..210a3c2 100644
    }
  }
 diff --git a/test/sample_consensus/test_sample_consensus_plane_models.cpp b/test/sample_consensus/test_sample_consensus_plane_models.cpp
-index 48a0011..27aba91 100644
+index 82141b3..351ca93 100644
 --- a/test/sample_consensus/test_sample_consensus_plane_models.cpp
 +++ b/test/sample_consensus/test_sample_consensus_plane_models.cpp
-@@ -465,10 +465,10 @@ TEST (SampleConsensusModelPlane, OptimizeFarFromOrigin)
+@@ -556,10 +556,10 @@ TEST (SampleConsensusModelPlane, OptimizeFarFromOrigin)
    Eigen::VectorXf coeffs(4); // Doesn't have to be initialized, the function doesn't use them
    Eigen::VectorXf optimized_coeffs(4);
    model.optimizeModelCoefficients(inliers, coeffs, optimized_coeffs);

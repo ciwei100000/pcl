@@ -9,7 +9,7 @@ Subject: Disable failing tests
  3 files changed, 3 insertions(+), 7 deletions(-)
 
 diff --git a/test/features/CMakeLists.txt b/test/features/CMakeLists.txt
-index d89d80c..d05945f 100644
+index 4dbab6e..6dc21fc 100644
 --- a/test/features/CMakeLists.txt
 +++ b/test/features/CMakeLists.txt
 @@ -92,10 +92,6 @@ if(BUILD_io)
@@ -24,7 +24,7 @@ index d89d80c..d05945f 100644
                 FILES test_moment_of_inertia_estimation.cpp
                 LINK_WITH pcl_gtest pcl_io pcl_features
 diff --git a/test/features/test_normal_estimation.cpp b/test/features/test_normal_estimation.cpp
-index 5211a2c..e197644 100644
+index c93f910..b297609 100644
 --- a/test/features/test_normal_estimation.cpp
 +++ b/test/features/test_normal_estimation.cpp
 @@ -409,7 +409,7 @@ TEST (PCL, NormalEstimationOpenMP)
@@ -37,7 +37,7 @@ index 5211a2c..e197644 100644
    PointCloud<PointXYZ>::Ptr cloudptr(new PointCloud<PointXYZ>());
  
 diff --git a/test/octree/test_octree.cpp b/test/octree/test_octree.cpp
-index 0a4df9e..fc37ad1 100644
+index e150248..4130a90 100644
 --- a/test/octree/test_octree.cpp
 +++ b/test/octree/test_octree.cpp
 @@ -1121,7 +1121,7 @@ public:
