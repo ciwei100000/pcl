@@ -10,7 +10,6 @@ Copyright: 2001, Addison-Wesley
            2001, Andrei Alexandrescu
            2007-2012, Ares Lagae
            2008, Ben Gurion University of the Negev, Beer Sheva, Israel
-           1999-2007, Brian Paul
            2014, Centrum Wiskunde Informatica
            2000-2012, Chih-Chung Chang and Chih-Jen Lin
            2011, Dirk Holz, University of Bonn
@@ -34,7 +33,7 @@ Copyright: 2001, Addison-Wesley
            2009-2010, NVIDIA Corporation
            2012-2021, Open Perception, Inc
            2014, RadiantBlue Technologies, Inc
-           2011 Suat Gedikli <gedikli@willowgarage.com>
+           2011, Suat Gedikli <gedikli@willowgarage.com>
            2004, Sylvain Paris and Francois Sillion
            2012, Texas A&M University
            2011, The Autonomous Systems Lab (ASL), ETH Zurich,
@@ -48,11 +47,6 @@ Copyright: 2001, Addison-Wesley
            2011, wwww.pointclouds.org
            2020, ysuzuki19
 License: BSD-3-clause
-
-Files: doc/*
-Copyright: 2009-2012, Willow Garage, Inc
-           2012-2014, Open Perception, Inc
-License: CC-BY-SA-3
 
 Files: surface/include/pcl/surface/3rdparty/opennurbs/*
        surface/src/3rdparty/opennurbs/*
@@ -91,21 +85,45 @@ Copyright: 1995-2005, Jean-loup Gailly
            1995-2005, Mark Adler
 License: Zlib
 
-Files: common/include/pcl/sse.h
-       gpu/kinfu_large_scale/tools/record_maps_rgb.cpp
+Files: gpu/kinfu_large_scale/tools/record_maps_rgb.cpp
        io/include/pcl/io/lzf.h
        io/src/lzf.cpp
        io/tools/openni_pcd_recorder.cpp
-       people/include/pcl/people/hog.h
-       people/src/hog.cpp
-       recognition/include/pcl/recognition/3rdparty/*
+       recognition/include/pcl/recognition/3rdparty/metslib/*
 Copyright: 2000-2010, Marc Alexander Lehmann <schmorp@schmorp.de>
            2006-2012, Mirko Maischberger <mirko.maischberger@gmail.com>
-           2012-2013, Open Perception, Inc
-           2012, Piotr Dollar & Ron Appel. [pdollar-at-caltech.edu
+           2012, Open Perception, Inc
            2012, Sudarshan Srinivasan <sudarshan85@gmail.com>
            2010-2011, Willow Garage, Inc
 License: BSD-2-clause
+
+Files: common/include/pcl/sse.h
+       people/include/pcl/people/hog.h
+       people/src/*
+Copyright: 2013, Open Perception, Inc
+           2012, Piotr Dollar & Ron Appel. [pdollar-at-caltech.edu
+License: BSD-2-clause-FreeBSD
+
+Files: cuda/common/include/pcl/cuda/common/eigen.h
+       gpu/features/include/pcl/gpu/features/device/eigen.hpp
+Copyright: 2010, Gael Guennebaud <gael.guennebaud@inria.fr>
+           2010-2011, Willow Garage, Inc
+License: BSD-3-clause or BSL-1 or LGPL-3+
+
+Files: outofcore/include/pcl/outofcore/cJSON.h
+       outofcore/src/cJSON.cpp
+Copyright: 2009, Dave Gamble
+License: Expat
+
+Files: apps/point_cloud_editor/src/common.cpp
+Copyright: 1999-2007, Brian Paul
+           2012, Texas A&M University
+License: BSD-3-clause or Expat
+
+Files: cmake/pcl_utils.cmake
+Copyright: 2007, Douglas Gregor <doug.gregor@gmail.com>
+           2007, Troy Straszheim
+License: BSL-1
 
 Files: apps/cloud_composer/resources/insert_from_OpenNi.png
 Copyright: 2008-2010, Martin Sourada <mso@fedoraproject.org>
@@ -121,16 +139,6 @@ Copyright: 2009-2010, David Vignoni <hello@davidvignoni.info>
 License: CC-BY-SA-3
 Comment: Oxygen Icons (http://www.oxygen-icons.org)
 
-Files: outofcore/include/pcl/outofcore/cJSON.h
-       outofcore/src/cJSON.cpp
-Copyright: 2009, Dave Gamble
-License: Expat
-
-Files: cmake/pcl_utils.cmake
-Copyright: 2007, Douglas Gregor <doug.gregor@gmail.com>
-           2007, Troy Straszheim
-License: BSL-1
-
 Files: segmentation/include/pcl/segmentation/extract_polygonal_prism_data.h
        segmentation/include/pcl/segmentation/impl/extract_polygonal_prism_data.hpp
 Copyright: 2010, Willow Garage, Inc.
@@ -142,6 +150,11 @@ Comment: These files contain the inpoly algorithm by Bob Stein and Craig Yap.
  Please feel free to use this source code for any purpose, commercial
  or otherwise, as long as you don't restrict anyone else's use of
  this source code.  Please give credit where credit is due.
+
+Files: doc/*
+Copyright: 2009-2012, Willow Garage, Inc
+           2012-2014, Open Perception, Inc
+License: CC-BY-SA-3
 
 Files: debian/*
 Copyright: 2014-2018, Jochen Sprickerhof <jspricke@debian.org>
@@ -173,6 +186,32 @@ License: BSD-2-clause
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
+
+License: BSD-2-clause-FreeBSD
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+ .
+ 1. Redistributions of source code must retain the above copyright notice, this
+    list of conditions and the following disclaimer.
+ .
+ 2. Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+ .
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ .
+ The views and conclusions contained in the software and documentation are those
+ of the authors and should not be interpreted as representing official policies,
+ either expressed or implied, of the FreeBSD Project.
 
 License: BSD-3-clause
  .
@@ -576,6 +615,23 @@ License: Expat
  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+License: LGPL-3+
+ This package is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 3 of the License, or (at your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <http://www.gnu.org/licenses/>.
+ .
+ On Debian systems, the complete text of the GNU Lesser General
+ Public License can be found in "/usr/share/common-licenses/LGPL-3".
+
 License: Open-Source
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
@@ -601,7 +657,6 @@ License: Open-Source
  OF SUCH DAMAGE.
 
 License: OpenNURBS
- .
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to
  deal in the Software without restriction, including without limitation the
@@ -633,4 +688,3 @@ License: Zlib
    misrepresented as being the original software.
  .
  3. This notice may not be removed or altered from any source distribution.
-
