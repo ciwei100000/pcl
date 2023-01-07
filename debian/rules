@@ -14,7 +14,7 @@ ifneq (,$(filter $(DEB_BUILD_ARCH),mipsel armhf armel))
   # fails with "Unknown debugging section .debug_addr"
   # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1016936
   # can be removed once dwz is fixed
-  export DEB_CXXFLAGS_MAINT_APPEND = -g1 -gdwarf-4
+override_dh_dwz:
 else
   PARALLEL=
 endif
