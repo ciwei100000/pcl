@@ -1,3 +1,4 @@
 0001-Fix-PCL_ROOT-path.patch
 0003-Use-newly-build-libs-when-testing.patch
 0003-Adopt-for-failing-tests-on-i386.patch
+0004-fix-undef-ref-vtk8.patch

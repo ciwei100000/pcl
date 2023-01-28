@@ -1,0 +1,17 @@
+From: Xuqing Liu <ciwei100000@gmail.com>
+Date: Sat, 28 Jan 20230 01:48:23 -0800
+Subject: Fix undefined reference to VTK8.2 functions during linking
+
+diff --git a/cmake/pcl_find_vtk.cmake b/cmake/pcl_find_vtk.cmake
+index ab48e742..ae424ace 100644
+--- a/cmake/pcl_find_vtk.cmake
++++ b/cmake/pcl_find_vtk.cmake
+@@ -112,6 +112,8 @@ else()
+   unset(HAVE_QVTK)
+ endif()
+ 
++find_package(VTK COMPONENTS ${PCL_VTK_COMPONENTS})
++
+ if(PCL_SHARED_LIBS OR (NOT (PCL_SHARED_LIBS) AND NOT (VTK_BUILD_SHARED_LIBS)))
+   if(VTK_VERSION VERSION_LESS 9.0)
+     if(VTK_USE_FILE)
