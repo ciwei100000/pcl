@@ -134,7 +134,7 @@ public:
   {}
 
   /** \brief destructor. */
-  ~Registration() {}
+  ~Registration() override = default;
 
   /** \brief Provide a pointer to the transformation estimation object.
    * (e.g., SVD, point to plane etc.)
@@ -446,6 +446,8 @@ public:
   {
     if (visualizerCallback) {
       update_visualizer_ = visualizerCallback;
+      pcl::Indices indices;
+      update_visualizer_(*input_, indices, *target_, indices);
       return (true);
     }
     return (false);
@@ -625,7 +627,7 @@ protected:
   /** \brief The minimum number of correspondences that the algorithm needs before
    * attempting to estimate the transformation. The default value is 3.
    */
-  int min_number_correspondences_;
+  unsigned int min_number_correspondences_;
 
   /** \brief The set of correspondences determined at this ICP step. */
   CorrespondencesPtr correspondences_;

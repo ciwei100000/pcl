@@ -1,3 +1,48 @@
+pcl (1.13.0+dfsg-3) unstable; urgency=medium
+
+  * upload to unstable
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Mon, 09 Jan 2023 21:21:07 +0100
+
+pcl (1.13.0+dfsg-2) experimental; urgency=medium
+
+  * Add patch for failing tests on i386
+  * Fix dwz with clang
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sat, 07 Jan 2023 09:26:50 +0100
+
+pcl (1.13.0+dfsg-1) experimental; urgency=medium
+
+  [ Debian Janitor ]
+  * Use secure URI in Homepage field.
+  * Set upstream metadata fields: Bug-Database, Bug-Submit, Repository-Browse.
+
+  [ Jochen Sprickerhof ]
+  * Better fix for dwz failing with clang
+  * New upstream version 1.13.0+dfsg
+  * Rebase patches
+  * Drop patches to disable tests
+  * Switch to new libglut-dev package name
+  * Move package description to source package
+  * Rename library packages due to Soname bump
+  * Update d/copyright
+  * Bump policy version (no changes)
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sun, 01 Jan 2023 13:00:10 +0100
+
+pcl (1.12.1+dfsg-6) unstable; urgency=medium
+
+  * Disable dh_dwz for clang builds
+  * Revert "Temporary add depends for #1013316"
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Sun, 25 Sep 2022 12:41:19 +0200
+
+pcl (1.12.1+dfsg-5) unstable; urgency=medium
+
+  * Add upstream patch to fix build on armhf
+
+ -- Jochen Sprickerhof <jspricke@debian.org>  Fri, 19 Aug 2022 13:41:49 +0200
+
 pcl (1.12.1+dfsg-4) unstable; urgency=medium
 
   * Add upstream source

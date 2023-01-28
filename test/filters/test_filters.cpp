@@ -2033,7 +2033,48 @@ TEST (FrustumCulling, Filters)
   removed = fc.getRemovedIndices ();
   EXPECT_EQ (removed->size (), input->size ());
 
+  // Should filter all points in the input cloud
+  fc.setNegative (false);
+  fc.setKeepOrganized (false);
+  fc.setRegionOfInterest (0.5f, 0.5f, 1.0f, 1.0f);
+  fc.filter (*output);
+  EXPECT_EQ (output->size (), input->size ());
+  removed = fc.getRemovedIndices ();
+  EXPECT_EQ (removed->size (), 0);
+  // Check invalid ROI values
+  EXPECT_THROW (fc.setRegionOfInterest (0.5f, 0.5f, 0.0f, 0.0f), PCLException);
+  EXPECT_THROW (fc.setRegionOfInterest (-0.4f, 0.0f, 8.2f, -1.3f), PCLException);
 
+  // Test on real point cloud, cut out milk cartoon in milk_cartoon_all_small_clorox.pcd
+  pcl::PointCloud <pcl::PointXYZ>::Ptr model (new pcl::PointCloud <pcl::PointXYZ>);
+  pcl::copyPointCloud (*cloud_organized, *model);
+
+  Eigen::Matrix4f cam2robot;
+  cam2robot << 0, 0, 1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1;
+  // Cut out object based on ROI 
+  fc.setInputCloud (model);
+  fc.setNegative (false);
+  fc.setVerticalFOV (43);
+  fc.setHorizontalFOV (57);
+  fc.setNearPlaneDistance (0);
+  fc.setFarPlaneDistance (0.9);
+  fc.setRegionOfInterest (0.44f, 0.30f, 0.16f, 0.38f);
+  fc.setCameraPose (cam2robot);
+  fc.filter (*output);
+  // Should extract milk cartoon with 13541 points
+  EXPECT_EQ (output->size (), 13541); 
+  removed = fc.getRemovedIndices ();
+  EXPECT_EQ (removed->size (), model->size () - output->size ());
+
+  // Cut out object based on field of view
+  fc.setRegionOfInterest (0.5f, 0.5f, 1.0f, 1.0f); // reset ROI
+  fc.setVerticalFOV (-22, 6);
+  fc.setHorizontalFOV (-22.5, -13.5);
+  fc.filter (*output);
+  // Should extract "all" laundry detergent with 10689 points
+  EXPECT_EQ (output->size (), 10689);
+  removed = fc.getRemovedIndices ();
+  EXPECT_EQ (removed->size (), model->size () - output->size ());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

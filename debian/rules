@@ -6,10 +6,15 @@ export DEB_CXXFLAGS_MAINT_APPEND = -g1
 
 BUILD_DOC = $(if $(shell dh_listpackages | grep libpcl-doc),-DWITH_DOCS=ON)
 
+# use clang on some archs as gcc is running into "virtual memory exhausted"
 ifneq (,$(filter $(DEB_BUILD_ARCH),mipsel armhf armel))
   PARALLEL=--max-parallel=2
   export CC=/usr/bin/clang
   export CXX=/usr/bin/clang++
+  # fails with "Unknown debugging section .debug_addr"
+  # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1016936
+  # can be removed once dwz is fixed
+override_dh_dwz:
 else
   PARALLEL=
 endif

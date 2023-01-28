@@ -6,7 +6,7 @@ set(OPT_DEPS visualization)
 set(DEFAULT ON)
 set(build TRUE)
 PCL_SUBSYS_OPTION(build "${SUBSYS_NAME}" "${SUBSYS_DESC}" ${DEFAULT} "${REASON}")
-PCL_SUBSYS_DEPEND(build "${SUBSYS_NAME}" DEPS ${SUBSYS_DEPS} OPT_DEPS ${OPT_DEPS})
+PCL_SUBSYS_DEPEND(build NAME ${SUBSYS_NAME} DEPS ${SUBSYS_DEPS} OPT_DEPS ${OPT_DEPS})
 
 if(NOT build)
   return()
@@ -14,6 +14,10 @@ endif()
 
 PCL_ADD_TEST(io_io test_io
               FILES test_io.cpp
+              LINK_WITH pcl_gtest pcl_io)
+
+PCL_ADD_TEST(io_split test_split
+              FILES test_split.cpp
               LINK_WITH pcl_gtest pcl_io)
 
 PCL_ADD_TEST(io_iterators test_iterators

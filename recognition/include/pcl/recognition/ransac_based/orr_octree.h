@@ -89,7 +89,7 @@ namespace pcl
                   n_[0] = n_[1] = n_[2] = p_[0] = p_[1] = p_[2] = 0.0f;
                 }
 
-                virtual~ Data (){}
+                virtual~ Data () = default;
 
                 inline void
                 addToPoint (float x, float y, float z)
@@ -203,7 +203,7 @@ namespace pcl
             inline void
             getBounds(float b[6]) const
             {
-              memcpy (b, bounds_, 6*sizeof (float));
+              std::copy(bounds_, bounds_ + 6, b);
             }
 
             inline Node*
@@ -322,7 +322,7 @@ namespace pcl
 
           if ( !node->getData () )
           {
-            Node::Data* data = new Node::Data (
+            auto* data = new Node::Data (
                 static_cast<int> ((node->getCenter ()[0] - bounds_[0])/voxel_size_),
                 static_cast<int> ((node->getCenter ()[1] - bounds_[2])/voxel_size_),
                 static_cast<int> ((node->getCenter ()[2] - bounds_[4])/voxel_size_),
@@ -427,7 +427,7 @@ namespace pcl
         inline void
         getBounds (float b[6]) const
         {
-          memcpy (b, bounds_, 6*sizeof (float));
+          std::copy(bounds_, bounds_ + 6, b);
         }
 
         inline float

@@ -54,16 +54,11 @@
 #include <vtkCellArray.h>
 #include <vtkHardwareSelector.h>
 #include <vtkSelectionNode.h>
-
 #include <vtkSelection.h>
 #include <vtkPointPicker.h>
 
 #include <pcl/visualization/vtk/vtkRenderWindowInteractorFix.h>
 #include <pcl/visualization/vtk/pcl_vtk_compatibility.h>
-
-#if VTK_RENDERING_BACKEND_OPENGL_VERSION < 2
-#include <pcl/visualization/vtk/vtkVertexBufferObjectMapper.h>
-#endif
 
 #include <vtkPolyLine.h>
 #include <vtkPolyDataMapper.h>
@@ -93,6 +88,8 @@
 
 #if VTK_MAJOR_VERSION > 7
 #include <vtkTexture.h>
+#include <vtkRenderStepsPass.h>
+#include <vtkEDLShading.h>
 #endif
 
 #include <pcl/visualization/common/shapes.h>
@@ -109,6 +106,8 @@
 #include <boost/algorithm/string.hpp> // for split
 #include <pcl/common/utils.h> // pcl::utils::ignore
 #include <pcl/console/parse.h>
+
+#include <thread>
 
 // Support for VTK 7.1 upwards
 #ifdef vtkGenericDataArray_h
@@ -420,11 +419,6 @@ void pcl::visualization::PCLVisualizer::setupRenderWindow (const std::string& na
   if (!win_)
     PCL_ERROR ("Pointer to render window is null\n");
 
-  // This is temporary measures for disable display of deprecated warnings
-  #if VTK_RENDERING_BACKEND_OPENGL_VERSION < 2
-  win_->GlobalWarningDisplayOff();
-  #endif
-
   win_->SetWindowName (name.c_str ());
 
   // By default, don't use vertex buffer objects
@@ -597,11 +591,23 @@ pcl::visualization::PCLVisualizer::spinOnce (int time, bool force_redraw)
   if (force_redraw)
     interactor_->Render ();
 
-  DO_EVERY (1.0 / interactor_->GetDesiredUpdateRate (),
-    exit_main_loop_timer_callback_->right_timer_id = interactor_->CreateRepeatingTimer (time);
-    interactor_->Start ();
-    interactor_->DestroyTimer (exit_main_loop_timer_callback_->right_timer_id);
-  );
+#if VTK_MAJOR_VERSION >= 9 && (VTK_MINOR_VERSION != 0 || VTK_BUILD_VERSION != 0) && (VTK_MINOR_VERSION != 0 || VTK_BUILD_VERSION != 1)
+// All VTK 9 versions, except 9.0.0 and 9.0.1
+  if(interactor_->IsA("vtkXRenderWindowInteractor")) {
+    DO_EVERY (1.0 / interactor_->GetDesiredUpdateRate (),
+      interactor_->ProcessEvents ();
+      std::this_thread::sleep_for (std::chrono::milliseconds (time));
+    );
+  }
+  else
+#endif
+  {
+    DO_EVERY (1.0 / interactor_->GetDesiredUpdateRate (),
+      exit_main_loop_timer_callback_->right_timer_id = interactor_->CreateRepeatingTimer (time);
+      interactor_->Start ();
+      interactor_->DestroyTimer (exit_main_loop_timer_callback_->right_timer_id);
+    );
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -817,7 +823,7 @@ bool
 pcl::visualization::PCLVisualizer::removeCoordinateSystem (const std::string& id, int viewport)
 {
   // Check to see if the given ID entry exists
-  CoordinateActorMap::iterator am_it = coordinate_actor_map_->find (id);
+  auto am_it = coordinate_actor_map_->find (id);
 
   if (am_it == coordinate_actor_map_->end ())
     return (false);
@@ -837,7 +843,7 @@ bool
 pcl::visualization::PCLVisualizer::removePointCloud (const std::string &id, int viewport)
 {
   // Check to see if the given ID entry exists
-  CloudActorMap::iterator am_it = cloud_actor_map_->find (id);
+  auto am_it = cloud_actor_map_->find (id);
 
   if (am_it == cloud_actor_map_->end ())
     return (false);
@@ -857,9 +863,9 @@ bool
 pcl::visualization::PCLVisualizer::removeShape (const std::string &id, int viewport)
 {
   // Check to see if the given ID entry exists
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
   // Extra step: check if there is a cloud with the same ID
-  CloudActorMap::iterator ca_it = cloud_actor_map_->find (id);
+  auto ca_it = cloud_actor_map_->find (id);
 
   bool shape = true;
   // Try to find a shape first
@@ -925,7 +931,7 @@ pcl::visualization::PCLVisualizer::removeText3D (const std::string &id, int view
   for (std::size_t i = viewport; rens_->GetNextItem (); ++i)
   {
     const std::string uid = id + std::string (i, '*');
-    ShapeActorMap::iterator am_it = shape_actor_map_->find (uid);
+    auto am_it = shape_actor_map_->find (uid);
 
     // was it found
     if (am_it == shape_actor_map_->end ())
@@ -958,7 +964,7 @@ bool
 pcl::visualization::PCLVisualizer::removeAllPointClouds (int viewport)
 {
   // Check to see if the given ID entry exists
-  CloudActorMap::iterator am_it = cloud_actor_map_->begin ();
+  auto am_it = cloud_actor_map_->begin ();
   while (am_it != cloud_actor_map_->end () )
   {
     if (removePointCloud (am_it->first, viewport))
@@ -977,7 +983,7 @@ pcl::visualization::PCLVisualizer::removeAllShapes (int viewport)
   style_->lut_enabled_ = false; // Temporally disable LUT to fasten shape removal
 
   // Check to see if the given ID entry exists
-  ShapeActorMap::iterator am_it = shape_actor_map_->begin ();
+  auto am_it = shape_actor_map_->begin ();
   while (am_it != shape_actor_map_->end ())
   {
     if (removeShape (am_it->first, viewport))
@@ -999,7 +1005,7 @@ bool
 pcl::visualization::PCLVisualizer::removeAllCoordinateSystems (int viewport)
 {
   // Check to see if the given ID entry exists
-  CoordinateActorMap::iterator am_it = coordinate_actor_map_->begin ();
+  auto am_it = coordinate_actor_map_->begin ();
   while (am_it != coordinate_actor_map_->end () )
   {
     if (removeCoordinateSystem (am_it->first, viewport))
@@ -1173,72 +1179,33 @@ pcl::visualization::PCLVisualizer::createActorFromVTKDataSet (const vtkSmartPoin
   if (!actor)
     actor = vtkSmartPointer<vtkLODActor>::New ();
 
-#if VTK_RENDERING_BACKEND_OPENGL_VERSION < 2
-  if (use_vbos_)
+  vtkSmartPointer<vtkDataSetMapper> mapper = vtkSmartPointer<vtkDataSetMapper>::New ();
+  mapper->SetInputData (data);
+
+  if (use_scalars)
   {
-    vtkSmartPointer<vtkVertexBufferObjectMapper> mapper = vtkSmartPointer<vtkVertexBufferObjectMapper>::New ();
-
-    mapper->SetInput (data);
-
-    if (use_scalars)
+    vtkSmartPointer<vtkDataArray> scalars = data->GetPointData ()->GetScalars ();
+    if (scalars)
     {
-      vtkSmartPointer<vtkDataArray> scalars = data->GetPointData ()->GetScalars ();
-      if (scalars)
-      {
-        double minmax[2];
-        scalars->GetRange (minmax);
-        mapper->SetScalarRange (minmax);
+      double minmax[2];
+      scalars->GetRange (minmax);
+      mapper->SetScalarRange (minmax);
 
-        mapper->SetScalarModeToUsePointData ();
-        mapper->SetInterpolateScalarsBeforeMapping (getDefaultScalarInterpolationForDataSet (data));
-        mapper->ScalarVisibilityOn ();
-      }
+      mapper->SetScalarModeToUsePointData ();
+      mapper->SetInterpolateScalarsBeforeMapping (getDefaultScalarInterpolationForDataSet (data));
+      mapper->ScalarVisibilityOn ();
     }
-
-    actor->SetNumberOfCloudPoints (int (std::max<vtkIdType> (1, data->GetNumberOfPoints () / 10)));
-    actor->GetProperty ()->SetInterpolationToFlat ();
-
-    /// FIXME disabling backface culling due to known VTK bug: vtkTextActors are not
-    /// shown when there is a vtkActor with backface culling on present in the scene
-    /// Please see VTK bug tracker for more details: http://www.vtk.org/Bug/view.php?id=12588
-    // actor->GetProperty ()->BackfaceCullingOn ();
-
-    actor->SetMapper (mapper);
   }
-  else
-#endif
-  {
-    vtkSmartPointer<vtkDataSetMapper> mapper = vtkSmartPointer<vtkDataSetMapper>::New ();
-    mapper->SetInputData (data);
 
-    if (use_scalars)
-    {
-      vtkSmartPointer<vtkDataArray> scalars = data->GetPointData ()->GetScalars ();
-      if (scalars)
-      {
-        double minmax[2];
-        scalars->GetRange (minmax);
-        mapper->SetScalarRange (minmax);
+  actor->SetNumberOfCloudPoints (int (std::max<vtkIdType> (1, data->GetNumberOfPoints () / 10)));
+  actor->GetProperty ()->SetInterpolationToFlat ();
 
-        mapper->SetScalarModeToUsePointData ();
-        mapper->SetInterpolateScalarsBeforeMapping (getDefaultScalarInterpolationForDataSet (data));
-        mapper->ScalarVisibilityOn ();
-      }
-    }
-#if VTK_RENDERING_BACKEND_OPENGL_VERSION < 2
-    mapper->ImmediateModeRenderingOff ();
-#endif
+  /// FIXME disabling backface culling due to known VTK bug: vtkTextActors are not
+  /// shown when there is a vtkActor with backface culling on present in the scene
+  /// Please see VTK bug tracker for more details: http://www.vtk.org/Bug/view.php?id=12588
+  // actor->GetProperty ()->BackfaceCullingOn ();
 
-    actor->SetNumberOfCloudPoints (int (std::max<vtkIdType> (1, data->GetNumberOfPoints () / 10)));
-    actor->GetProperty ()->SetInterpolationToFlat ();
-
-    /// FIXME disabling backface culling due to known VTK bug: vtkTextActors are not
-    /// shown when there is a vtkActor with backface culling on present in the scene
-    /// Please see VTK bug tracker for more details: http://www.vtk.org/Bug/view.php?id=12588
-    // actor->GetProperty ()->BackfaceCullingOn ();
-
-    actor->SetMapper (mapper);
-  }
+  actor->SetMapper (mapper);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -1251,72 +1218,33 @@ pcl::visualization::PCLVisualizer::createActorFromVTKDataSet (const vtkSmartPoin
   if (!actor)
     actor = vtkSmartPointer<vtkActor>::New ();
 
-#if VTK_RENDERING_BACKEND_OPENGL_VERSION < 2
-  if (use_vbos_)
+  vtkSmartPointer<vtkDataSetMapper> mapper = vtkSmartPointer<vtkDataSetMapper>::New ();
+  mapper->SetInputData (data);
+
+  if (use_scalars)
   {
-    vtkSmartPointer<vtkVertexBufferObjectMapper> mapper = vtkSmartPointer<vtkVertexBufferObjectMapper>::New ();
-
-    mapper->SetInput (data);
-
-    if (use_scalars)
+    vtkSmartPointer<vtkDataArray> scalars = data->GetPointData ()->GetScalars ();
+    if (scalars)
     {
-      vtkSmartPointer<vtkDataArray> scalars = data->GetPointData ()->GetScalars ();
-      if (scalars)
-      {
-        double minmax[2];
-        scalars->GetRange (minmax);
-        mapper->SetScalarRange (minmax);
+      double minmax[2];
+      scalars->GetRange (minmax);
+      mapper->SetScalarRange (minmax);
 
-        mapper->SetScalarModeToUsePointData ();
-        mapper->SetInterpolateScalarsBeforeMapping (getDefaultScalarInterpolationForDataSet (data));
-        mapper->ScalarVisibilityOn ();
-      }
+      mapper->SetScalarModeToUsePointData ();
+      mapper->SetInterpolateScalarsBeforeMapping (getDefaultScalarInterpolationForDataSet (data));
+      mapper->ScalarVisibilityOn ();
     }
+  }
 
     //actor->SetNumberOfCloudPoints (int (std::max<vtkIdType> (1, data->GetNumberOfPoints () / 10)));
-    actor->GetProperty ()->SetInterpolationToFlat ();
+  actor->GetProperty ()->SetInterpolationToFlat ();
 
-    /// FIXME disabling backface culling due to known VTK bug: vtkTextActors are not
-    /// shown when there is a vtkActor with backface culling on present in the scene
-    /// Please see VTK bug tracker for more details: http://www.vtk.org/Bug/view.php?id=12588
-    // actor->GetProperty ()->BackfaceCullingOn ();
+  /// FIXME disabling backface culling due to known VTK bug: vtkTextActors are not
+  /// shown when there is a vtkActor with backface culling on present in the scene
+  /// Please see VTK bug tracker for more details: http://www.vtk.org/Bug/view.php?id=12588
+  // actor->GetProperty ()->BackfaceCullingOn ();
 
-    actor->SetMapper (mapper);
-  }
-  else
-#endif
-  {
-    vtkSmartPointer<vtkDataSetMapper> mapper = vtkSmartPointer<vtkDataSetMapper>::New ();
-    mapper->SetInputData (data);
-
-    if (use_scalars)
-    {
-      vtkSmartPointer<vtkDataArray> scalars = data->GetPointData ()->GetScalars ();
-      if (scalars)
-      {
-        double minmax[2];
-        scalars->GetRange (minmax);
-        mapper->SetScalarRange (minmax);
-
-        mapper->SetScalarModeToUsePointData ();
-        mapper->SetInterpolateScalarsBeforeMapping (getDefaultScalarInterpolationForDataSet (data));
-        mapper->ScalarVisibilityOn ();
-      }
-    }
-#if VTK_RENDERING_BACKEND_OPENGL_VERSION < 2
-    mapper->ImmediateModeRenderingOff ();
-#endif
-
-    //actor->SetNumberOfCloudPoints (int (std::max<vtkIdType> (1, data->GetNumberOfPoints () / 10)));
-    actor->GetProperty ()->SetInterpolationToFlat ();
-
-    /// FIXME disabling backface culling due to known VTK bug: vtkTextActors are not
-    /// shown when there is a vtkActor with backface culling on present in the scene
-    /// Please see VTK bug tracker for more details: http://www.vtk.org/Bug/view.php?id=12588
-    // actor->GetProperty ()->BackfaceCullingOn ();
-
-    actor->SetMapper (mapper);
-  }
+  actor->SetMapper (mapper);
 
   //actor->SetNumberOfCloudPoints (std::max<vtkIdType> (1, data->GetNumberOfPoints () / 10));
   actor->GetProperty ()->SetInterpolationToFlat ();
@@ -1410,7 +1338,7 @@ pcl::visualization::PCLVisualizer::setPointCloudRenderingProperties (
     int property, double val1, double val2, double val3, const std::string &id, int)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  CloudActorMap::iterator am_it = cloud_actor_map_->find (id);
+  auto am_it = cloud_actor_map_->find (id);
 
   if (am_it == cloud_actor_map_->end ())
   {
@@ -1448,7 +1376,7 @@ pcl::visualization::PCLVisualizer::setPointCloudRenderingProperties (
     int property, double val1, double val2, const std::string &id, int)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  CloudActorMap::iterator am_it = cloud_actor_map_->find (id);
+  auto am_it = cloud_actor_map_->find (id);
 
   if (am_it == cloud_actor_map_->end ())
   {
@@ -1499,7 +1427,7 @@ bool
 pcl::visualization::PCLVisualizer::getPointCloudRenderingProperties (int property, double &value, const std::string &id)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  CloudActorMap::iterator am_it = cloud_actor_map_->find (id);
+  auto am_it = cloud_actor_map_->find (id);
 
   if (am_it == cloud_actor_map_->end ())
     return (false);
@@ -1545,7 +1473,7 @@ pcl::visualization::PCLVisualizer::getPointCloudRenderingProperties (RenderingPr
                                                                      const std::string &id)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  CloudActorMap::iterator am_it = cloud_actor_map_->find (id);
+  auto am_it = cloud_actor_map_->find (id);
 
   if (am_it == cloud_actor_map_->end ())
     return (false);
@@ -1583,7 +1511,7 @@ pcl::visualization::PCLVisualizer::setPointCloudRenderingProperties (
     int property, double value, const std::string &id, int)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  CloudActorMap::iterator am_it = cloud_actor_map_->find (id);
+  auto am_it = cloud_actor_map_->find (id);
 
   if (am_it == cloud_actor_map_->end ())
   {
@@ -1616,9 +1544,6 @@ pcl::visualization::PCLVisualizer::setPointCloudRenderingProperties (
     // using immediate more rendering.
     case PCL_VISUALIZER_IMMEDIATE_RENDERING:
     {
-#if VTK_RENDERING_BACKEND_OPENGL_VERSION < 2
-      actor->GetMapper ()->SetImmediateModeRendering (int (value));
-#endif
       actor->Modified ();
       break;
     }
@@ -1688,7 +1613,7 @@ bool
 pcl::visualization::PCLVisualizer::setPointCloudSelected (const bool selected, const std::string &id)
 {
    // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  CloudActorMap::iterator am_it = cloud_actor_map_->find (id);
+  auto am_it = cloud_actor_map_->find (id);
 
   if (am_it == cloud_actor_map_->end ())
   {
@@ -1721,7 +1646,7 @@ pcl::visualization::PCLVisualizer::setShapeRenderingProperties (
     int property, double val1, double val2, double val3, const std::string &id, int)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
 
   if (am_it == shape_actor_map_->end ())
   {
@@ -1768,7 +1693,7 @@ pcl::visualization::PCLVisualizer::setShapeRenderingProperties (
     int property, double val1, double val2, const std::string &id, int)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
 
   if (am_it == shape_actor_map_->end ())
   {
@@ -1820,7 +1745,7 @@ pcl::visualization::PCLVisualizer::setShapeRenderingProperties (
     int property, double value, const std::string &id, int)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
 
   if (am_it == shape_actor_map_->end ())
   {
@@ -2014,7 +1939,7 @@ pcl::visualization::PCLVisualizer::getCameraFile () const
 bool
 pcl::visualization::PCLVisualizer::updateShapePose (const std::string &id, const Eigen::Affine3f& pose)
 {
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
 
   vtkLODActor* actor;
 
@@ -2039,7 +1964,7 @@ pcl::visualization::PCLVisualizer::updateShapePose (const std::string &id, const
 bool
 pcl::visualization::PCLVisualizer::updateCoordinateSystemPose (const std::string &id, const Eigen::Affine3f& pose)
 {
-  ShapeActorMap::iterator am_it = coordinate_actor_map_->find (id);
+  auto am_it = coordinate_actor_map_->find (id);
 
   vtkLODActor* actor;
 
@@ -2065,7 +1990,7 @@ bool
 pcl::visualization::PCLVisualizer::updatePointCloudPose (const std::string &id, const Eigen::Affine3f& pose)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  CloudActorMap::iterator am_it = cloud_actor_map_->find (id);
+  auto am_it = cloud_actor_map_->find (id);
 
   if (am_it == cloud_actor_map_->end ())
     return (false);
@@ -2249,7 +2174,7 @@ void
 pcl::visualization::PCLVisualizer::resetCameraViewpoint (const std::string &id)
 {
   vtkSmartPointer<vtkMatrix4x4> camera_pose;
-  static CloudActorMap::iterator it = cloud_actor_map_->find (id);
+  const CloudActorMap::iterator it = cloud_actor_map_->find(id);
   if (it != cloud_actor_map_->end ())
     camera_pose = it->second.viewpoint_transformation_;
   else
@@ -2320,7 +2245,7 @@ pcl::visualization::PCLVisualizer::addCylinder (const pcl::ModelCoefficients &co
                                                const std::string &id, int viewport)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr, "[addCylinder] A shape with id <%s> already exists! Please choose a different id and retry.\n", id.c_str ());
@@ -2352,7 +2277,7 @@ pcl::visualization::PCLVisualizer::addCube (const pcl::ModelCoefficients &coeffi
                                             const std::string &id, int viewport)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr, "[addCube] A shape with id <%s> already exists! Please choose a different id and retry.\n", id.c_str ());
@@ -2386,7 +2311,7 @@ pcl::visualization::PCLVisualizer::addCube (
   const std::string &id, int viewport)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr, "[addCube] A shape with id <%s> already exists! Please choose a different id and retry.\n", id.c_str ());
@@ -2415,7 +2340,7 @@ pcl::visualization::PCLVisualizer::addCube (float x_min, float x_max,
                                             const std::string &id, int viewport)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr, "[addCube] A shape with id <%s> already exists! Please choose a different id and retry.\n", id.c_str ());
@@ -2444,7 +2369,7 @@ pcl::visualization::PCLVisualizer::addEllipsoid (
   const std::string &id, int viewport)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr, "[addEllipsoid] A shape with id <%s> already exists! Please choose a different id and retry.\n", id.c_str ());
@@ -2470,7 +2395,7 @@ pcl::visualization::PCLVisualizer::addSphere (const pcl::ModelCoefficients &coef
                                              const std::string &id, int viewport)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr, "[addSphere] A shape with id <%s> already exists! Please choose a different id and retry.\n", id.c_str ());
@@ -2501,7 +2426,7 @@ bool
 pcl::visualization::PCLVisualizer::addModelFromPolyData (
     vtkSmartPointer<vtkPolyData> polydata, const std::string & id, int viewport)
 {
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr,
@@ -2525,7 +2450,7 @@ bool
 pcl::visualization::PCLVisualizer::addModelFromPolyData (
     vtkSmartPointer<vtkPolyData> polydata, vtkSmartPointer<vtkTransform> transform, const std::string & id, int viewport)
 {
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr,
@@ -2555,7 +2480,7 @@ bool
 pcl::visualization::PCLVisualizer::addModelFromPLYFile (const std::string &filename,
                                                        const std::string &id, int viewport)
 {
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr,
@@ -2584,7 +2509,7 @@ pcl::visualization::PCLVisualizer::addModelFromPLYFile (const std::string &filen
                                                        vtkSmartPointer<vtkTransform> transform, const std::string &id,
                                                        int viewport)
 {
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr,
@@ -2617,7 +2542,7 @@ bool
 pcl::visualization::PCLVisualizer::addLine (const pcl::ModelCoefficients &coefficients, const std::string &id, int viewport)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr, "[addLine] A shape with id <%s> already exists! Please choose a different id and retry.\n", id.c_str ());
@@ -2653,7 +2578,7 @@ bool
   pcl::visualization::PCLVisualizer::addPlane (const pcl::ModelCoefficients &coefficients, const std::string &id, int viewport)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr, "[addPlane] A shape with id <%s> already exists! Please choose a different id and retry.\n", id.c_str ());
@@ -2683,7 +2608,7 @@ bool
   pcl::visualization::PCLVisualizer::addPlane (const pcl::ModelCoefficients &coefficients, double x, double y, double z, const std::string &id, int viewport)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr, "[addPlane] A shape with id <%s> already exists! Please choose a different id and retry.\n", id.c_str ());
@@ -2714,7 +2639,7 @@ bool
 pcl::visualization::PCLVisualizer::addCircle (const pcl::ModelCoefficients &coefficients, const std::string &id, int viewport)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr, "[addCircle] A shape with id <%s> already exists! Please choose a different id and retry.\n", id.c_str ());
@@ -2745,7 +2670,7 @@ bool
 pcl::visualization::PCLVisualizer::addCone (const pcl::ModelCoefficients &coefficients, const std::string &id, int viewport)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr, "[addCone] A shape with id <%s> already exists! Please choose a different id and retry.\n", id.c_str ());
@@ -2827,7 +2752,7 @@ pcl::visualization::PCLVisualizer::addText (const std::string &text, int xpos, i
     tid = id;
 
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (tid);
+  auto am_it = shape_actor_map_->find (tid);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr, "[addText] A text with id <%s> already exists! Please choose a different id and retry.\n", tid.c_str ());
@@ -2863,7 +2788,7 @@ pcl::visualization::PCLVisualizer::addText (const std::string &text, int xpos, i
     tid = id;
 
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (tid);
+  auto am_it = shape_actor_map_->find (tid);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr, "[addText] A text with id <%s> already exists! Please choose a different id and retry.\n", tid.c_str ());
@@ -2899,7 +2824,7 @@ pcl::visualization::PCLVisualizer::addText (const std::string &text, int xpos, i
     tid = id;
 
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (tid);
+  auto am_it = shape_actor_map_->find (tid);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr, "[addText] A text with id <%s> already exists! Please choose a different id and retry.\n", tid.c_str ());
@@ -2935,7 +2860,7 @@ pcl::visualization::PCLVisualizer::updateText (const std::string &text, int xpos
     tid = id;
 
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (tid);
+  auto am_it = shape_actor_map_->find (tid);
   if (am_it == shape_actor_map_->end ())
     return (false);
 
@@ -2961,7 +2886,7 @@ pcl::visualization::PCLVisualizer::updateText (const std::string &text, int xpos
     tid = id;
 
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (tid);
+  auto am_it = shape_actor_map_->find (tid);
   if (am_it == shape_actor_map_->end ())
     return (false);
 
@@ -2990,7 +2915,7 @@ pcl::visualization::PCLVisualizer::updateText (const std::string &text, int xpos
     tid = id;
 
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (tid);
+  auto am_it = shape_actor_map_->find (tid);
   if (am_it == shape_actor_map_->end ())
     return (false);
 
@@ -3015,7 +2940,7 @@ pcl::visualization::PCLVisualizer::updateText (const std::string &text, int xpos
 bool
 pcl::visualization::PCLVisualizer::updateColorHandlerIndex (const std::string &id, int index)
 {
-  CloudActorMap::iterator am_it = cloud_actor_map_->find (id);
+  auto am_it = cloud_actor_map_->find (id);
   if (am_it == cloud_actor_map_->end ())
   {
     pcl::console::print_warn (stderr, "[updateColorHandlerIndex] PointCloud with id <%s> doesn't exist!\n", id.c_str ());
@@ -3035,37 +2960,19 @@ pcl::visualization::PCLVisualizer::updateColorHandlerIndex (const std::string &i
   double minmax[2];
   scalars->GetRange (minmax);
   // Update the data
-  vtkPolyData *data = static_cast<vtkPolyData*>(am_it->second.actor->GetMapper ()->GetInput ());
+  auto *data = dynamic_cast<vtkPolyData*>(am_it->second.actor->GetMapper ()->GetInput ());
   data->GetPointData ()->SetScalars (scalars);
   // Modify the mapper
-#if VTK_RENDERING_BACKEND_OPENGL_VERSION < 2
-  if (use_vbos_)
-  {
-    vtkVertexBufferObjectMapper* mapper = static_cast<vtkVertexBufferObjectMapper*>(am_it->second.actor->GetMapper ());
-    mapper->SetScalarRange (minmax);
-    mapper->SetScalarModeToUsePointData ();
-    mapper->SetInput (data);
-    // Modify the actor
-    am_it->second.actor->SetMapper (mapper);
-    am_it->second.actor->Modified ();
-    am_it->second.color_handler_index_ = index;
+  auto* mapper = dynamic_cast<vtkDataSetMapper*>(am_it->second.actor->GetMapper ());
+  mapper->SetScalarRange (minmax);
+  mapper->SetScalarModeToUsePointData ();
+  mapper->SetInputData (data);
+  // Modify the actor
+  am_it->second.actor->SetMapper (mapper);
+  am_it->second.actor->Modified ();
+  am_it->second.color_handler_index_ = index;
 
-    //style_->setCloudActorMap (cloud_actor_map_);
-  }
-  else
-#endif
-  {
-    vtkPolyDataMapper* mapper = static_cast<vtkPolyDataMapper*>(am_it->second.actor->GetMapper ());
-    mapper->SetScalarRange (minmax);
-    mapper->SetScalarModeToUsePointData ();
-    mapper->SetInputData (data);
-    // Modify the actor
-    am_it->second.actor->SetMapper (mapper);
-    am_it->second.actor->Modified ();
-    am_it->second.color_handler_index_ = index;
-
-    //style_->setCloudActorMap (cloud_actor_map_);
-  }
+  //style_->setCloudActorMap (cloud_actor_map_);
 
   return (true);
 }
@@ -3078,7 +2985,7 @@ pcl::visualization::PCLVisualizer::addPolygonMesh (const pcl::PolygonMesh &poly_
                                                    const std::string &id,
                                                    int viewport)
 {
-  CloudActorMap::iterator am_it = cloud_actor_map_->find (id);
+  auto am_it = cloud_actor_map_->find (id);
   if (am_it != cloud_actor_map_->end ())
   {
     pcl::console::print_warn (stderr,
@@ -3202,7 +3109,7 @@ pcl::visualization::PCLVisualizer::updatePolygonMesh (
   }
 
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  CloudActorMap::iterator am_it = cloud_actor_map_->find (id);
+  auto am_it = cloud_actor_map_->find (id);
   if (am_it == cloud_actor_map_->end ())
     return (false);
 
@@ -3213,7 +3120,7 @@ pcl::visualization::PCLVisualizer::updatePolygonMesh (
   std::vector<pcl::Vertices> verts (poly_mesh.polygons); // copy vector
 
   // Get the current poly data
-  vtkSmartPointer<vtkPolyData> polydata = static_cast<vtkPolyDataMapper*>(am_it->second.actor->GetMapper ())->GetInput ();
+  vtkSmartPointer<vtkPolyData> polydata = dynamic_cast<vtkPolyData*>(am_it->second.actor->GetMapper ()->GetInput ());
   if (!polydata)
     return (false);
   vtkSmartPointer<vtkCellArray> cells = polydata->GetStrips ();
@@ -3225,15 +3132,16 @@ pcl::visualization::PCLVisualizer::updatePolygonMesh (
   points->SetNumberOfPoints (nr_points);
 
   // Get a pointer to the beginning of the data array
-  float *data = static_cast<vtkFloatArray*> (points->GetData ())->GetPointer (0);
+  float *data = dynamic_cast<vtkFloatArray*> (points->GetData ())->GetPointer (0);
 
   int ptr = 0;
   std::vector<int> lookup;
   // If the dataset is dense (no NaNs)
   if (cloud->is_dense)
   {
-    for (vtkIdType i = 0; i < nr_points; ++i, ptr += 3)
-      std::copy (&(*cloud)[i].x, &(*cloud)[i].x + 3, &data[ptr]);
+    for (vtkIdType i = 0; i < nr_points; ++i, ptr += 3) {
+      std::copy(&(*cloud)[i].x, &(*cloud)[i].x + 3, &data[ptr]);
+    }
   }
   else
   {
@@ -3279,7 +3187,7 @@ bool
 pcl::visualization::PCLVisualizer::addPolylineFromPolygonMesh (
     const pcl::PolygonMesh &polymesh, const std::string &id, int viewport)
 {
-  ShapeActorMap::iterator am_it = shape_actor_map_->find (id);
+  auto am_it = shape_actor_map_->find (id);
   if (am_it != shape_actor_map_->end ())
   {
     pcl::console::print_warn (stderr,
@@ -3342,7 +3250,7 @@ pcl::visualization::PCLVisualizer::addTextureMesh (const pcl::TextureMesh &mesh,
                                                    const std::string &id,
                                                    int viewport)
 {
-  CloudActorMap::iterator am_it = cloud_actor_map_->find (id);
+  auto am_it = cloud_actor_map_->find (id);
   if (am_it != cloud_actor_map_->end ())
   {
     PCL_ERROR ("[PCLVisualizer::addTextureMesh] A shape with id <%s> already exists!"
@@ -3525,11 +3433,38 @@ pcl::visualization::PCLVisualizer::addTextureMesh (const pcl::TextureMesh &mesh,
   return (true);
 }
 
+void
+pcl::visualization::PCLVisualizer::enableEDLRendering(int viewport)
+{
+#if VTK_MAJOR_VERSION > 7
+  auto* basicPass = vtkRenderStepsPass::New();
+
+  auto* edl = vtkEDLShading::New();
+  edl->SetDelegatePass(basicPass);
+
+    // Add it to all renderers
+  rens_->InitTraversal();
+  vtkRenderer* renderer = nullptr;
+  int i = 0;
+  while ((renderer = rens_->GetNextItem())) {
+    if (i == 0) {
+      renderer->SetPass(edl);
+    }
+    else if (i == viewport) {
+      renderer->SetPass(edl);
+    }
+    i++;
+  }
+#else
+  PCL_WARN("EDL requires VTK version 8 or newer.");
+  utils::ignore(viewport);
+#endif
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
 void
 pcl::visualization::PCLVisualizer::setRepresentationToSurfaceForAllActors ()
 {
-  ShapeActorMap::iterator am_it;
   rens_->InitTraversal ();
   vtkRenderer* renderer = nullptr;
   while ((renderer = rens_->GetNextItem ()))
@@ -3549,7 +3484,6 @@ pcl::visualization::PCLVisualizer::setRepresentationToSurfaceForAllActors ()
 void
 pcl::visualization::PCLVisualizer::setRepresentationToPointsForAllActors ()
 {
-  ShapeActorMap::iterator am_it;
   rens_->InitTraversal ();
   vtkRenderer* renderer = nullptr;
   while ((renderer = rens_->GetNextItem ()))
@@ -3568,7 +3502,6 @@ pcl::visualization::PCLVisualizer::setRepresentationToPointsForAllActors ()
 void
 pcl::visualization::PCLVisualizer::setRepresentationToWireframeForAllActors ()
 {
-  ShapeActorMap::iterator am_it;
   rens_->InitTraversal ();
   vtkRenderer* renderer = nullptr;
   while ((renderer = rens_->GetNextItem ()))
@@ -3689,22 +3622,6 @@ pcl::visualization::PCLVisualizer::renderViewTesselatedSphere (
 
   mapper->SetInputConnection (trans_filter_scale->GetOutputPort ());
   mapper->Update ();
-
-  //////////////////////////////
-  // * Compute area of the mesh
-  //////////////////////////////
-  vtkSmartPointer<vtkCellArray> cells = mapper->GetInput ()->GetPolys ();
-  vtkIdType npts = 0;
-  vtkCellPtsPtr ptIds = nullptr;
-
-  double p1[3], p2[3], p3[3], totalArea = 0;
-  for (cells->InitTraversal (); cells->GetNextCell(npts, ptIds);)
-  {
-    polydata->GetPoint (ptIds[0], p1);
-    polydata->GetPoint (ptIds[1], p2);
-    polydata->GetPoint (ptIds[2], p3);
-    totalArea += vtkTriangle::TriangleArea (p1, p2, p3);
-  }
 
   //create icosahedron
   vtkSmartPointer<vtkPlatonicSolidSource> ico = vtkSmartPointer<vtkPlatonicSolidSource>::New ();
@@ -3952,7 +3869,7 @@ pcl::visualization::PCLVisualizer::renderViewTesselatedSphere (
     {
       int id_mesh = static_cast<int> (ids->GetValue (sel_id));
       vtkCell * cell = polydata->GetCell (id_mesh);
-      vtkTriangle* triangle = dynamic_cast<vtkTriangle*> (cell);
+      auto* triangle = dynamic_cast<vtkTriangle*> (cell);
       if (!triangle)
       {
         PCL_WARN ("[renderViewTesselatedSphere] Invalid triangle %d, skipping!\n", id_mesh);
@@ -4296,7 +4213,7 @@ pcl::visualization::PCLVisualizer::addPointCloud (
     const std::string &id, int viewport)
 {
   // Check to see if this entry already exists (has it been already added to the visualizer?)
-  CloudActorMap::iterator am_it = cloud_actor_map_->find (id);
+  auto am_it = cloud_actor_map_->find (id);
   if (am_it != cloud_actor_map_->end ())
   {
     // Here we're just pushing the handlers onto the queue. If needed, something fancier could
@@ -4318,7 +4235,7 @@ pcl::visualization::PCLVisualizer::addPointCloud (
     const std::string &id, int viewport)
 {
   // Check to see if this ID entry already exists (has it been already added to the visualizer?)
-  CloudActorMap::iterator am_it = cloud_actor_map_->find (id);
+  auto am_it = cloud_actor_map_->find (id);
 
   if (am_it != cloud_actor_map_->end ())
   {
@@ -4342,7 +4259,7 @@ pcl::visualization::PCLVisualizer::addPointCloud (
     const std::string &id, int viewport)
 {
   // Check to see if this entry already exists (has it been already added to the visualizer?)
-  CloudActorMap::iterator am_it = cloud_actor_map_->find (id);
+  auto am_it = cloud_actor_map_->find (id);
   if (am_it != cloud_actor_map_->end ())
   {
     // Here we're just pushing the handlers onto the queue. If needed, something fancier could
@@ -4424,7 +4341,7 @@ pcl::visualization::PCLVisualizer::removeCorrespondences (
 int
 pcl::visualization::PCLVisualizer::getColorHandlerIndex (const std::string &id)
 {
-  CloudActorMap::iterator am_it = style_->getCloudActorMap ()->find (id);
+  auto am_it = style_->getCloudActorMap ()->find (id);
   if (am_it == cloud_actor_map_->end ())
     return (-1);
 
@@ -4435,7 +4352,7 @@ pcl::visualization::PCLVisualizer::getColorHandlerIndex (const std::string &id)
 int
 pcl::visualization::PCLVisualizer::getGeometryHandlerIndex (const std::string &id)
 {
-  CloudActorMap::iterator am_it = style_->getCloudActorMap ()->find (id);
+  auto am_it = style_->getCloudActorMap ()->find (id);
   if (am_it != cloud_actor_map_->end ())
     return (-1);
 
@@ -4463,13 +4380,8 @@ pcl::visualization::PCLVisualizer::resetStoppedFlag ()
 void
 pcl::visualization::PCLVisualizer::setUseVbos (bool use_vbos)
 {
-#if VTK_RENDERING_BACKEND_OPENGL_VERSION < 2
-  use_vbos_ = use_vbos;
-  style_->setUseVbos (use_vbos_);
-#else
   PCL_WARN ("[PCLVisualizer::setUseVbos] Has no effect when OpenGL version is ≥ 2\n");
   pcl::utils::ignore(use_vbos);
-#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -4515,7 +4427,7 @@ void
 pcl::visualization::PCLVisualizer::FPSCallback::Execute (
     vtkObject* caller, unsigned long, void*)
 {
-  vtkRenderer *ren = reinterpret_cast<vtkRenderer *> (caller);
+  auto *ren = reinterpret_cast<vtkRenderer *> (caller);
   last_fps = 1.0f / static_cast<float> (ren->GetLastRenderTimeInSeconds ());
   char buf[128];
   sprintf (buf, "%.1f FPS", last_fps);
@@ -4564,15 +4476,15 @@ pcl::visualization::PCLVisualizer::textureFromTexMaterial (const pcl::TexMateria
                  boost::filesystem::directory_iterator (),
                  back_inserter (paths));
 
-      for (paths_vector::const_iterator it = paths.begin (); it != paths.end (); ++it)
+      for (const auto& path : paths)
       {
-        if (boost::filesystem::is_regular_file (*it))
+        if (boost::filesystem::is_regular_file (path))
         {
-          std::string name = it->string ();
+          std::string name = path.string ();
           boost::to_upper (name);
           if (name == upper_filename)
           {
-            real_name = it->string ();
+            real_name = path.string ();
             break;
           }
         }
@@ -4664,8 +4576,8 @@ pcl::visualization::PCLVisualizer::getUniqueCameraFile (int argc, char **argv)
       if (boost::filesystem::exists (path))
       {
         path = boost::filesystem::canonical (path);
-        const char *str = path.string ().c_str ();
-        sha1.process_bytes (str, std::strlen (str));
+        const auto pathStr = path.string ();
+        sha1.process_bytes (pathStr.c_str(), pathStr.size());
         valid = true;
       }
     }

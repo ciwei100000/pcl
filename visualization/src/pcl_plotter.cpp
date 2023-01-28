@@ -53,7 +53,9 @@
 #include <vtkPlot.h>
 #include <vtkTable.h>
 
+#include <algorithm>
 #include <fstream>
+#include <limits>
 
 #include <pcl/visualization/pcl_plotter.h>
 
@@ -90,7 +92,7 @@ pcl::visualization::PCLPlotter::PCLPlotter (char const *name)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-pcl::visualization::PCLPlotter::~PCLPlotter() {}
+pcl::visualization::PCLPlotter::~PCLPlotter() = default;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
@@ -105,9 +107,9 @@ pcl::visualization::PCLPlotter::addPlotData (
   //creating a permanent copy of the arrays
   double *permanent_X = new double[size];
   double *permanent_Y = new double[size];
-  memcpy(permanent_X, array_X, size*sizeof(double));
-  memcpy(permanent_Y, array_Y, size*sizeof(double));
-  
+  std::copy(array_X, array_X + size, permanent_X);
+  std::copy(array_Y, array_Y + size, permanent_Y);
+
   //transforming data to be fed to the vtkChartXY
   VTK_CREATE (vtkTable, table);
 
@@ -165,6 +167,8 @@ pcl::visualization::PCLPlotter::addPlotData (
     array_y[i] = plot_data[i].second;
   }
   this->addPlotData (array_x, array_y, static_cast<unsigned long> (plot_data.size ()), name, type, (color.empty ()) ? nullptr : &color[0]);
+  delete[] array_x;
+  delete[] array_y;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -207,7 +211,7 @@ pcl::visualization::PCLPlotter::addPlotData (
   {
     double xval = i*incr + x_min;
     double yval = compute(r_function, xval);
-    //if (yval == DBL_MAX) continue; //handling dived by zero 
+    //if (yval == std::numeric_limits<double>::max()) continue; //handling dived by zero
     
     array_x[i] = xval;
     array_y[i] = yval;
@@ -610,7 +614,7 @@ pcl::visualization::PCLPlotter::computeHistogram (
   {
     if (std::isfinite (value))
     {
-      unsigned int index = (unsigned int) (std::floor ((value - min) / size));
+      auto index = (unsigned int) (std::floor ((value - min) / size));
       if (index == (unsigned int) nbins) index = nbins - 1; //including right boundary
       histogram[index].second++;
     }
@@ -636,7 +640,7 @@ pcl::visualization::PCLPlotter::compute (RationalFunction const & r_function, do
   PolynomialFunction numerator = r_function.first, denominator = r_function.second;
   
   double dres = this->compute (denominator,val);
-  //if (dres == 0) return DBL_MAX;  //return the max possible double value to represent infinity
+  //if (dres == 0) return std::numeric_limits<double>::max();  //return the max possible double value to represent infinity
   double nres = this->compute (numerator,val);
   return (nres/dres);
 }

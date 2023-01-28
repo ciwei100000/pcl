@@ -73,6 +73,8 @@ pcl::GridProjection<PointNT>::~GridProjection ()
 template <typename PointNT> void
 pcl::GridProjection<PointNT>::scaleInputDataPoint (double scale_factor)
 {
+  cloud_scale_factor_ = scale_factor;
+  PCL_DEBUG ("[pcl::GridProjection::scaleInputDataPoint] scale_factor=%g\n", scale_factor);
   for (auto& point: *data_) {
     point.getVector3fMap() /= static_cast<float> (scale_factor);
   }
@@ -350,14 +352,12 @@ pcl::GridProjection<PointNT>::getVectorAtPoint (const Eigen::Vector4f &p,
   std::vector <double> pt_union_weight (pt_union_indices.size ());
   Eigen::Vector3f out_vector (0, 0, 0);
   double sum = 0.0;
-  double mag = 0.0;
 
   for (std::size_t i = 0; i < pt_union_indices.size (); ++i)
   {
     Eigen::Vector4f pp ((*data_)[pt_union_indices[i]].x, (*data_)[pt_union_indices[i]].y, (*data_)[pt_union_indices[i]].z, 0);
     pt_union_dist[i] = (pp - p).squaredNorm ();
     pt_union_weight[i] = pow (M_E, -pow (pt_union_dist[i], 2.0) / gaussian_scale_);
-    mag += pow (M_E, -pow (sqrt (pt_union_dist[i]), 2.0) / gaussian_scale_);
     sum += pt_union_weight[i];
   }
 
@@ -733,9 +733,9 @@ pcl::GridProjection<PointNT>::performReconstruction (pcl::PolygonMesh &output)
   // Copy the data from surface_ to cloud
   for (std::size_t i = 0; i < cloud.size (); ++i)
   {
-    cloud[i].x = surface_[i].x ();
-    cloud[i].y = surface_[i].y ();
-    cloud[i].z = surface_[i].z ();
+    cloud[i].x = cloud_scale_factor_*surface_[i].x ();
+    cloud[i].y = cloud_scale_factor_*surface_[i].y ();
+    cloud[i].z = cloud_scale_factor_*surface_[i].z ();
   }
   pcl::toPCLPointCloud2 (cloud, output.cloud);
 }
@@ -758,9 +758,9 @@ pcl::GridProjection<PointNT>::performReconstruction (pcl::PointCloud<PointNT> &p
   // Copy the data from surface_ to cloud
   for (std::size_t i = 0; i < points.size (); ++i)
   {
-    points[i].x = surface_[i].x ();
-    points[i].y = surface_[i].y ();
-    points[i].z = surface_[i].z ();
+    points[i].x = cloud_scale_factor_*surface_[i].x ();
+    points[i].y = cloud_scale_factor_*surface_[i].y ();
+    points[i].z = cloud_scale_factor_*surface_[i].z ();
   }
 }
 

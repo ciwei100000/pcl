@@ -5,12 +5,14 @@ set(DEFAULT OFF)
 set(build TRUE)
 set(REASON "Disabled by default")
 PCL_SUBSYS_OPTION(build "${SUBSYS_NAME}" "${SUBSYS_DESC}" ${DEFAULT} "${REASON}")
-PCL_SUBSYS_DEPEND(build "${SUBSYS_NAME}" DEPS ${SUBSYS_DEPS})
+PCL_SUBSYS_DEPEND(build NAME ${SUBSYS_NAME} DEPS ${SUBSYS_DEPS})
 if(NOT build)
   return()
 endif()
 
 find_package(benchmark REQUIRED)
+get_target_property(BenchmarkBuildType benchmark::benchmark TYPE)
+
 add_custom_target(run_benchmarks)
 
 PCL_ADD_BENCHMARK(features_normal_3d FILES features/normal_3d.cpp

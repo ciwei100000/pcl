@@ -40,7 +40,7 @@
 #pragma once
 
 #include <pcl/filters/filter.h>
-#include <cfloat> // for FLT_MAX
+#include <limits>
 
 namespace pcl
 {
@@ -190,6 +190,8 @@ namespace pcl
       using Ptr = shared_ptr<VoxelGrid<PointT> >;
       using ConstPtr = shared_ptr<const VoxelGrid<PointT> >;
 
+      PCL_MAKE_ALIGNED_OPERATOR_NEW;
+
       /** \brief Empty constructor. */
       VoxelGrid () :
         leaf_size_ (Eigen::Vector4f::Zero ()),
@@ -201,8 +203,8 @@ namespace pcl
         div_b_ (Eigen::Vector4i::Zero ()),
         divb_mul_ (Eigen::Vector4i::Zero ()),
         filter_field_name_ (""),
-        filter_limit_min_ (-FLT_MAX),
-        filter_limit_max_ (FLT_MAX),
+        filter_limit_min_ (std::numeric_limits<float>::lowest()),
+        filter_limit_max_ (std::numeric_limits<float>::max()),
         filter_limit_negative_ (false),
         min_points_per_voxel_ (0)
       {
@@ -210,9 +212,7 @@ namespace pcl
       }
 
       /** \brief Destructor. */
-      ~VoxelGrid ()
-      {
-      }
+      ~VoxelGrid () override = default;
 
       /** \brief Set the voxel grid leaf size.
         * \param[in] leaf_size the voxel grid leaf size
@@ -411,7 +411,8 @@ namespace pcl
         filter_limit_max_ = limit_max;
       }
 
-      /** \brief Get the field filter limits (min/max) set by the user. The default values are -FLT_MAX, FLT_MAX.
+      /** \brief Get the field filter limits (min/max) set by the user.
+                 The default values are std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max().
         * \param[out] limit_min the minimum allowed field value
         * \param[out] limit_max the maximum allowed field value
         */
@@ -528,8 +529,8 @@ namespace pcl
         div_b_ (Eigen::Vector4i::Zero ()),
         divb_mul_ (Eigen::Vector4i::Zero ()),
         filter_field_name_ (""),
-        filter_limit_min_ (-FLT_MAX),
-        filter_limit_max_ (FLT_MAX),
+        filter_limit_min_ (std::numeric_limits<float>::lowest()),
+        filter_limit_max_ (std::numeric_limits<float>::max()),
         filter_limit_negative_ (false),
         min_points_per_voxel_ (0)
       {
@@ -537,9 +538,7 @@ namespace pcl
       }
 
       /** \brief Destructor. */
-      ~VoxelGrid ()
-      {
-      }
+      ~VoxelGrid () override = default;
 
       /** \brief Set the voxel grid leaf size.
         * \param[in] leaf_size the voxel grid leaf size
@@ -760,7 +759,8 @@ namespace pcl
         filter_limit_max_ = limit_max;
       }
 
-      /** \brief Get the field filter limits (min/max) set by the user. The default values are -FLT_MAX, FLT_MAX.
+      /** \brief Get the field filter limits (min/max) set by the user.
+        *        The default values are std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max().
         * \param[out] limit_min the minimum allowed field value
         * \param[out] limit_max the maximum allowed field value
         */

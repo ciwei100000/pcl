@@ -231,10 +231,8 @@ public:
       }
     } while (++circ != circ_end);
 
-    for (FaceIndices::const_iterator it = delete_faces_vertex_.begin();
-         it != delete_faces_vertex_.end();
-         ++it) {
-      this->deleteFace(*it);
+    for (const auto& delete_me : delete_faces_vertex_) {
+      this->deleteFace(delete_me);
     }
   }
 
@@ -325,14 +323,14 @@ public:
     }
 
     // Adjust the indices
-    for (VertexIterator it = vertices_.begin(); it != vertices_.end(); ++it) {
+    for (auto it = vertices_.begin(); it != vertices_.end(); ++it) {
       if (it->idx_outgoing_half_edge_.isValid()) {
         it->idx_outgoing_half_edge_ =
             new_half_edge_indices[it->idx_outgoing_half_edge_.get()];
       }
     }
 
-    for (HalfEdgeIterator it = half_edges_.begin(); it != half_edges_.end(); ++it) {
+    for (auto it = half_edges_.begin(); it != half_edges_.end(); ++it) {
       it->idx_terminating_vertex_ =
           new_vertex_indices[it->idx_terminating_vertex_.get()];
       it->idx_next_half_edge_ = new_half_edge_indices[it->idx_next_half_edge_.get()];
@@ -342,7 +340,7 @@ public:
       }
     }
 
-    for (FaceIterator it = faces_.begin(); it != faces_.end(); ++it) {
+    for (auto it = faces_.begin(); it != faces_.end(); ++it) {
       it->idx_inner_half_edge_ = new_half_edge_indices[it->idx_inner_half_edge_.get()];
     }
   }
@@ -896,7 +894,7 @@ public:
   inline void
   resizeVertices(const std::size_t n, const VertexData& data = VertexData())
   {
-    vertices_.resize(n);
+    vertices_.resize(n, Vertex());
     this->resizeData(vertex_data_cloud_, n, data, HasVertexData());
   }
 
@@ -906,7 +904,7 @@ public:
               const EdgeData& edge_data = EdgeData(),
               const HalfEdgeData he_data = HalfEdgeData())
   {
-    half_edges_.resize(2 * n);
+    half_edges_.resize(2 * n, HalfEdge());
     this->resizeData(half_edge_data_cloud_, 2 * n, he_data, HasHalfEdgeData());
     this->resizeData(edge_data_cloud_, n, edge_data, HasEdgeData());
   }
@@ -915,7 +913,7 @@ public:
   inline void
   resizeFaces(const std::size_t n, const FaceData& data = FaceData())
   {
-    faces_.resize(n);
+    faces_.resize(n, Face());
     this->resizeData(face_data_cloud_, n, data, HasFaceData());
   }
 
@@ -1800,12 +1798,12 @@ protected:
     Index ind_old(0), ind_new(0);
 
     typename ElementContainerT::const_iterator it_e_old = elements.begin();
-    typename ElementContainerT::iterator it_e_new = elements.begin();
+    auto it_e_new = elements.begin();
 
     typename DataContainerT::const_iterator it_d_old = data_cloud.begin();
-    typename DataContainerT::iterator it_d_new = data_cloud.begin();
+    auto it_d_new = data_cloud.begin();
 
-    typename IndexContainerT::iterator it_ind_new = new_indices.begin();
+    auto it_ind_new = new_indices.begin();
     typename IndexContainerT::const_iterator it_ind_new_end = new_indices.end();
 
     while (it_ind_new != it_ind_new_end) {
@@ -1988,10 +1986,15 @@ protected:
   }
 
   /** \brief Always manifold. */
-  inline bool isManifold(std::true_type /*is_manifold*/) const { return (true); }
+  inline bool
+  isManifold(std::true_type /*is_manifold*/) const
+  {
+    return (true);
+  }
 
   /** \brief Check if all vertices in the mesh are manifold. */
-  bool isManifold(std::false_type /*is_manifold*/) const
+  bool
+  isManifold(std::false_type /*is_manifold*/) const
   {
     for (std::size_t i = 0; i < this->sizeVertices(); ++i) {
       if (!this->isManifold(VertexIndex(i)))
@@ -2023,12 +2026,12 @@ protected:
   /** \brief Resize the mesh data. */
   template <class DataCloudT>
   inline void
-  resizeData(DataCloudT& /*data_cloud*/,
+  resizeData(DataCloudT& data_cloud,
              const std::size_t n,
              const typename DataCloudT::value_type& data,
              std::true_type /*has_data*/) const
   {
-    data.resize(n, data);
+    data_cloud.resize(n, data);
   }
 
   /** \brief Does nothing. */
